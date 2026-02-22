@@ -1,0 +1,13 @@
+# Exclude generated data
+DICOM/
+MAR_ILS_Archive.zip
+MAR_ILS_Archive.zip.sha256
+checksums_sha256.txt
+metadata.csv
+MAR_ILS_Lab_Instructions.pdf
+
+# Exclude Python environment/cache
+__pycache__/
+*.pyc
+venv/
+.DS_Store
