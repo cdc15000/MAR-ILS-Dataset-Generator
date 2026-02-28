@@ -1,4 +1,4 @@
-# MAR ILS Dataset Generator (v3.0)
+# MAR ILS Dataset Generator
 
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 ![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)
