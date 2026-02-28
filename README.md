@@ -38,5 +38,5 @@ This will generate:
 - `MAR_ILS_Lab_Instructions.pdf`: Standardized protocol for participating labs
 - `metadata.csv`: Full phantom and simulation parameters
 ## Technical Contact
-Christopher D. Cocchiaraley
+Christopher D. Cocchiaraley<br>
 Consumer Member, ASTM International Committee F04
