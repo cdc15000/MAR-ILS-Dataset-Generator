@@ -1,0 +1,280 @@
+{
+  "generator_version": "v6.0.0",
+  "script_version": "run_cho_analysis_v6_0",
+  "standard_reference": "ASTM-WKXXXXX-v1.0.0",
+  "observer": "2D CHO, single slice",
+  "tier": {
+    "tier_id": "T3_HEAD",
+    "description": "Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier",
+    "body_semi_x_mm": 100.0,
+    "body_semi_y_mm": 100.0,
+    "is_circular_body": true,
+    "metal_radius_mm": 8.0,
+    "metal_mu_cm": 1.5,
+    "metal_material": "Ti6Al4V",
+    "lesion_semi_major_mm": 1.5,
+    "lesion_semi_minor_mm": 1.0,
+    "lesion_center_x": 320,
+    "roi_size": 73,
+    "metal_radius_vox": 16,
+    "body_semi_x_vox": 200,
+    "body_semi_y_vox": 200,
+    "lesion_semi_major_vox": 3,
+    "lesion_semi_minor_vox": 2,
+    "l_nominal_vox": 64,
+    "l_nominal_mm": 32.0,
+    "gap_vox": 45,
+    "gap_mm": 22.5,
+    "blockage_frac": 0.16086124651033248,
+    "channel_width_a": 4.5,
+    "mu_lesion_cm": 0.2083708,
+    "roi_x_center": 320,
+    "roi_y_center": 256
+  },
+  "lesion_slice_index": 128,
+  "num_channels": 10,
+  "internal_noise_sigma": 15.0,
+  "ils_mode": true,
+  "reconstruction_pipeline": "not declared",
+  "noMAR": {
+    "AUC": 0.533125,
+    "Bias": 0.14625,
+    "CI_95": [
+      0.516234375,
+      0.5675
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.679375,
+      "AUC_5050": 0.55375,
+      "Bias_5050": 0.125625
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 670.0,
+      "p_one_sided": 0.00014028778787178453,
+      "significant_p05": true
+    },
+    "noise_sweep": {
+      "sweep_points": [
+        {
+          "sigma": 0,
+          "AUC": 0.515,
+          "CI_95": [
+            0.509984375,
+            0.5375
+          ]
+        },
+        {
+          "sigma": 5,
+          "AUC": 0.518125,
+          "CI_95": [
+            0.5087343750000001,
+            0.545015625
+          ]
+        },
+        {
+          "sigma": 10,
+          "AUC": 0.52625,
+          "CI_95": [
+            0.51309375,
+            0.5550781250000001
+          ]
+        },
+        {
+          "sigma": 15,
+          "AUC": 0.533125,
+          "CI_95": [
+            0.5143593750000001,
+            0.5681875
+          ]
+        },
+        {
+          "sigma": 20,
+          "AUC": 0.54125,
+          "CI_95": [
+            0.515,
+            0.576296875
+          ]
+        },
+        {
+          "sigma": 25,
+          "AUC": 0.540625,
+          "CI_95": [
+            0.511875,
+            0.58
+          ]
+        },
+        {
+          "sigma": 30,
+          "AUC": 0.53875,
+          "CI_95": [
+            0.5037343750000001,
+            0.5762812500000001
+          ]
+        },
+        {
+          "sigma": 40,
+          "AUC": 0.539375,
+          "CI_95": [
+            0.49996875,
+            0.57946875
+          ]
+        },
+        {
+          "sigma": 50,
+          "AUC": 0.543125,
+          "CI_95": [
+            0.50496875,
+            0.588125
+          ]
+        },
+        {
+          "sigma": 65,
+          "AUC": 0.546875,
+          "CI_95": [
+            0.50996875,
+            0.591890625
+          ]
+        },
+        {
+          "sigma": 80,
+          "AUC": 0.546875,
+          "CI_95": [
+            0.509375,
+            0.590046875
+          ]
+        }
+      ],
+      "sigmoid_fit": {
+        "A": 0.044207875257162625,
+        "k": -0.12600382078989475,
+        "sigma_0": 6.466682653258753,
+        "fit_ok": true,
+        "r_squared": 0.9466424909260941
+      }
+    }
+  },
+  "MAR": {
+    "AUC": 0.5525,
+    "Bias": 0.10750000000000004,
+    "CI_95": [
+      0.51375,
+      0.603765625
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.66,
+      "AUC_5050": 0.535625,
+      "Bias_5050": 0.12437500000000001
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 628.0,
+      "p_one_sided": 0.0013853147693225765,
+      "significant_p05": true
+    },
+    "noise_sweep": {
+      "sweep_points": [
+        {
+          "sigma": 0,
+          "AUC": 0.5225,
+          "CI_95": [
+            0.510625,
+            0.54815625
+          ]
+        },
+        {
+          "sigma": 5,
+          "AUC": 0.52625,
+          "CI_95": [
+            0.513703125,
+            0.5538124999999999
+          ]
+        },
+        {
+          "sigma": 10,
+          "AUC": 0.54375,
+          "CI_95": [
+            0.518703125,
+            0.5919062500000001
+          ]
+        },
+        {
+          "sigma": 15,
+          "AUC": 0.5525,
+          "CI_95": [
+            0.5174218749999999,
+            0.6088593750000001
+          ]
+        },
+        {
+          "sigma": 20,
+          "AUC": 0.566875,
+          "CI_95": [
+            0.519984375,
+            0.6263124999999999
+          ]
+        },
+        {
+          "sigma": 25,
+          "AUC": 0.56,
+          "CI_95": [
+            0.516203125,
+            0.6082031250000001
+          ]
+        },
+        {
+          "sigma": 30,
+          "AUC": 0.555,
+          "CI_95": [
+            0.5149375,
+            0.605765625
+          ]
+        },
+        {
+          "sigma": 40,
+          "AUC": 0.55875,
+          "CI_95": [
+            0.5137343750000001,
+            0.6076875
+          ]
+        },
+        {
+          "sigma": 50,
+          "AUC": 0.5575,
+          "CI_95": [
+            0.511875,
+            0.617609375
+          ]
+        },
+        {
+          "sigma": 65,
+          "AUC": 0.553125,
+          "CI_95": [
+            0.510609375,
+            0.599453125
+          ]
+        },
+        {
+          "sigma": 80,
+          "AUC": 0.5525,
+          "CI_95": [
+            0.511859375,
+            0.598765625
+          ]
+        }
+      ],
+      "sigmoid_fit": {
+        "A": 0.057768886221839094,
+        "k": -0.20789996634179442,
+        "sigma_0": 4.079025639832902,
+        "fit_ok": true,
+        "r_squared": 0.871903961348279
+      }
+    }
+  },
+  "delta_AUC": 0.01937500000000003,
+  "delta_AUC_CI_95": [
+    -0.02376562499999994,
+    0.05814062499999997
+  ],
+  "delta_wilcoxon_p_twosided": 0.11185002994352544,
+  "self_test": false
+}

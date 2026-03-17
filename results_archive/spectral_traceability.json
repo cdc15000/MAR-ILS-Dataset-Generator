@@ -1,0 +1,110 @@
+{
+  "standard_reference": "ASTM WKXXXXX v1.0.0",
+  "algorithm": "Dual-Energy Spectral MAR (60+140 keV \u2192 70 keV VMI)",
+  "algorithm_file": "algorithms/reference_spectral_mar.py",
+  "blend_weight": 0.7,
+  "timestamp_utc": "2026-03-17T17:32:26.084105+00:00",
+  "observer": "2D CHO, single slice (\u00a7A1.5.3)",
+  "internal_noise_sigma": 15.0,
+  "num_realizations": 40,
+  "tiers": {
+    "T1_AB": {
+      "description": "Large adult-body Co-Cr rod \u2014 mandatory 510(k) anchor tier",
+      "metal_material": "CoCr",
+      "metal_radius_mm": 10.0,
+      "blockage_frac": 0.4145,
+      "transmission_60keV": 0.0002,
+      "transmission_140keV": 0.0529,
+      "transmission_improvement_factor": 235.1,
+      "AUC_noMAR": 0.5375,
+      "AUC_noMAR_CI_95": [
+        0.53125,
+        0.5675
+      ],
+      "AUC_MAR": 0.525625,
+      "AUC_MAR_CI_95": [
+        0.520625,
+        0.550625
+      ],
+      "delta_AUC": -0.011875,
+      "delta_AUC_CI_95": [
+        -0.03625,
+        0.01125
+      ],
+      "delta_wilcoxon_p": 0.3753805605592788,
+      "outcome": "INDETERMINATE"
+    },
+    "T2_SB": {
+      "description": "Small pediatric-body SS-316L rod \u2014 supplemental tier",
+      "metal_material": "SS316L",
+      "metal_radius_mm": 5.0,
+      "blockage_frac": 0.4004,
+      "transmission_60keV": 0.0608,
+      "transmission_140keV": 0.3679,
+      "transmission_improvement_factor": 6.0,
+      "AUC_noMAR": 0.57,
+      "AUC_noMAR_CI_95": [
+        0.5425,
+        0.616875
+      ],
+      "AUC_MAR": 0.61875,
+      "AUC_MAR_CI_95": [
+        0.588109375,
+        0.66875
+      ],
+      "delta_AUC": 0.04875,
+      "delta_AUC_CI_95": [
+        0.003734,
+        0.098141
+      ],
+      "delta_wilcoxon_p": 2.293745637871325e-09,
+      "outcome": "SUPERIOR"
+    },
+    "T3_HEAD": {
+      "description": "Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier",
+      "metal_material": "Ti6Al4V",
+      "metal_radius_mm": 8.0,
+      "blockage_frac": 0.1609,
+      "transmission_60keV": 0.0907,
+      "transmission_140keV": 0.4737,
+      "transmission_improvement_factor": 5.2,
+      "AUC_noMAR": 0.533125,
+      "AUC_noMAR_CI_95": [
+        0.516234375,
+        0.5675
+      ],
+      "AUC_MAR": 0.505,
+      "AUC_MAR_CI_95": [
+        0.491234375,
+        0.523125
+      ],
+      "delta_AUC": -0.028125,
+      "delta_AUC_CI_95": [
+        -0.064391,
+        -0.0025
+      ],
+      "delta_wilcoxon_p": 0.1058129653429205,
+      "outcome": "INFERIOR"
+    }
+  },
+  "cross_tier_summary": {
+    "superior_tiers": [
+      "T2_SB"
+    ],
+    "indeterminate_tiers": [
+      "T1_AB"
+    ],
+    "inferior_tiers": [
+      "T3_HEAD"
+    ],
+    "regulatory_note": "Spectral MAR achieves formal SUPERIORITY (\u0394AUC > 0, CI_lower > 0) on T2_SB (SS316L, 40% blockage). CoCr (T1_AB) at 41% blockage is INDETERMINATE due to insufficient high-energy transmission (5.3%). Ti6Al4V (T3_HEAD) at 16% blockage is INFERIOR \u2014 low blockage makes noMAR near-optimal; BMD noise degrades performance.",
+    "hardware_requirements": {
+      "dual_energy_acquisition": true,
+      "energy_low_keV": 60,
+      "energy_high_keV": 140,
+      "minimum_metal_transmission_140keV": 0.2,
+      "minimum_blockage_frac": 0.3,
+      "optimal_conditions": "SS316L or similar (\u03bc_140 \u2264 1.0 cm\u207b\u00b9), blockage \u2265 35%"
+    }
+  }
+}

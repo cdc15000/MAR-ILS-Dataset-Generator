@@ -1,0 +1,181 @@
+{
+  "generator_version": "v6.0.0",
+  "script_version": "run_cho_analysis_v6_0",
+  "standard_reference": "ASTM-WKXXXXX-v1.0.0",
+  "observer": "2D CHO, single slice",
+  "tier": {
+    "tier_id": "T1_AB",
+    "description": "Large adult-body Co-Cr rod \u2014 mandatory 510(k) anchor tier",
+    "body_semi_x_mm": 85.0,
+    "body_semi_y_mm": 60.0,
+    "is_circular_body": false,
+    "metal_radius_mm": 10.0,
+    "metal_mu_cm": 4.2,
+    "metal_material": "CoCr",
+    "lesion_semi_major_mm": 3.0,
+    "lesion_semi_minor_mm": 2.0,
+    "lesion_center_x": 289,
+    "roi_size": 145,
+    "metal_radius_vox": 20,
+    "body_semi_x_vox": 170,
+    "body_semi_y_vox": 120,
+    "lesion_semi_major_vox": 6,
+    "lesion_semi_minor_vox": 4,
+    "l_nominal_vox": 33,
+    "l_nominal_mm": 16.5,
+    "gap_vox": 7,
+    "gap_mm": 3.5,
+    "blockage_frac": 0.4145022329531675,
+    "channel_width_a": 9.0,
+    "mu_lesion_cm": 0.2083708,
+    "roi_x_center": 289,
+    "roi_y_center": 256
+  },
+  "lesion_slice_index": 128,
+  "num_channels": 10,
+  "internal_noise_sigma": 15.0,
+  "ils_mode": true,
+  "reconstruction_pipeline": "not declared",
+  "noMAR": {
+    "AUC": 0.5375,
+    "Bias": 0.23062499999999997,
+    "CI_95": [
+      0.53125,
+      0.5675
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.768125,
+      "AUC_5050": 0.59125,
+      "Bias_5050": 0.1768749999999999
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 812.0,
+      "p_one_sided": 2.2737367544323206e-11,
+      "significant_p05": true
+    },
+    "noise_sweep": {
+      "sweep_points": [
+        {
+          "sigma": 0,
+          "AUC": 0.530625,
+          "CI_95": [
+            0.52496875,
+            0.555046875
+          ]
+        },
+        {
+          "sigma": 5,
+          "AUC": 0.53,
+          "CI_95": [
+            0.5249375000000001,
+            0.558125
+          ]
+        },
+        {
+          "sigma": 10,
+          "AUC": 0.530625,
+          "CI_95": [
+            0.525625,
+            0.55440625
+          ]
+        },
+        {
+          "sigma": 15,
+          "AUC": 0.5375,
+          "CI_95": [
+            0.53,
+            0.566265625
+          ]
+        },
+        {
+          "sigma": 20,
+          "AUC": 0.549375,
+          "CI_95": [
+            0.536796875,
+            0.5920312500000001
+          ]
+        },
+        {
+          "sigma": 25,
+          "AUC": 0.545625,
+          "CI_95": [
+            0.53559375,
+            0.581890625
+          ]
+        },
+        {
+          "sigma": 30,
+          "AUC": 0.544375,
+          "CI_95": [
+            0.535625,
+            0.57759375
+          ]
+        },
+        {
+          "sigma": 40,
+          "AUC": 0.549375,
+          "CI_95": [
+            0.53996875,
+            0.581875
+          ]
+        },
+        {
+          "sigma": 50,
+          "AUC": 0.5475,
+          "CI_95": [
+            0.54125,
+            0.577515625
+          ]
+        },
+        {
+          "sigma": 65,
+          "AUC": 0.546875,
+          "CI_95": [
+            0.543109375,
+            0.5769062500000001
+          ]
+        },
+        {
+          "sigma": 80,
+          "AUC": 0.548125,
+          "CI_95": [
+            0.543109375,
+            0.581296875
+          ]
+        }
+      ],
+      "sigmoid_fit": {
+        "A": 0.04905857681294762,
+        "k": -0.09439087601894083,
+        "sigma_0": 4.388873155747601e-08,
+        "fit_ok": true,
+        "r_squared": 0.8102273825926545
+      }
+    }
+  },
+  "MAR": {
+    "AUC": 0.525625,
+    "Bias": 0.15000000000000002,
+    "CI_95": [
+      0.520625,
+      0.550625
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.675625,
+      "AUC_5050": 0.57,
+      "Bias_5050": 0.10562500000000008
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 793.0,
+      "p_one_sided": 1.1468728189356625e-09,
+      "significant_p05": true
+    }
+  },
+  "delta_AUC": -0.011874999999999969,
+  "delta_AUC_CI_95": [
+    -0.036250000000000004,
+    0.011249999999999982
+  ],
+  "delta_wilcoxon_p_twosided": 0.3753805605592788,
+  "self_test": false
+}
