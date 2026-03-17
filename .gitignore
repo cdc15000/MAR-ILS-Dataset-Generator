@@ -7,7 +7,10 @@ metadata.csv
 MAR_ILS_Lab_Instructions.pdf
 
 # Exclude Python environment/cache
+mar-ils/
 __pycache__/
+*.h5
+*.dcm
 *.pyc
 venv/
 .DS_Store
