@@ -1,0 +1,205 @@
+{
+  "tdp_version": "1.0.0",
+  "standard": "ASTM-WKXXXXX-v1.0.0",
+  "generation_date": "2026-03-17",
+  "generation_ts": "2026-03-17T17:37:14.740956+00:00",
+  "mode": "multi-algorithm comparison",
+  "algorithms": [
+    "ASD-iMAR",
+    "DLSC-iMAR",
+    "FS-iMAR",
+    "MBIR-iMAR",
+    "POCS-TV",
+    "Spectral MAR",
+    "iMAR"
+  ],
+  "t1_ab_present": true,
+  "comparison": [
+    {
+      "tier_id": "T1_AB",
+      "description": "Large adult-body Co-Cr rod \u2014 mandatory 510(k) anchor tier",
+      "algorithms": [
+        {
+          "algorithm": "Spectral MAR",
+          "AUC_noMAR": 0.5375,
+          "AUC_MAR": 0.525625,
+          "delta_AUC": -0.011874999999999969,
+          "delta_AUC_CI": [
+            -0.036250000000000004,
+            0.011249999999999982
+          ],
+          "wilcoxon_p": 1.1468728189356625e-09,
+          "outcome": "NON-INFERIOR",
+          "claim": "MAR implementation 'Spectral MAR' demonstrates NON-INFERIOR lesion detectability vs noMAR for T1_AB (Large adult-body Co-Cr rod \u2014 mandatory 510(k) anchor tier; 41% angular blockage, CoCr) with \u0394AUC = -0.0119 (95% CI [-0.0363, +0.0112]; one-tailed Wilcoxon p = 0.0000)."
+        },
+        {
+          "algorithm": "iMAR",
+          "AUC_noMAR": 0.5375,
+          "AUC_MAR": 0.523125,
+          "delta_AUC": -0.014375000000000027,
+          "delta_AUC_CI": [
+            -0.038140625000000074,
+            0.0037499999999999227
+          ],
+          "wilcoxon_p": 2.3828943085391074e-07,
+          "outcome": "NON-INFERIOR",
+          "claim": "MAR implementation 'iMAR' demonstrates NON-INFERIOR lesion detectability vs noMAR for T1_AB (Large adult-body Co-Cr rod \u2014 mandatory 510(k) anchor tier; 41% angular blockage, CoCr) with \u0394AUC = -0.0144 (95% CI [-0.0381, +0.0037]; one-tailed Wilcoxon p = 0.0000)."
+        }
+      ]
+    },
+    {
+      "tier_id": "T2_SB",
+      "description": "Small pediatric-body SS-316L rod \u2014 supplemental tier",
+      "algorithms": [
+        {
+          "algorithm": "ASD-iMAR",
+          "AUC_noMAR": 0.57,
+          "AUC_MAR": 0.5040625,
+          "delta_AUC": -0.06593749999999998,
+          "delta_AUC_CI": [
+            -0.11374999999999996,
+            -0.035914062499999976
+          ],
+          "wilcoxon_p": 0.08858594519462515,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'ASD-iMAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = -0.0659 (95% CI [-0.1137, -0.0359]; one-tailed Wilcoxon p = 0.0886)."
+        },
+        {
+          "algorithm": "DLSC-iMAR",
+          "AUC_noMAR": 0.57,
+          "AUC_MAR": 0.515625,
+          "delta_AUC": -0.05437499999999995,
+          "delta_AUC_CI": [
+            -0.12189062499999996,
+            -0.0062343749999999925
+          ],
+          "wilcoxon_p": 0.5919805091170929,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'DLSC-iMAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = -0.0544 (95% CI [-0.1219, -0.0062]; one-tailed Wilcoxon p = 0.5920)."
+        },
+        {
+          "algorithm": "FS-iMAR",
+          "AUC_noMAR": 0.801875,
+          "AUC_MAR": 0.54,
+          "delta_AUC": -0.26187499999999997,
+          "delta_AUC_CI": [
+            -0.333140625,
+            -0.192484375
+          ],
+          "wilcoxon_p": 0.0012564532562464592,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'FS-iMAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = -0.2619 (95% CI [-0.3331, -0.1925]; one-tailed Wilcoxon p = 0.0013)."
+        },
+        {
+          "algorithm": "MBIR-iMAR",
+          "AUC_noMAR": 0.57,
+          "AUC_MAR": 0.514375,
+          "delta_AUC": -0.055624999999999925,
+          "delta_AUC_CI": [
+            -0.088765625,
+            -0.018718749999999965
+          ],
+          "wilcoxon_p": 1.1160564099554904e-06,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'MBIR-iMAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = -0.0556 (95% CI [-0.0888, -0.0187]; one-tailed Wilcoxon p = 0.0000)."
+        },
+        {
+          "algorithm": "Spectral MAR",
+          "AUC_noMAR": 0.57,
+          "AUC_MAR": 0.61875,
+          "delta_AUC": 0.04875000000000007,
+          "delta_AUC_CI": [
+            0.003734374999999924,
+            0.09814062500000001
+          ],
+          "wilcoxon_p": 5.002220859751105e-11,
+          "outcome": "SUPERIOR",
+          "claim": "MAR implementation 'Spectral MAR' demonstrates SUPERIOR lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = +0.0488 (95% CI [+0.0037, +0.0981]; one-tailed Wilcoxon p = 0.0000)."
+        },
+        {
+          "algorithm": "iMAR",
+          "AUC_noMAR": 0.801875,
+          "AUC_MAR": 0.539375,
+          "delta_AUC": -0.26249999999999996,
+          "delta_AUC_CI": [
+            -0.338125,
+            -0.19125000000000003
+          ],
+          "wilcoxon_p": 0.00012408394559315639,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'iMAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T2_SB (Small pediatric-body SS-316L rod \u2014 supplemental tier; 40% angular blockage, SS316L) with \u0394AUC = -0.2625 (95% CI [-0.3381, -0.1913]; one-tailed Wilcoxon p = 0.0001)."
+        }
+      ]
+    },
+    {
+      "tier_id": "T3_HEAD",
+      "description": "Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier",
+      "algorithms": [
+        {
+          "algorithm": "FS-iMAR",
+          "AUC_noMAR": 0.533125,
+          "AUC_MAR": 0.5525,
+          "delta_AUC": 0.01937500000000003,
+          "delta_AUC_CI": [
+            -0.02376562499999994,
+            0.05814062499999997
+          ],
+          "wilcoxon_p": 0.0013853147693225765,
+          "outcome": "NON-INFERIOR",
+          "claim": "MAR implementation 'FS-iMAR' demonstrates NON-INFERIOR lesion detectability vs noMAR for T3_HEAD (Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier; 16% angular blockage, Ti6Al4V) with \u0394AUC = +0.0194 (95% CI [-0.0238, +0.0581]; one-tailed Wilcoxon p = 0.0014)."
+        },
+        {
+          "algorithm": "POCS-TV",
+          "AUC_noMAR": 0.533125,
+          "AUC_MAR": 0.51375,
+          "delta_AUC": -0.01937499999999992,
+          "delta_AUC_CI": [
+            -0.05499999999999994,
+            0.00624999999999998
+          ],
+          "wilcoxon_p": 0.015485230842386954,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'POCS-TV' demonstrates INDETERMINATE lesion detectability vs noMAR for T3_HEAD (Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier; 16% angular blockage, Ti6Al4V) with \u0394AUC = -0.0194 (95% CI [-0.0550, +0.0062]; one-tailed Wilcoxon p = 0.0155)."
+        },
+        {
+          "algorithm": "Spectral MAR",
+          "AUC_noMAR": 0.533125,
+          "AUC_MAR": 0.505,
+          "delta_AUC": -0.028124999999999956,
+          "delta_AUC_CI": [
+            -0.06439062500000006,
+            -0.002500000000000055
+          ],
+          "wilcoxon_p": 0.001030283357067674,
+          "outcome": "INDETERMINATE",
+          "claim": "MAR implementation 'Spectral MAR' demonstrates INDETERMINATE lesion detectability vs noMAR for T3_HEAD (Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier; 16% angular blockage, Ti6Al4V) with \u0394AUC = -0.0281 (95% CI [-0.0644, -0.0025]; one-tailed Wilcoxon p = 0.0010)."
+        },
+        {
+          "algorithm": "iMAR",
+          "AUC_noMAR": 0.533125,
+          "AUC_MAR": 0.52625,
+          "delta_AUC": -0.0068749999999999645,
+          "delta_AUC_CI": [
+            -0.04749999999999999,
+            0.027515625000000064
+          ],
+          "wilcoxon_p": 0.00625604220203968,
+          "outcome": "NON-INFERIOR",
+          "claim": "MAR implementation 'iMAR' demonstrates NON-INFERIOR lesion detectability vs noMAR for T3_HEAD (Circular head phantom Ti-6Al-4V rod \u2014 supplemental tier; 16% angular blockage, Ti6Al4V) with \u0394AUC = -0.0069 (95% CI [-0.0475, +0.0275]; one-tailed Wilcoxon p = 0.0063)."
+        }
+      ]
+    }
+  ],
+  "traceability": {
+    "observer": "2D Channelized Hotelling Observer (CHO)",
+    "channels": "10 Laguerre-Gauss (tier-specific a)",
+    "covariance": "LA condition only (\u00a7A1.5.2(a))",
+    "regularization": "Tikhonov \u03bb = 0.01 \u00d7 trace(K) / 10",
+    "hold_out": "Leave-One-Out (LOO) with observer re-fit per fold",
+    "bootstrap": "1000 resamples, observation-level, on LOO scores",
+    "wilcoxon": "One-tailed paired Wilcoxon on d[i] = s_LP[i] \u2212 s_LA[i]",
+    "estimation_bias": "50/50 2-fold CV",
+    "metric": "Mann-Whitney AUC (mid-rank tie correction)",
+    "note_3d": "3D integration across z PROHIBITED (\u00a7A1.5.3)"
+  }
+}
