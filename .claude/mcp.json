@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "ALLOWED_PATHS": "/Users/laptop-h9y2/projects/mar-ils"
+      }
+    },
+    "python-data-inspector": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp.server.data_inspector"
+      ],
+      "env": {
+        "DATA_PATHS": "/Users/laptop-h9y2/projects/mar-ils/results_archive,/Users/laptop-h9y2/projects/mar-ils/tdp_output"
+      }
+    },
+    "matplotlib-visualization": {
+      "command": "python3",
+      "args": [
+        "-c",
+        "import sys; sys.path.insert(0, '/Users/laptop-h9y2/projects/mar-ils'); from view_sinograms import *; print('Visualization MCP ready')"
+      ]
+    }
+  }
+}
