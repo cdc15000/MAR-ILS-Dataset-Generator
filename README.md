@@ -1,4 +1,3 @@
-````markdown
 # MAR ILS Dataset Generator & Evaluation Framework
 
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
@@ -99,4 +98,3 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 **Christopher D. Cocchiaraley**
 Consumer Member, ASTM International Committee F04
 Executor of the Estate of Veronica M. Cocchiaraley
-````
