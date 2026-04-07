@@ -4,6 +4,7 @@
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![Standard: ASTM WKXXXXX Rev 04](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2004-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
+![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
 ## Overview
 
@@ -79,11 +80,27 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 | :--- | :--- |
 | `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 04). |
 | `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 04). |
+| `patch_2026b_metadata.py` | One-time DICOM 2026b CP-2575 metadata patcher. |
 | `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 04, machine-readable) |
 | `docs_and_references/IEC_203_6_7_102_draft.md` | Draft IEC clause for MAR performance evaluation |
 | `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
 | `/algorithms` | Reference MAR implementations (iMAR, MBIR, Spectral). |
 | `/legacy` | Archived v6.0.0 parallel-beam research framework. |
+
+---
+
+## Metadata Standard: DICOM 2026b Compliant
+
+This is the **first reference implementation** of the **DICOM CP-2575 Metal Artifact Reduction Macro** (PS3.3 C.8.15.3.15), finalized in DICOM 2026b.
+
+All DICOM files produced by the generator and the `patch_2026b_metadata.py` utility include:
+
+| Tag | Keyword | Value |
+| :--- | :--- | :--- |
+| `(0018,9390)` | Metal Artifact Reduction Sequence | Present (1 item) |
+| `(0018,9391)` | Metal Artifact Reduction Applied | `NO` |
+
+The `noMAR` reconstructions are tagged `NO` by definition. Laboratories applying MAR algorithms must set `(0018,9391)` to `YES` and optionally populate `(0018,9392)` Metal Artifact Reduction Algorithm with a value from **CID 10036** (e.g., `MAR_IMAR`, `MAR_SPECTRAL`).
 
 ---
 
