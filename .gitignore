@@ -6,11 +6,19 @@ checksums_sha256.txt
 metadata.csv
 MAR_ILS_Lab_Instructions.pdf
 
+# Exclude dataset output directories (N=40 runs produce ~50+ GB)
+astm_reference_dataset/
+astm_mar_ils_*/
+results_archive/
+tdp_output/
+
 # Exclude Python environment/cache
 mar-ils/
 __pycache__/
 *.h5
 *.dcm
 *.pyc
+*.nbi
+*.nbc
 venv/
 .DS_Store
