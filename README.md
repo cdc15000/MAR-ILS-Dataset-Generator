@@ -2,7 +2,7 @@
 
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
-![Standard: ASTM WKXXXXX](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX-orange)
+![Standard: ASTM WKXXXXX Rev 04](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2004-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 
 ## Overview
@@ -16,11 +16,11 @@ This is the **reference evaluation framework** for conducting standardized **Int
 
 ---
 
-## 🏛️ April 2026 Status: Metrology Baseline Locked
+## April 2026 Status: Metrology Baseline Locked
 
 The framework has officially transitioned from parallel-beam research tiers to a **Normative Fan-Beam Geometry** (SID=570mm, SDD=1040mm). 
 
-### 📊 ILS Reference Baseline ($N=40$)
+### ILS Reference Baseline ($N=40$)
 The following values are established as the normative floor for ASTM WKXXXXX Rev 04:
 
 | Metric | Value | Status |
@@ -32,15 +32,33 @@ The following values are established as the normative floor for ASTM WKXXXXX Rev
 
 ---
 
-## 🚀 Performance Breakthrough: Numba Acceleration
+## Performance Breakthrough: Numba Acceleration
 The v7.0.0 engine features a JIT-compiled **Batch Backprojector** optimized for Apple Silicon (M3) and modern x86_64 architectures, providing a **24x speedup** over standard NumPy implementations.
 
 * **Throughput:** ~61s per realization (256 slices).
 * **Efficiency:** Full $N=40$ dataset generation in <30 minutes on standard workstations.
 
+## Quick Start
+
+```bash
+# Generate the canonical fan-beam dataset
+python generator_v7_0_0.py --output-dir ./astm_reference_dataset
+
+# Self-test (validates CHO pipeline — ΔAUC = 0 by definition)
+python run_cho_analysis_v7_0.py \
+    --dataset-dir ./astm_reference_dataset \
+    --self-test --internal-noise-sigma 15
+
+# ILS mode (score your MAR algorithm)
+python run_cho_analysis_v7_0.py \
+    --dataset-dir ./astm_reference_dataset \
+    --mar-output-dir ./mar_recon \
+    --internal-noise-sigma 15
+```
+
 ---
 
-## 🤖 AI-Integrated Laboratory (MCP)
+## AI-Integrated Laboratory (MCP)
 This repository includes **Model Context Protocol (MCP)** servers, allowing AI assistants to act as "Laboratory Hands" on your local workstation.
 
 * **Data Inspector (`mcp_data_inspector.py`):** Automatically parses CHO JSON results and summarizes statistical significance.
@@ -48,22 +66,36 @@ This repository includes **Model Context Protocol (MCP)** servers, allowing AI a
 
 ---
 
-## 🛠️ Validation & Audit Tools
+## Validation & Audit Tools
 To ensure inter-laboratory consistency, use the following in-memory physics auditors:
 * **`plot_spectral_transparency.py`:** Visualizes the "Transparency Jump" between 60 keV and 140 keV.
 * **`check_metal_overflow.py`:** Audits the normative **3000 HU metal-ROI hard-set** requirement.
 
 ---
 
-## 📂 Deliverables & Repository Structure
+## Deliverables & Repository Structure
 
 | Path | Description |
 | :--- | :--- |
 | `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 04). |
 | `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 04). |
-| `/docs_and_references` | ASTM, IEC, and FDA regulatory draft standards. |
+| `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 04, machine-readable) |
+| `docs_and_references/IEC_203_6_7_102_draft.md` | Draft IEC clause for MAR performance evaluation |
+| `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
 | `/algorithms` | Reference MAR implementations (iMAR, MBIR, Spectral). |
 | `/legacy` | Archived v6.0.0 parallel-beam research framework. |
+
+---
+
+## Regulatory Framework
+
+| Layer | Document | Role |
+|-------|----------|------|
+| **1 — What to record** | DICOM CP-2575 (2026b) | MAR metadata tags in DICOM |
+| **2 — Must record** | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Regulatory mandate |
+| **3 — How to measure** | ASTM WKXXXXX Rev 04 | Quantitative ΔAUC test method |
+| **3a — Must measure** | IEC 60601-2-44 Ed. 4 §203.6.7.102 (proposed) | Mandate ΔAUC reporting |
+| **4 — Acceptance** | FDA guidance (proposed) | Non-degradation / superiority thresholds |
 
 ---
 

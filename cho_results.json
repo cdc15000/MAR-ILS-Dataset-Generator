@@ -1,0 +1,163 @@
+{
+  "generator_version": "v7.0.0",
+  "script_version": "run_cho_analysis_v7_0",
+  "standard_reference": "ASTM-WKXXXXX-Rev04",
+  "acquisition_geometry": "fan-beam (SID=570mm, SDD=1040mm)",
+  "observer": "2D CHO, single slice (\u00a7A1.5.3)",
+  "roi_size": 121,
+  "roi_center": [
+    281,
+    256
+  ],
+  "channel_width_a": 7.5,
+  "num_channels": 10,
+  "lesion_slice_index": 128,
+  "internal_noise_sigma": 15.0,
+  "num_realizations": 40,
+  "auc_tolerance": 0.005,
+  "ils_mode": false,
+  "reconstruction_pipeline": "N/A (self-test)",
+  "noMAR": {
+    "AUC": 0.829375,
+    "Bias": 0.11812500000000004,
+    "CI_95": [
+      0.7612187499999999,
+      0.9025156249999999
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.9475,
+      "AUC_5050": 0.7225,
+      "Bias_5050": 0.22499999999999998
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 817.0,
+      "p_one_sided": 4.547473508864641e-12,
+      "significant_p05": true
+    },
+    "noise_sweep": {
+      "sweep_points": [
+        {
+          "sigma": 0,
+          "AUC": 0.7475,
+          "CI_95": [
+            0.69796875,
+            0.82003125
+          ]
+        },
+        {
+          "sigma": 5,
+          "AUC": 0.7625,
+          "CI_95": [
+            0.708046875,
+            0.840625
+          ]
+        },
+        {
+          "sigma": 10,
+          "AUC": 0.8,
+          "CI_95": [
+            0.73728125,
+            0.88128125
+          ]
+        },
+        {
+          "sigma": 15,
+          "AUC": 0.829375,
+          "CI_95": [
+            0.764296875,
+            0.9113593750000001
+          ]
+        },
+        {
+          "sigma": 20,
+          "AUC": 0.841875,
+          "CI_95": [
+            0.7730625,
+            0.918234375
+          ]
+        },
+        {
+          "sigma": 25,
+          "AUC": 0.846875,
+          "CI_95": [
+            0.776828125,
+            0.9151562500000001
+          ]
+        },
+        {
+          "sigma": 30,
+          "AUC": 0.840625,
+          "CI_95": [
+            0.77178125,
+            0.9101562500000001
+          ]
+        },
+        {
+          "sigma": 40,
+          "AUC": 0.82875,
+          "CI_95": [
+            0.7631093750000001,
+            0.901375
+          ]
+        },
+        {
+          "sigma": 50,
+          "AUC": 0.81875,
+          "CI_95": [
+            0.754359375,
+            0.89253125
+          ]
+        },
+        {
+          "sigma": 65,
+          "AUC": 0.80625,
+          "CI_95": [
+            0.7374843750000001,
+            0.88196875
+          ]
+        },
+        {
+          "sigma": 80,
+          "AUC": 0.7925,
+          "CI_95": [
+            0.7223906250000001,
+            0.86625
+          ]
+        }
+      ],
+      "sigmoid_fit": {
+        "A": 0.33109445205344107,
+        "k": -0.2604237713581272,
+        "sigma_0": 2.9114267330148843e-25,
+        "fit_ok": true,
+        "r_squared": 0.10316738410766069
+      }
+    }
+  },
+  "MAR": {
+    "AUC": 0.829375,
+    "Bias": 0.11812500000000004,
+    "CI_95": [
+      0.7612187499999999,
+      0.9025156249999999
+    ],
+    "bias_5050": {
+      "AUC_resub": 0.9475,
+      "AUC_5050": 0.7225,
+      "Bias_5050": 0.22499999999999998
+    },
+    "wilcoxon": {
+      "wilcoxon_stat": 817.0,
+      "p_one_sided": 4.547473508864641e-12,
+      "significant_p05": true
+    }
+  },
+  "delta_AUC": 0.0,
+  "delta_AUC_CI_95": [
+    0.0,
+    0.0
+  ],
+  "delta_wilcoxon_p_twosided": NaN,
+  "self_test": true,
+  "screening_mode": false
+}
