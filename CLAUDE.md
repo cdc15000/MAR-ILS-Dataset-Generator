@@ -6,10 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with **ASTM WKXXXXX Revision 04** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
 
+## Project Root
+
+The persistent working directory is `~/projects/mar-ils/`. A convenience symlink exists at `/tmp/mar-ils` → `~/projects/mar-ils/`.
+
 ## Commands
 
 ### Environment Setup
 ```bash
+cd ~/projects/mar-ils
 source mar-ils/bin/activate   # activate virtual environment (Python 3.10)
 pip install -r requirements.txt
 pip install numba              # optional: ~24x speedup via JIT + batch geometry
@@ -56,6 +61,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ### Scripts (versioned by filename — use the highest version)
 - **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 04): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
 - **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 04 ROI parameters (121×121, centre (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
+- **`patch_2026b_metadata.py`** — One-time utility to inject DICOM 2026b CP-2575 MAR metadata into existing datasets.
 - `legacy/generator_v6_0_0.py` — Research tier framework (T1_AB/T2_SB/T3_HEAD). Not normative. Uses parallel-beam geometry and tier-specific parameters. Retained for multi-tier research.
 - `legacy/run_cho_analysis_v6_0.py` — Tier-aware CHO. Not normative. Uses tier_config.py for ROI parameters.
 - `tier_config.py` — Three-tier registry (v6 research framework only).
@@ -167,6 +173,17 @@ python run_cho_analysis_v7_0.py \
     --mar-output-dir ./mar_recon \
     --internal-noise-sigma 15
 ```
+
+### DICOM 2026b Compliance (CP-2575, 2026-04-07)
+- All DICOM output includes the **Metal Artifact Reduction Macro** (PS3.3 C.8.15.3.15).
+- `(0018,9390)` Metal Artifact Reduction Sequence (SQ, 1 item) → `(0018,9391)` Metal Artifact Reduction Applied (CS) = `"NO"`.
+- Tags are written via hex (`ds.add_new(0x00189390, 'SQ', [...])`) because pydicom's bundled dictionary does not yet include the 2026b additions. Verification:
+  ```python
+  import pydicom
+  ds = pydicom.dcmread('path/to/slice.dcm')
+  print(ds[0x00189390].value[0][0x00189391].value)  # → "NO"
+  ```
+- `patch_2026b_metadata.py` retrofits existing datasets (idempotent, regenerates checksums).
 
 ## Regulatory Framework (Layered Approach)
 

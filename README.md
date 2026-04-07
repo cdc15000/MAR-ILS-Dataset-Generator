@@ -102,6 +102,20 @@ All DICOM files produced by the generator and the `patch_2026b_metadata.py` util
 
 The `noMAR` reconstructions are tagged `NO` by definition. Laboratories applying MAR algorithms must set `(0018,9391)` to `YES` and optionally populate `(0018,9392)` Metal Artifact Reduction Algorithm with a value from **CID 10036** (e.g., `MAR_IMAR`, `MAR_SPECTRAL`).
 
+### Verification (hex-tag method)
+
+Because pydicom's bundled data dictionary does not yet include the 2026b additions, auditing requires hex-tag access:
+
+```python
+import pydicom
+ds = pydicom.dcmread('astm_reference_dataset/noMAR_recon/LP/realization_001/slice_0129.dcm')
+
+# Access the MAR Macro via hex tags
+mar_seq = ds[0x00189390]                          # Metal Artifact Reduction Sequence
+mar_applied = mar_seq.value[0][0x00189391].value   # → "NO"
+print(f'(0018,9391) Metal Artifact Reduction Applied = {mar_applied}')
+```
+
 ---
 
 ## Regulatory Framework
