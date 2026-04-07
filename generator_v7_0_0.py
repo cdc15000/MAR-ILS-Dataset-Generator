@@ -707,6 +707,11 @@ def _write_dicom_slice(
     ds.RescaleSlope = 1
     ds.PixelData = hu_clipped.tobytes()
 
+    # DICOM 2026b CP-2575: Metal Artifact Reduction Macro (C.8.15.3.15)
+    mar_item = Dataset()
+    mar_item.add_new(0x00189391, 'CS', 'NO')   # Metal Artifact Reduction Applied
+    ds.add_new(0x00189390, 'SQ', [mar_item])    # Metal Artifact Reduction Sequence
+
     ds.save_as(str(output_dir / f'slice_{z + 1:04d}.dcm'), write_like_original=False)
 
 
