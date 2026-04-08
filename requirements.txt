@@ -1,8 +1,8 @@
-numpy>=1.21.0
-scipy>=1.7.0
-pydicom>=2.3.0
-h5py>=3.7.0
-tqdm>=4.64.0
-reportlab>=3.6.0
-matplotlib>=3.5.0
-torch>=2.0.0
+numpy==2.2.6
+scipy==1.15.3
+pydicom==3.0.1
+h5py==3.15.1
+tqdm==4.67.3
+reportlab==4.4.10
+matplotlib==3.10.8
+# numba is optional (~24x speedup). Install separately: pip install numba

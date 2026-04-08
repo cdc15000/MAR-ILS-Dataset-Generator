@@ -79,6 +79,33 @@ from reportlab.pdfbase.ttfonts import TTFont
 from tqdm import tqdm
 import math
 
+from mar_ils_core.constants import (
+    X_DIM, Y_DIM, Z_DIM, VOXEL_MM, VOXEL_CM,
+    PHANTOM_CENTER_X, PHANTOM_CENTER_Y,
+    SID_MM, SDD_MM, SID_CM, SDD_CM, SID_VOX, SDD_VOX,
+    N_ANGLES, N_DET,
+    GAMMA_MAX_RAD, DELTA_GAMMA_RAD, DET_FAN_ANGLES_RAD, COS_DET_FAN,
+    ANGLES_DEG, ANGLES_RAD,
+    _RAY_T_VALS, _N_RAY_SAMPLES, _RAY_STEP,
+    MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM,
+    BACKGROUND_HU, METAL_HU,
+    BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
+    METAL_RADIUS_VOX, LESION_RADIUS_VOX,
+    LESION_CENTER_X, LESION_SLICE_INDEX,
+    LESION_DELTA_HU, MU_LESION_CM,
+    SCATTER_FRAC, SIGMA_E_COUNTS, NOISE_SIGMA_TARGET_HU,
+    JITTER_MAX_DEG,
+    NUM_REALIZATIONS_DEFAULT, BASE_SEED,
+)
+from mar_ils_core.phantom import (
+    build_body_mask as _build_body_mask,
+    build_metal_mask as _build_metal_mask,
+    build_lesion_mask as _build_lesion_mask,
+    build_attenuation_map,
+)
+from mar_ils_core.noise import apply_noise
+from mar_ils_core.dicom_utils import write_dicom_slice as _write_dicom_slice
+
 try:
     import numba
     _HAS_NUMBA = True
@@ -86,77 +113,9 @@ except ImportError:
     _HAS_NUMBA = False
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Canonical constants (ASTM WKXXXXX Rev 04 — single configuration)
+# Generator-specific constants
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# Volume geometry (§A1.1)
-X_DIM: int = 512
-Y_DIM: int = 512
-Z_DIM: int = 256
-VOXEL_MM: float = 0.5
-VOXEL_CM: float = VOXEL_MM / 10.0  # 0.05 cm
-PHANTOM_CENTER_X: int = 256
-PHANTOM_CENTER_Y: int = 256
-
-# Fan-beam geometry [Rev 04] (§A1.1(f,g))
-SID_MM: float = 570.0       # source-to-isocenter distance
-SDD_MM: float = 1040.0      # source-to-detector distance
-SID_CM: float = SID_MM / 10.0
-SDD_CM: float = SDD_MM / 10.0
-SID_VOX: float = SID_MM / VOXEL_MM   # 1140.0 voxels
-SDD_VOX: float = SDD_MM / VOXEL_MM   # 2080.0 voxels
-N_ANGLES: int = 720          # full 360° rotation
-N_DET: int = 512             # equi-angular detector elements
-
-# Detector fan angles
-_FOV_HALF_MM: float = X_DIM * VOXEL_MM / 2.0  # 128 mm
-GAMMA_MAX_RAD: float = float(np.arcsin(_FOV_HALF_MM / SID_MM))  # ~0.2266 rad
-DELTA_GAMMA_RAD: float = 2.0 * GAMMA_MAX_RAD / N_DET  # angular pitch
-DET_FAN_ANGLES_RAD: np.ndarray = (
-    (np.arange(N_DET) - N_DET / 2.0 + 0.5) * DELTA_GAMMA_RAD
-)
-COS_DET_FAN: np.ndarray = np.cos(DET_FAN_ANGLES_RAD)
-
-# Source rotation angles
-ANGLES_DEG: np.ndarray = np.linspace(0.0, 360.0, N_ANGLES, endpoint=False)
-ANGLES_RAD: np.ndarray = np.deg2rad(ANGLES_DEG)
-
-# Ray-tracing parameters (forward projection)
-_DIAG_VOX: float = float(np.sqrt(X_DIM**2 + Y_DIM**2)) / 2.0
-_RAY_T_START: float = SID_VOX - _DIAG_VOX - 10.0
-_RAY_T_END: float = SID_VOX + _DIAG_VOX + 10.0
-_RAY_STEP: float = 0.4   # voxel step along each ray (sub-voxel accuracy)
-_RAY_T_VALS: np.ndarray = np.arange(_RAY_T_START, _RAY_T_END, _RAY_STEP)
-_N_RAY_SAMPLES: int = len(_RAY_T_VALS)
-
-# Physical constants (NIST XCOM, 60 keV monochromatic)
-MU_AIR_CM: float = 0.000196
-MU_TISSUE_CM: float = 0.2059
-MU_IRON_CM: float = 2.408
-BACKGROUND_HU: float = 40.0
-METAL_HU: float = 3000.0
-
-# Phantom geometry (§A1.2–§A1.4)
-BODY_SEMI_X_VOX: int = round(85.0 / VOXEL_MM)   # 170
-BODY_SEMI_Y_VOX: int = round(60.0 / VOXEL_MM)   # 120
-METAL_RADIUS_VOX: int = round(5.0 / VOXEL_MM)    # 10
-LESION_RADIUS_VOX: int = round(2.5 / VOXEL_MM)   # 5
-LESION_CENTER_X: int = 281    # §A1.4(c): 256 + 10 + 10 + 5
-LESION_SLICE_INDEX: int = 128
-
-# Lesion contrast (§A1.4(e))
-LESION_DELTA_HU: float = 12.0
-MU_LESION_CM: float = MU_TISSUE_CM * (1.0 + LESION_DELTA_HU / 1000.0)
-
-# Noise model
-SCATTER_FRAC: float = 0.05
-SIGMA_E_COUNTS: float = 5.0
-NOISE_SIGMA_TARGET_HU: float = 30.0
-JITTER_MAX_DEG: float = 15.0
-
-# Study parameters
-NUM_REALIZATIONS_DEFAULT: int = 40
-BASE_SEED: int = 20260314
 DATASET_VERSION: str = "v7.0.0"
 STANDARD_REF: str = "ASTM-WKXXXXX-Rev04"
 
@@ -314,62 +273,6 @@ if _HAS_NUMBA:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Phantom construction
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def _build_body_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
-    return (
-        ((xx - PHANTOM_CENTER_X) / BODY_SEMI_X_VOX) ** 2
-        + ((yy - PHANTOM_CENTER_Y) / BODY_SEMI_Y_VOX) ** 2
-        <= 1.0
-    )
-
-
-def _build_metal_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
-    return (
-        (xx - PHANTOM_CENTER_X) ** 2 + (yy - PHANTOM_CENTER_Y) ** 2
-        <= METAL_RADIUS_VOX ** 2
-    )
-
-
-def _build_lesion_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
-    return (
-        (xx - LESION_CENTER_X) ** 2 + (yy - PHANTOM_CENTER_Y) ** 2
-        <= LESION_RADIUS_VOX ** 2
-    )
-
-
-def build_attenuation_map(
-    place_lesion: bool,
-    jitter_deg: float = 0.0,
-) -> np.ndarray:
-    """Construct 2D attenuation map (cm⁻¹) for one axial slice."""
-    yy, xx = np.mgrid[0:Y_DIM, 0:X_DIM]
-    body_mask = _build_body_mask(yy, xx)
-    metal_mask = _build_metal_mask(yy, xx)
-    lesion_mask = _build_lesion_mask(yy, xx)
-
-    mu = np.full((Y_DIM, X_DIM), MU_AIR_CM, dtype=np.float64)
-    mu[body_mask] = MU_TISSUE_CM
-    mu[metal_mask] = MU_IRON_CM
-    if place_lesion:
-        mu[lesion_mask] = MU_LESION_CM
-
-    if abs(jitter_deg) > 1e-6:
-        mu = scipy.ndimage.rotate(
-            mu, -jitter_deg, reshape=False, order=1,
-            mode='constant', cval=MU_AIR_CM,
-        )
-        body_rot = scipy.ndimage.rotate(
-            body_mask.astype(np.float32), -jitter_deg,
-            reshape=False, order=1, mode='constant', cval=0.0,
-        ) > 0.5
-        mu[~body_rot] = MU_AIR_CM
-
-    return mu.astype(np.float32)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # Fan-beam forward projection [Rev 04]
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -411,25 +314,6 @@ def forward_project_slice(mu: np.ndarray) -> np.ndarray:
         sino[i] = vals.sum(axis=1) * (_RAY_STEP * VOXEL_CM)
 
     return sino.astype(np.float32)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Noise model (unchanged from v5.3.0/v6.0.0)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def apply_noise(sino_clean: np.ndarray, I0: float, rng: np.random.Generator) -> np.ndarray:
-    """
-    Physics-based CT acquisition noise (Vaishnav 2020).
-
-      I_meas = Poisson(I₀·exp(−p) + S) + N(0, σ_e²)
-      p_meas = −ln(max(I_meas, 0.1) / I₀)
-    """
-    S = SCATTER_FRAC * I0
-    I_expected = I0 * np.exp(-sino_clean) + S
-    I_measured = rng.poisson(I_expected).astype(np.float64)
-    I_measured += rng.normal(0.0, SIGMA_E_COUNTS, size=I_measured.shape)
-    I_measured = np.maximum(I_measured, 0.1)
-    return (-np.log(I_measured / I0)).astype(np.float32)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -642,77 +526,6 @@ def generate_sinogram_realization(
         np_grp.attrs['place_lesion'] = int(place_lesion)
         np_grp.attrs['lesion_slice_index'] = LESION_SLICE_INDEX
         np_grp.attrs['lesion_z_extent'] = 1 if place_lesion else 0
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DICOM writing
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def _write_dicom_slice(
-    hu: np.ndarray,
-    z: int,
-    *,
-    output_dir: Path,
-    realization_idx: int,
-    condition_label: str,
-    study_uid: str,
-    series_uid: str,
-    metal_mask: np.ndarray,
-) -> None:
-    """Write one 2D HU array as DICOM. Metal hard-set to 3000 HU (§A1.3(d,f))."""
-    output_dir.mkdir(parents=True, exist_ok=True)
-    hu = hu.copy()
-    hu[metal_mask] = METAL_HU
-    hu_clipped = np.clip(hu, -1024, 32767).astype(np.int16)
-
-    file_meta = FileMetaDataset()
-    file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'
-    file_meta.MediaStorageSOPInstanceUID = generate_uid()
-    file_meta.TransferSyntaxUID = '1.2.840.10008.1.2.1'
-
-    ds = FileDataset(str(output_dir), {}, file_meta=file_meta, preamble=b'\0' * 128)
-    ds.is_implicit_VR = False
-    ds.is_little_endian = True
-
-    now = datetime.now(timezone.utc)
-    ds.ContentDate = now.strftime('%Y%m%d')
-    ds.ContentTime = now.strftime('%H%M%S.%f')
-    ds.Modality = 'CT'
-    ds.Manufacturer = 'ASTM WKXXXXX ILS'
-    ds.StudyDescription = f'MAR ILS {DATASET_VERSION}'
-    ds.SeriesDescription = condition_label
-    ds.ProtocolName = f'{STANDARD_REF}-{condition_label}'
-    ds.ConvolutionKernel = 'RAM-LAK'
-    ds.KVP = '60'
-    ds.ExposureTime = '0'
-    ds.SliceThickness = str(VOXEL_MM)
-    ds.SOPClassUID = '1.2.840.10008.5.1.4.1.1.2'
-    ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
-    ds.StudyInstanceUID = study_uid
-    ds.SeriesInstanceUID = series_uid
-    ds.Rows = Y_DIM
-    ds.Columns = X_DIM
-    ds.PixelSpacing = [VOXEL_MM, VOXEL_MM]
-    ds.ImagePositionPatient = [0.0, 0.0, float(z * VOXEL_MM)]
-    ds.ImageOrientationPatient = [1, 0, 0, 0, 1, 0]
-    ds.SliceLocation = float(z * VOXEL_MM)
-    ds.InstanceNumber = z + 1
-    ds.SamplesPerPixel = 1
-    ds.PhotometricInterpretation = 'MONOCHROME2'
-    ds.BitsAllocated = 16
-    ds.BitsStored = 16
-    ds.HighBit = 15
-    ds.PixelRepresentation = 1
-    ds.RescaleIntercept = 0
-    ds.RescaleSlope = 1
-    ds.PixelData = hu_clipped.tobytes()
-
-    # DICOM 2026b CP-2575: Metal Artifact Reduction Macro (C.8.15.3.15)
-    mar_item = Dataset()
-    mar_item.add_new(0x00189391, 'CS', 'NO')   # Metal Artifact Reduction Applied
-    ds.add_new(0x00189390, 'SQ', [mar_item])    # Metal Artifact Reduction Sequence
-
-    ds.save_as(str(output_dir / f'slice_{z + 1:04d}.dcm'), write_like_original=False)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

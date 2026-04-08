@@ -275,6 +275,11 @@ def _process_one(args):
 # ---------------------------------------------------------------------------
 
 def main():
+    warnings.warn(
+        "This algorithm uses parallel-beam geometry (Rev 03). "
+        "It is NOT compatible with v7.0.0 fan-beam datasets.",
+        DeprecationWarning, stacklevel=2,
+    )
     ap = argparse.ArgumentParser(
         description="NMAR benchmark for ASTM WKXXXXX Rev 03 dataset")
     ap.add_argument("--input-dir", default="./astm_reference_dataset",

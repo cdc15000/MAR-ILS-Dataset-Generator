@@ -388,6 +388,11 @@ def _save_dlsc_dicom(img_hu: np.ndarray, template_dcm, out_path: Path,
 # ---------------------------------------------------------------------------
 
 def main():
+    warnings.warn(
+        "This algorithm uses parallel-beam geometry (Rev 03). "
+        "It is NOT compatible with v7.0.0 fan-beam datasets.",
+        DeprecationWarning, stacklevel=2,
+    )
     ap = argparse.ArgumentParser(
         description="DLSC-iMAR benchmark — Deep Image Prior sinogram completion")
     ap.add_argument("--input-dir", default="./astm_reference_dataset",
