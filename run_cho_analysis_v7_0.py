@@ -67,30 +67,12 @@ from scipy.special import genlaguerre
 from scipy.stats import wilcoxon
 from scipy.optimize import curve_fit
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Canonical constants (ASTM WKXXXXX Rev 04 — hardcoded, no tier dependency)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-LESION_SLICE_INDEX: int = 128     # zero-indexed (§A1.4(a))
-NUM_REALIZATIONS_DEFAULT: int = 40
-
-# CHO ROI (§A1.5.4)
-ROI_SIZE: int = 121               # 121×121 voxels
-ROI_CENTER_X: int = 281           # lesion centre x (§A1.4(c))
-ROI_CENTER_Y: int = 256           # phantom centre y
-
-# Channel parameters (§A1.5.1)
-NUM_CHANNELS: int = 10            # Laguerre-Gauss channels
-CHANNEL_WIDTH_A: float = 7.5      # 1.5 × r_lesion = 1.5 × 5 = 7.5 voxels
-
-# Bootstrap
-N_BOOT: int = 1000
-
-# Noise sweep (informative diagnostic)
-DEFAULT_SIGMA_SWEEP: list[float] = [0, 5, 10, 15, 20, 25, 30, 40, 50, 65, 80]
-
-# AUC equivalence tolerance (§8.3, Rev 04)
-AUC_TOLERANCE: float = 0.005
+from mar_ils_core.constants import (
+    LESION_SLICE_INDEX, NUM_REALIZATIONS_DEFAULT,
+    ROI_SIZE, ROI_CENTER_X, ROI_CENTER_Y,
+    NUM_CHANNELS, CHANNEL_WIDTH_A,
+    N_BOOT, AUC_TOLERANCE, DEFAULT_SIGMA_SWEEP,
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -503,6 +503,11 @@ def _process_one(args_tuple):
 # ---------------------------------------------------------------------------
 
 def main():
+    warnings.warn(
+        "This algorithm uses parallel-beam geometry (Rev 03). "
+        "It is NOT compatible with v7.0.0 fan-beam datasets.",
+        DeprecationWarning, stacklevel=2,
+    )
     ap = argparse.ArgumentParser(
         description="MBIR-iMAR benchmark for ASTM WKXXXXX v1.0.0")
     ap.add_argument("--input-dir", default="./bench_t2_sb")

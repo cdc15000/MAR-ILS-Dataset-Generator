@@ -623,6 +623,11 @@ def generate_sinogram_comparison(
 
 
 def main():
+    warnings.warn(
+        "This algorithm uses parallel-beam geometry (Rev 03). "
+        "It is NOT compatible with v7.0.0 fan-beam datasets.",
+        DeprecationWarning, stacklevel=2,
+    )
     ap = argparse.ArgumentParser(
         description="Dual-Energy Spectral MAR — Reference Implementation"
     )
