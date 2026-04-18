@@ -62,9 +62,15 @@ from pathlib import Path
 import h5py
 import numpy as np
 import pydicom
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+except ImportError as e:
+    raise ImportError(
+        "reference_dlsc_imar.py requires PyTorch (optional dependency, "
+        "not listed in requirements.txt). Install with: pip install torch"
+    ) from e
 from pydicom.uid import generate_uid
 from scipy.ndimage import gaussian_filter
 from scipy.signal import savgol_filter

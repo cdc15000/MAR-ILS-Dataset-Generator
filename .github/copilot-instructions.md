@@ -7,7 +7,7 @@ source mar-ils/bin/activate       # Activate venv (Python 3.10)
 pip install -r requirements.txt   # Install dependencies
 ```
 
-**Key Dependencies:** numpy, scipy, pydicom, h5py, torch, reportlab, matplotlib
+**Key Dependencies:** numpy, scipy, pydicom, h5py, reportlab, matplotlib (numba optional for ~24× speedup; torch optional, only required by `algorithms/reference_dlsc_imar.py`)
 
 ---
 
