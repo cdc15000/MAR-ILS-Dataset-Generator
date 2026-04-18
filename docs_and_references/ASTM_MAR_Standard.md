@@ -482,7 +482,7 @@ The following parameters shall not be modified under any circumstance. Modificat
 | **Projection angles [Rev 04]** | **720 over [0°, 360°)** | **§A1.1(f)** |
 | **Reconstruction [Rev 04]** | **Fan-beam FBP, Ram-Lak, cosine pre-weight, (SID/L)²** | **§A1.1(g)** |
 | **CHO equivalence tolerance [Rev 04]** | **±0.005 AUC** | **§8.3** |
-| **Baseline AUC_noMAR [Rev 04]** | **To be established under fan-beam geometry prior to first ballot** | **§1A.2** |
+| **Baseline AUC_noMAR [Rev 04]** | **0.8294, 95% CI [0.7612, 0.9025] (N=40 LP + 40 LA, σ_internal=15, 2026-04-07)** | **§1A.2** |
 
 ---
 
