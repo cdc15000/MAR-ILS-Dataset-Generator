@@ -5,7 +5,7 @@
 **Date:** 2026-04-05
 **Supersedes:** Revision 03 (03/14/2026)
 
-> **Change summary (Rev 03 → Rev 04):** Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360° full rotation). FBP reconstruction changed from parallel-beam rotation-sum to fan-beam cosine-weighted distance-weighted backprojection. CHO implementation equivalence tolerance relaxed from ±0.001 to ±0.005 AUC. Screening mode (20 realizations) added for pilot evaluation; 40 remains the minimum for formal reporting. Acceptance criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.102 and FDA guidance. Baseline AUC_noMAR established at 0.8294 under fan-beam geometry (N=40, σ=15, 2026-04-07). Reference scripts updated to v7.0.0.
+> **Change summary (Rev 03 → Rev 04):** Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360° full rotation). FBP reconstruction changed from parallel-beam rotation-sum to fan-beam cosine-weighted distance-weighted backprojection. CHO implementation equivalence tolerance relaxed from ±0.001 to ±0.005 AUC. Screening mode (20 realizations) added for pilot evaluation; 40 remains the minimum for formal reporting. Acceptance criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. Baseline AUC_noMAR established at 0.8294 under fan-beam geometry (N=40, σ=15, 2026-04-07). Reference scripts updated to v7.0.0.
 >
 > **Change summary (Rev 02 → Rev 03):** Observer dimensionality changed from 3D to 2D (Slice 128 only); lesion geometry changed from full z-extent cylinder to single-slice disc; lesion HU implementation changed from 120 HU post-FBP hard-set to ~12 HU sinogram-domain physics contrast (no hard-set); minimum realizations increased from 20 to 40 per condition; Vaishnav internal observer noise regularisation (σ = 15) added as normative requirement; Vaishnav Transition AUC baseline (0.7063) recorded in §1A.2.
 
@@ -129,7 +129,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **5.4** This test method does not establish performance acceptance criteria. A positive ΔAUC indicates that MAR improves lesion detectability relative to the no-MAR condition; a negative ΔAUC indicates degradation. Both outcomes are scientifically valid results and shall be reported without suppression or sign correction.
 
-**5.5** This test method is structured to support incorporation by normative reference into external performance standards. **[Rev 04]** Acceptance criteria based on ΔAUC values are established by the incorporating authority (e.g., IEC 60601-2-44 §203.6.7.102, national regulatory guidance), not by this standard. This standard defines only the measurement method.
+**5.5** This test method is structured to support incorporation by normative reference into external performance standards. **[Rev 04]** Acceptance criteria based on ΔAUC values are established by the incorporating authority (e.g., IEC 60601-2-44 §203.6.7.101.1 via its proposed compliance-statement amendment referencing this TYPE TEST; national regulatory guidance), not by this standard. This standard defines only the measurement method.
 
 **5.6** Unlike methods that rely on physical dimensions of image artifacts, this test method acknowledges that image quality is fundamentally defined by the ability of an observer to perform a clinical task.
 
@@ -488,4 +488,4 @@ The following parameters shall not be modified under any circumstance. Modificat
 
 *End of ASTM WKXXXXX Revision 04*
 
-*Revision 04 (2026-04-05) updates the acquisition geometry from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm), relaxes the CHO equivalence tolerance to ±0.005 AUC, adds a screening mode (20 realizations), and establishes a layered acceptance criteria framework with cross-reference to IEC 60601-2-44 Ed. 4 §203.6.7.102 and FDA guidance. All **[Rev 04]** markers indicate normative changes from Rev 03. Prior **[Rev 03]** markers are retained for traceability.*
+*Revision 04 (2026-04-05) updates the acquisition geometry from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm), relaxes the CHO equivalence tolerance to ±0.005 AUC, adds a screening mode (20 realizations), and establishes a layered acceptance criteria framework with cross-reference to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via its proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. All **[Rev 04]** markers indicate normative changes from Rev 03. Prior **[Rev 03]** markers are retained for traceability.*
