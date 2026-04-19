@@ -146,7 +146,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **5.4** This test method does not establish performance acceptance criteria. A positive ΔAUC indicates that MAR improves lesion detectability relative to the no-MAR condition; a negative ΔAUC indicates degradation. Both outcomes are scientifically valid results and shall be reported without suppression or sign correction.
 
-**5.5** This test method is structured to support incorporation by normative reference into external performance standards. **[Rev 04]** Acceptance criteria based on ΔAUC values are established by the incorporating authority (e.g., IEC 60601-2-44 §203.6.7.101.1 via its proposed compliance-statement amendment referencing this TYPE TEST; national regulatory guidance), not by this standard. This standard defines only the measurement method.
+**5.5** This test method is structured to support incorporation by normative reference into external performance standards. **[Rev 04]** Acceptance criteria based on ΔAUC values are established by the incorporating authority (e.g., IEC 60601-2-44 §203.6.7.101.1 via the two-phase IEC proposal referencing this TYPE TEST — Phase 1 informative NOTE during the FDIS window, Phase 2 binding Amendment post-publication of this standard; national regulatory guidance), not by this standard. This standard defines only the measurement method.
 
 ---
 

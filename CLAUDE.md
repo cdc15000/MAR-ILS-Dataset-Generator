@@ -190,10 +190,10 @@ python run_cho_analysis_v7_0.py \
 | Layer | Document | Role |
 |---|---|---|
 | 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | MAR method available (.1), user information (.2), DICOM recording (.3) |
-| 2 | ASTM FXXXX (incorporated via proposed §203.6.7.101.1 compliance-statement amendment) | TYPE TEST — measures ΔAUC |
+| 2 | ASTM FXXXX (bound to §203.6.7.101.1 via two-phase IEC proposal — Phase 1 informative NOTE pre-Approval; Phase 2 binding Amendment post-ASTM-publication) | TYPE TEST — measures ΔAUC |
 | 3 | FDA guidance | Acceptance criteria (non-degradation threshold, superiority claim) |
 
-See `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` and `docs_and_references/FDA_guidance_framework.md` for draft regulatory text.
+See `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` (two-phase IEC proposal) and `docs_and_references/FDA_guidance_framework.md` for draft regulatory text.
 
 ## Versioning Convention
 Scripts embed version in filename. **v7.0.0** is the current normative reference (fan-beam, single canonical config, ASTM Rev 04). v6.0.0 is the research tier framework (parallel-beam, three tiers).
