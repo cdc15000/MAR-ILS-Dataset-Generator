@@ -5,7 +5,7 @@
 **Date:** 2026-04-05
 **Supersedes:** Revision 03 (03/14/2026)
 
-> **Change summary (Rev 03 → Rev 04):** Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360° full rotation). FBP reconstruction changed from parallel-beam rotation-sum to fan-beam cosine-weighted distance-weighted backprojection. CHO implementation equivalence tolerance relaxed from ±0.001 to ±0.005 AUC. Screening mode (20 realizations) added for pilot evaluation; 40 remains the minimum for formal reporting. Acceptance criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. Baseline AUC_noMAR established at 0.8294 under fan-beam geometry (N=40, σ=15, 2026-04-07). Reference scripts updated to v7.0.0.
+> **Change summary (Rev 03 → Rev 04):** Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360° full rotation). FBP reconstruction changed from parallel-beam rotation-sum to fan-beam cosine-weighted distance-weighted backprojection. CHO implementation equivalence tolerance relaxed from ±0.001 to ±0.005 AUC (§6.4 and §11.2 updated for consistency). Screening mode (20 realizations) added for pilot evaluation; 40 remains the minimum for formal reporting. Acceptance criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. Baseline AUC_noMAR established at 0.8294 under fan-beam geometry (N=40, σ=15, 2026-04-07). Scope-boundary clause §1.9 added clarifying type-test vs. clinical-validation distinction. §1A.5 (Scope and Precedent) added citing F2119, IEC 62220-1, AAPM TG-233, ACR CT Accreditation precedents and F2119 complementarity. §1A.6 (Metal-Material Rationale) added. §2 expanded to cite F2119, IEC 60601-2-44, DICOM PS3.3, Wunderlich & Noo, Kak & Slaney. §14.12 preset-reporting clause added. §16(o) DICOM 2026b MAR Macro verification item added. §A1.5.3 clarified that 2D constraint applies to observer not to MAR algorithm. Subcommittee of jurisdiction: F04.15 Material Test Methods. Annex A2 (Informational) added specifying optional multi-point signal-amplitude and dose sweeps per Vaishnav et al. (2020). Reference scripts updated to v7.0.0.
 >
 > **Change summary (Rev 02 → Rev 03):** Observer dimensionality changed from 3D to 2D (Slice 128 only); lesion geometry changed from full z-extent cylinder to single-slice disc; lesion HU implementation changed from 120 HU post-FBP hard-set to ~12 HU sinogram-domain physics contrast (no hard-set); minimum realizations increased from 20 to 40 per condition; Vaishnav internal observer noise regularisation (σ = 15) added as normative requirement; Vaishnav Transition AUC baseline (0.7063) recorded in §1A.2.
 
@@ -15,9 +15,9 @@ Metal artifact reduction (MAR) methods are increasingly incorporated into comput
 
 This test method establishes a procedure for measuring MAR performance using a standardized digital volumetric dataset, a single canonical metal and lesion configuration, and a channelized Hotelling observer (CHO) model. The figure of merit is ΔAUC: the signed difference in area under the ROC curve between MAR-enabled and MAR-disabled conditions. The digital, checksum-verified dataset eliminates physical phantom logistics, permitting reproducible interlaboratory comparison. The method applies to systems producing HU-calibrated reconstructed image data and is structured to support precision and bias evaluation in accordance with ISO 5725. It is intended for type testing and does not establish performance acceptance criteria.
 
-## Standard Test Method for Quantitative Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems
+## Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
 
-*This test method is under the jurisdiction of ASTM Committee F04 on Medical and Surgical Materials and Devices and is the direct responsibility of Subcommittee TBD. Current edition approved 2026-03-14. DOI:10.1520/XXXXX-XX*
+*This test method is under the jurisdiction of ASTM Committee F04 on Medical and Surgical Materials and Devices and is the direct responsibility of Subcommittee F04.15 on Material Test Methods. Current edition (Revision 04) approved 2026-04-05; editorial pass 2026-04-18. DOI:10.1520/XXXXX-XX*
 
 ---
 
@@ -39,6 +39,8 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **1.8** *This international standard was developed in accordance with internationally recognized principles on standardization established in the Decision on Principles for the Development of International Standards, Guides and Recommendations issued by the World Trade Organization Technical Barriers to Trade (TBT) Committee.*
 
+**1.9** *Scope boundary* — This test method provides a controlled, reproducible measurement of MAR algorithmic behavior under a single canonical test configuration. It is a type test for method comparison and conformity assessment. Clinical validity of a MAR algorithm for any specific patient anatomy, implant geometry, or acquisition protocol is not established by this test alone and shall be supported by additional evidence as required by the incorporating authority or regulatory pathway. Labeling claims derived from this test method shall be scoped to the canonical test configuration (e.g., "In a Type Test per this standard, ΔAUC = X ± CI").
+
 ---
 
 ## 1A. Background and Technical Basis (Informational)
@@ -51,6 +53,10 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **1A.4** The canonical dataset provides background variability through per-realization rotation of the artifact template (§A1.7). This mechanism prevents the CHO from exploiting static artifact patterns and ensures that the observer's performance reflects genuine signal detectability rather than artifact fingerprint memorization.
 
+**1A.5** *Scope and precedent* — The single canonical configuration approach follows established precedent in medical imaging type testing, including ASTM F2119 (Evaluation of MR Image Artifacts from Passive Implants), IEC 62220-1 (detector DQE), AAPM TG-233 (CT image quality), and the ACR CT Accreditation Program. A standardized, narrow measurement enables interlaboratory precision and bias characterization per ASTM E691 and ISO 5725; clinical-practice claims are supported by separate, device-specific evidence as required by the relevant regulatory authority. This test method is complementary to ASTM F2119 (evaluation of MR image artifacts from passive implants): F2119 characterizes the physical extent of image artifacts produced by a passive implant under standardized MR scanning conditions; the present method quantifies the observer-based task-detectability impact of an algorithmic countermeasure (MAR) applied within the imaging system. The two methods address non-overlapping axes — modality (MR / CT) × object of measurement (physical artifact extent / algorithmic task impact) — and together cover the passive-implant / active-algorithm quadrants of artifact assessment in F04's jurisdiction.
+
+**1A.6** *Metal-material rationale* — The canonical metal material (iron, μ = 2.408 cm⁻¹ at 60 keV) is selected as a representative high-Z attenuator sitting within the range of clinical implant materials (titanium 1.41, stainless steel 2.3, cobalt-chromium 2.7 cm⁻¹ at 60 keV). The 10 mm diameter and centered-on-axis geometry are chosen to produce a defined, reproducible beam-hardening and photon-starvation artifact signature, not to simulate any specific clinical implant. The canonical metal functions as a controlled acoustic test tone for MAR algorithmic response — every algorithm under test faces the same attenuation challenge.
+
 ---
 
 ## 2. Referenced Documents
@@ -58,17 +64,28 @@ This test method establishes a procedure for measuring MAR performance using a s
 **2.1** *ASTM Standards:*
 
 - ASTM E177 – Practice for Use of the Terms Precision and Bias in ASTM Test Methods
-- ASTM E691 – Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method.
+- ASTM E691 – Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
+- ASTM F2119 – Standard Test Method for Evaluation of MR Image Artifacts from Passive Implants
 
 **2.2** *ISO Standards:*
 
-- ISO 5725-1 – Accuracy (trueness and precision) of measurement methods and results – Part 1.
+- ISO 5725-1 – Accuracy (trueness and precision) of measurement methods and results – Part 1
 - ISO 5725-2 – Basic method for determination of repeatability and reproducibility of a standard measurement method
 
-**2.3** *Other References:*
+**2.3** *IEC Standards:*
+
+- IEC 60601-2-44 – Medical electrical equipment – Part 2-44: Particular requirements for the basic safety and essential performance of X-ray equipment for computed tomography
+
+**2.4** *DICOM Standards:*
+
+- DICOM PS3.3 – Information Object Definitions (including the Metal Artifact Reduction Macro, CP-2575, 2026b)
+
+**2.5** *Other References:*
 
 - Vaishnav JY et al. CT metal artifact reduction algorithms: Toward a framework for objective performance assessment. Medical Physics 47(8):3344–3355, 2020. DOI: 10.1002/mp.14231
 - Barrett HH, Myers KJ. Foundations of Image Science. Wiley, 2004.
+- Wunderlich A, Noo F. On the efficiency of two-sample tests based on the Mann-Whitney U statistic for imaging tasks. IEEE Trans Med Imaging 34(2):522–533, 2015.
+- Kak AC, Slaney M. Principles of Computerized Tomographic Imaging. IEEE Press, 1988.
 - FIPS PUB 180-4 — Secure Hash Standard (SHA-256)
 
 ---
@@ -121,19 +138,15 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 5. Significance and Use
 
-**5.1** This test method provides an objective and reproducible means of quantifying the impact of MAR algorithms on diagnostic task performance preservation.
+**5.1** This test method provides an objective, reproducible, task-based measurement of MAR algorithmic impact on lesion detectability. Unlike methods that rely on physical dimensions of image artifacts, this method evaluates image quality by the ability of a fully specified deterministic model observer (CHO) to perform a binary detection task, removing human-reader variability.
 
-**5.2** The method supports comparison of MAR implementations across systems and laboratories by measuring the preservation of lesion detectability in a standardized SKE/BKS detection task.
+**5.2** The method supports comparison of MAR implementations across systems and laboratories by measuring the preservation of lesion detectability in a standardized SKE/BKS detection task with bit-identical input data across all participating sites.
 
-**5.3** The test method is intended for type testing, research, and performance characterization.
+**5.3** The test method is intended for type testing, research, and performance characterization. It is not a substitute for clinical validation; see §1.9.
 
 **5.4** This test method does not establish performance acceptance criteria. A positive ΔAUC indicates that MAR improves lesion detectability relative to the no-MAR condition; a negative ΔAUC indicates degradation. Both outcomes are scientifically valid results and shall be reported without suppression or sign correction.
 
 **5.5** This test method is structured to support incorporation by normative reference into external performance standards. **[Rev 04]** Acceptance criteria based on ΔAUC values are established by the incorporating authority (e.g., IEC 60601-2-44 §203.6.7.101.1 via its proposed compliance-statement amendment referencing this TYPE TEST; national regulatory guidance), not by this standard. This standard defines only the measurement method.
-
-**5.6** Unlike methods that rely on physical dimensions of image artifacts, this test method acknowledges that image quality is fundamentally defined by the ability of an observer to perform a clinical task.
-
-**5.7** The use of a fully specified and deterministic model observer (CHO) removes human-reader variability, providing a reproducible measure of how the MAR algorithm affects lesion detection performance.
 
 ---
 
@@ -145,7 +158,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **6.3** Alteration of the standardized dataset, including resampling, interpolation, windowing before CHO input, or truncation of the HU range, invalidates the test.
 
-**6.4** Use of floating-point arithmetic below 64-bit precision may introduce numerical bias exceeding the ±0.001 AUC equivalence tolerance.
+**6.4** Use of floating-point arithmetic below 64-bit precision may introduce numerical bias exceeding the ±0.005 AUC equivalence tolerance specified in §8.3.
 
 **6.5** Failure to verify the SHA-256 checksum prior to analysis invalidates the test result.
 
@@ -223,7 +236,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **11.1** Verify SHA-256 checksum of every file in the distributed dataset against the manifest provided with the standard. Any checksum mismatch disqualifies the dataset and invalidates any results derived from it.
 
-**11.2** Validate the CHO implementation against the supplied reference validation dataset, confirming AUC agreement within ±0.001.
+**11.2** Validate the CHO implementation against the supplied reference validation dataset, confirming AUC agreement within ±0.005 per §8.3.
 
 **11.3** Configure the imaging system MAR parameters as specified in the test plan. Document all configuration settings.
 
@@ -267,6 +280,8 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **14.11** All preprocessing, reconstruction, and postprocessing parameters other than the MAR enable / disable state shall remain identical between conditions. Any parameter change, including window / level settings applied before CHO input, invalidates the test result.
 
+**14.12** *Multi-preset algorithms* — Where the MAR algorithm under test provides user-selectable strength or operating-point presets (e.g., "low / medium / high"), each preset shall be evaluated independently as a distinct test run. The preset identifier shall be recorded in the test report per §16(b) and ΔAUC reported per preset per §16(h). A single test campaign may include results for multiple presets of the same algorithm.
+
 ---
 
 ## 15. Calculation or Interpretation of Results
@@ -303,6 +318,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 - (l) Individual AUC_MAR and AUC_noMAR values
 - (m) Any deviations from this test method
 - **(n) [Rev 03]** Internal noise parameter σ_internal used (normative value: 15; see §A1.5.2(d))
+- **(o) [Rev 04]** Verification of the DICOM Metal Artifact Reduction Macro (PS3.3 C.8.15.3.15, CP-2575, 2026b). The report shall confirm that the MAR enable/disable state is recorded in the Metal Artifact Reduction Applied attribute (0018,9391) of the Metal Artifact Reduction Sequence (0018,9390) on every output DICOM series, and that the recorded value is consistent with the algorithm configuration under test
 
 ---
 
@@ -333,7 +349,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 18. Keywords
 
-metal artifact; metal artifact reduction; MAR; channelized Hotelling observer; model observer; ROC curve; AUC; ΔAUC; lesion detectability; interlaboratory study; precision and bias; tomographic imaging; computed tomography; signal-known-exactly; Laguerre–Gauss channels; reproducibility; 2D observer; Vaishnav framework; sinogram-domain contrast
+metal artifact; metal artifact reduction; MAR; channelized Hotelling observer; CHO; model observer; ROC curve; AUC; ΔAUC; lesion detectability; interlaboratory study; type test; precision and bias; tomographic imaging; computed tomography; fan-beam; signal-known-exactly; Laguerre–Gauss channels; reproducibility; 2D observer; Vaishnav framework; sinogram-domain contrast; DICOM; Metal Artifact Reduction Macro; CP-2575; IEC 60601-2-44
 
 ---
 
@@ -416,6 +432,8 @@ The phantom cross-section represents a simplified torso geometry consisting of a
 
 **[Rev 03]** The CHO shall operate on a two-dimensional (2D) region of interest from **Slice 128 (LESION_SLICE_INDEX = 128, zero-indexed) only**. Three-dimensional volumetric integration across z is **PROHIBITED** under this standard. The 2D ROI is 121 × 121 voxels centred at (281, 256) as specified in §A1.5.4. Loading additional slices and aggregating channel responses across z constitutes a violation of this standard and will produce artificially inflated AUC values that are not comparable across laboratories.
 
+> **[Rev 04] Scope of the 2D constraint:** The 2D constraint specified in this section applies to the **CHO observer**, not to the **MAR algorithm under test**. The MAR algorithm may operate on the full 3D volume or on any subset of slices appropriate to its implementation (e.g., iterative MBIR methods that use multi-slice context). Only the observer-based evaluation is restricted to Slice 128. This ensures that algorithms relying on 3D context are evaluated on the same basis as algorithms operating slice-by-slice.
+
 > **Rationale:** When the lesion is confined to a single slice and the CHO integrates across all 256 z-slices, the observer accumulates √256 ≈ 16× coherent signal gain from the 255 lesion-absent slices in the LA condition while adding noise-only z-planes in the LP condition, driving d′ → ∞ and AUC → 1.000 for both conditions regardless of MAR algorithm quality. The 2D mandate eliminates this artifact.
 
 > **[Rev 04] Note:** The CHO operates on reconstructed DICOM images and is therefore independent of the acquisition geometry (parallel-beam, fan-beam, or cone-beam). The fan-beam geometry change (§A1.1(f,g)) affects only the sinogram generation and FBP reconstruction, not the CHO mathematics.
@@ -486,6 +504,46 @@ The following parameters shall not be modified under any circumstance. Modificat
 
 ---
 
+## ANNEX A2 (Informational)
+
+### Multi-Point Performance Characterization
+
+**[Rev 04]** This annex is informational. The normative deliverable of this test method is the scalar ΔAUC at the canonical lesion contrast (12 HU) and dose setpoint (I₀ = 310,853, σ_noise = 30 HU target). The scalar metric supports interlaboratory precision and bias characterization per ASTM E691 and ISO 5725.
+
+For investigators, manufacturers, and regulatory reviewers who wish to characterize MAR algorithmic behavior across a range of operating conditions, Vaishnav et al. (Medical Physics 47(8), 2020) recommend presenting full detectability curves as functions of signal amplitude and dose. This annex specifies an optional multi-point reporting protocol that preserves the canonical configuration as the normative anchor while extending the characterization.
+
+### A2.1 Signal-Amplitude Sweep
+
+- (a) Signal-amplitude sweep values: 4, 8, 12, 16, 20 HU nominal lesion contrast (five operating points, inclusive of the canonical 12 HU).
+- (b) Each operating point shall use the complete sinogram-domain physics chain specified in §10.1.2 with `MU_LESION_CM = MU_TISSUE_CM × (1 + c/1000)` where c is the contrast in HU.
+- (c) Each operating point shall be generated with N = 40 independent realizations per condition (160 volumes per point, 800 volumes for the full sweep).
+- (d) CHO analysis shall be performed per §14 for each operating point, producing ΔAUC, 95% CI, and standard deviation per operating point.
+- (e) The resulting curve ΔAUC(c) shall be reported as a table of five values with sign, CI, and standard deviation.
+
+### A2.2 Dose Sweep
+
+- (a) Dose sweep values: I₀ × {0.5, 0.71, 1.0, 1.41, 2.0} relative to the canonical I₀ = 310,853 (five operating points, inclusive of the canonical value). These ratios correspond to ±√2 in photon flux and therefore approximately ±√2 in per-pixel SNR in the reconstructed image.
+- (b) Each operating point shall use the complete forward-projection and FBP chain specified in §A1.1 and §A1.7, with I₀ scaled per the sweep value. Gaussian electronic noise (σ_e) scales as 1/√I₀ per the analytic calibration in §1A.3.
+- (c) Each operating point shall be generated with N = 40 independent realizations per condition.
+- (d) CHO analysis shall be performed per §14 for each operating point.
+- (e) The resulting curve ΔAUC(I₀) shall be reported as a table of five values with sign, CI, and standard deviation.
+
+### A2.3 Reporting
+
+**A2.3.1** The multi-point report shall be clearly labelled as informational and shall not be reported as compliant with the normative scalar deliverable of this standard. Laboratories submitting multi-point results shall also submit the canonical scalar ΔAUC at the reference operating point (§10.1.1) as the primary normative result.
+
+**A2.3.2** Recommended labeling claim language derived from multi-point results follows the pattern of Vaishnav et al. (2020):
+
+> "In a Type Test per ASTM FXXXX signal-amplitude sweep (Annex A2.1), [Device X] improved AUC over the no-MAR baseline by up to [value] across lesion contrasts from 4 to 20 HU."
+
+**A2.3.3** Multi-point characterization is recommended but not required for submissions seeking substantial-equivalence determination based on non-degradation. Multi-point characterization is recommended for submissions seeking scoped quantitative improvement claims per the framework of Vaishnav et al. (2020).
+
+### A2.4 Relationship to Normative Scalar
+
+The scalar ΔAUC at the canonical operating point (§10.1.1) remains the normative result under this standard. Precision and bias statistics per §17 shall be computed from the scalar result only. Multi-point results are informational and their precision characterization is outside the scope of ASTM E691 as implemented in §17.1.
+
+---
+
 *End of ASTM WKXXXXX Revision 04*
 
-*Revision 04 (2026-04-05) updates the acquisition geometry from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm), relaxes the CHO equivalence tolerance to ±0.005 AUC, adds a screening mode (20 realizations), and establishes a layered acceptance criteria framework with cross-reference to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via its proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. All **[Rev 04]** markers indicate normative changes from Rev 03. Prior **[Rev 03]** markers are retained for traceability.*
+*Revision 04 (2026-04-05, editorial pass 2026-04-18) updates the acquisition geometry from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm), relaxes the CHO equivalence tolerance to ±0.005 AUC, adds a screening mode (20 realizations), establishes a layered acceptance criteria framework with cross-reference to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via its proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance, aligns title and structure with ASTM F2119 conventions, documents subcommittee of jurisdiction (F04.15), clarifies type-test vs. clinical-validation scope boundary, adds F2119 complementarity and precedent clauses, adds preset-reporting and DICOM 2026b MAR Macro verification requirements, and introduces Annex A2 (Informational) specifying optional multi-point characterization per Vaishnav et al. (2020). All **[Rev 04]** markers indicate normative changes from Rev 03. Prior **[Rev 03]** markers are retained for traceability.*
