@@ -18,8 +18,9 @@ Changes from v6.0.0 / v5.3.0
       are permitted under this standard."
 [RR]  --realizations flag: 40 (normative default) or 20 (screening mode).
 [AC]  Acceptance criteria cross-reference to IEC 60601-2-44 §203.6.7.101.1
-      (via proposed compliance-statement amendment binding ASTM FXXXX as the
-      TYPE TEST) and FDA guidance (layered approach per §5.5).
+      (via two-phase IEC proposal: Phase 1 informative NOTE pre-Approval;
+      Phase 2 binding Amendment post-ASTM-FXXXX-publication) and FDA guidance
+      (layered approach per §5.5).
 
 Canonical Parameters (ASTM WKXXXXX Rev 04)
 -------------------------------------------
