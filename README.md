@@ -1,3 +1,7 @@
+![Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties, before and after orthopaedic metal artefact reduction.](docs_and_references/images/wellenberg_2019_fig8_ab.jpg)
+
+*Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties. Figure reproduced from Wellenberg RHH, van Osch JAC, Boelhouwers HJ, Edens MA, Streekstra GJ, Ettema HB, Boomsma MF. "CT radiation dose reduction in patients with total hip arthroplasties using model-based iterative reconstruction and orthopaedic metal artefact reduction." Skeletal Radiology 48(11):1775–1785 (2019), [doi:10.1007/s00256-019-03206-z](https://doi.org/10.1007/s00256-019-03206-z). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Cropped to panels (a) and (b) of original Figure 8; panel letter overlays removed.*
+
 # MAR ILS Dataset Generator & Evaluation Framework
 
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
@@ -14,14 +18,6 @@ This is the **reference evaluation framework** for conducting standardized **Int
 2.  **Reference MAR Algorithms:** Implementations of iMAR, MBIR, and Dual-Energy Spectral MAR.
 3.  **Objective Statistical Scoring:** Quantifying lesion detectability ($\Delta AUC$) using a **Channelized Hotelling Observer (CHO)** with normative internal noise ($\sigma=15$).
 4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
-
-### What MAR Does (Clinical Example)
-
-![Clinical example of metal artifact reduction on bilateral total hip arthroplasty: standard iterative reconstruction vs. the same acquisition with orthopaedic MAR applied.](docs_and_references/images/wellenberg_2019_fig8_ab.jpg)
-
-*Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties. **Left:** standard iterative reconstruction (iDose⁴) showing severe photon-starvation streaks and signal loss between prostheses. **Right:** same acquisition with orthopaedic MAR (O-MAR) applied — streaks are largely resolved and pelvic soft tissue becomes assessable. Figure reproduced from Wellenberg RHH, van Osch JAC, Boelhouwers HJ, Edens MA, Streekstra GJ, Ettema HB, Boomsma MF. "CT radiation dose reduction in patients with total hip arthroplasties using model-based iterative reconstruction and orthopaedic metal artefact reduction." Skeletal Radiology 48(11):1775–1785 (2019), [doi:10.1007/s00256-019-03206-z](https://doi.org/10.1007/s00256-019-03206-z). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Cropped to panels (a) and (b) of original Figure 8; panel letter overlays removed.*
-
-The purpose of this framework is to **quantify** that visual impression — to measure, reproducibly and across laboratories, how much a MAR algorithm actually changes a radiologist's ability to detect small low-contrast lesions near metal.
 
 ---
 
