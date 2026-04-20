@@ -3,7 +3,7 @@
 
 # MAR ILS Dataset Generator and Evaluation Framework
 
-![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![Standard: ASTM WKXXXXX Rev 04](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2004-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
@@ -23,6 +23,7 @@
   - [Verification (hex-tag method)](#verification-hex-tag-method)
 - [Regulatory Framework](#regulatory-framework)
 - [References](#references)
+- [License](#license)
 - [Technical Contact](#technical-contact)
 
 ---
@@ -159,6 +160,14 @@ print(f'(0018,9391) Metal Artifact Reduction Applied = {mar_applied}')
 3. **Barrett, H.H., and Myers, K.J.** *Foundations of Image Science*, Chapter 14 — Image Quality, pp. 913–1000. Wiley-Interscience, Hoboken (NJ), 2004. [[Publisher](https://www.wiley.com/en-us/Foundations+of+Image+Science-p-9780471153009)]
 
 4. **American Association of Physicists in Medicine.** *AAPM Report No. 233 — Performance Evaluation of CT Systems*, 2019. [[AAPM / issuu](https://issuu.com/aapmdocs/docs/tg-233_final_8ec461f2715a5e?mode=embed&viewMode=singlePage&backgroundColor=eeeeee)]
+
+---
+
+## License
+
+All code and documentation in this repository are released under the **Apache License, Version 2.0** — see [`LICENSE.md`](LICENSE.md) for the full text.
+
+The single third-party figure (axial pelvic CT at the top of this README) is reproduced from Wellenberg et al. 2019 under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache 2.0 license; attribution is given in the figure caption.
 
 ---
 
