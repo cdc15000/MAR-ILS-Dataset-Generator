@@ -15,7 +15,10 @@
 - [April 2026 Status: Metrology Baseline Locked](#april-2026-status-metrology-baseline-locked)
   - [ILS Reference Baseline (N=40)](#ils-reference-baseline-n40)
 - [Performance Breakthrough: Numba Acceleration](#performance-breakthrough-numba-acceleration)
+- [Setup](#setup)
 - [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Dataset](#dataset)
 - [AI-Integrated Laboratory (MCP)](#ai-integrated-laboratory-mcp)
 - [Validation & Audit Tools](#validation--audit-tools)
 - [Deliverables & Repository Structure](#deliverables--repository-structure)
@@ -61,6 +64,40 @@ The v7.0.0 engine features a JIT-compiled **Batch Backprojector** optimized for 
 * **Throughput:** ~61s per realization (256 slices).
 * **Efficiency:** Full $N=40$ dataset generation in <30 minutes on standard workstations.
 
+---
+
+## Setup
+
+### Requirements
+
+* **Python** 3.10 or newer
+* **~40 GB free disk** for a full $N=40$ dataset (~35 GB of HDF5 sinograms + DICOM reconstructions)
+* **16+ GB RAM** recommended; 8 CPU cores gets full-$N$ generation under 30 minutes
+* macOS, Linux, or Windows (paths below use POSIX)
+
+### Installation
+
+```bash
+git clone https://github.com/cdc15000/MAR-ILS-Dataset-Generator.git
+cd MAR-ILS-Dataset-Generator
+
+python3.10 -m venv mar-ils
+source mar-ils/bin/activate
+
+pip install -r requirements.txt
+pip install numba    # optional but strongly recommended — ~24x speedup
+```
+
+### Verify the install
+
+```bash
+python generator_v7_0_0.py --dry-run
+```
+
+A clean `--dry-run` prints the locked constants and exits 0 without writing any files.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -78,6 +115,106 @@ python run_cho_analysis_v7_0.py \
     --mar-output-dir ./mar_recon \
     --internal-noise-sigma 15
 ```
+
+---
+
+## Usage
+
+### 1. Generate the reference dataset
+
+```bash
+python generator_v7_0_0.py [options]
+```
+
+| Flag | Default | Purpose |
+| :--- | :--- | :--- |
+| `--output-dir PATH` | `./astm_reference_dataset` | Target directory for the dataset |
+| `--workers N` | all cores | Process-pool size (use `1` for debugging) |
+| `--realizations N` | `40` | Normative $N=40$; `20` for screening pilot |
+| `--dry-run` | off | Print config and exit without writing any files |
+| `--no-pdf` | off | Skip the lab instructions PDF |
+
+### 2. Run CHO analysis
+
+**Self-test** — pipeline validation (ΔAUC = 0 by construction):
+
+```bash
+python run_cho_analysis_v7_0.py \
+    --dataset-dir ./astm_reference_dataset \
+    --self-test --internal-noise-sigma 15
+```
+
+**ILS mode** — score a submitted MAR reconstruction set against the noMAR baseline:
+
+```bash
+python run_cho_analysis_v7_0.py \
+    --dataset-dir ./astm_reference_dataset \
+    --mar-output-dir ./mar_recon \
+    --internal-noise-sigma 15
+```
+
+`--internal-noise-sigma 15` is the locked normative default — do not change it for submissions scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
+
+### 3. Visualize sinograms
+
+```bash
+python view_sinograms.py sinograms/LP/realization_001.h5
+python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
+```
+
+### 4. Patch legacy datasets with DICOM 2026b metadata
+
+```bash
+python patch_2026b_metadata.py --dataset-dir ./astm_reference_dataset
+```
+
+Idempotent; regenerates `checksums_sha256.txt` after injecting the MAR Macro (§ [Verification](#verification-hex-tag-method)).
+
+---
+
+## Dataset
+
+### Produced by the generator
+
+```
+<output_dir>/
+├── sinograms/
+│   ├── LP/  realization_001.h5 ... realization_040.h5   # lesion-present
+│   └── LA/  realization_001.h5 ... realization_040.h5   # lesion-absent
+├── noMAR_recon/
+│   ├── LP/  realization_001/ ... realization_040/        # 256 DICOMs each
+│   └── LA/  realization_001/ ... realization_040/
+├── checksums_sha256.txt           # SHA-256 integrity manifest
+├── generator_provenance.json      # locked constants + git SHA
+└── MAR_ILS_Lab_Instructions.pdf   # one-page operational instructions for labs
+```
+
+Total size: **~35 GB** for $N=40$; **~18 GB** for $N=20$ screening.
+
+### HDF5 sinogram format
+
+Each `realization_NNN.h5` contains:
+
+| Dataset / attr | Shape / type | Content |
+| :--- | :--- | :--- |
+| `line_integrals` | `(256, 720, 512)` float32 | Fan-beam line integrals, neper |
+| `@geometry.SID_mm` / `@SDD_mm` | scalar | 570 / 1040 |
+| `@geometry.n_angles` / `@n_det` | scalar | 720 / 512 |
+| `@geometry.angles_deg` / `@det_fan_angles_deg` | 1-D array | Projection + detector geometry samples |
+| `@noise_params.I0` / `sigma_e_counts` / `seed` | scalar | Noise calibration (I₀ = 310,853) |
+| `@lesion_slice_index` | scalar | `128` — the only slice containing the lesion disc |
+
+### Lab submission layout (for CHO scoring)
+
+Participating labs submit reconstructed DICOMs back in this structure:
+
+```
+mar_recon/
+├── LP/  realization_001/ ... (slice_NNNN.dcm, 1-indexed)
+└── LA/  realization_001/ ...
+```
+
+Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on slice 128; 3D integration is prohibited per §A1.5.3 of the draft standard.
 
 ---
 
