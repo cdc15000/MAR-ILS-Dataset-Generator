@@ -9,6 +9,24 @@
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
+## Contents
+
+- [Overview](#overview)
+- [April 2026 Status: Metrology Baseline Locked](#april-2026-status-metrology-baseline-locked)
+  - [ILS Reference Baseline (N=40)](#ils-reference-baseline-n40)
+- [Performance Breakthrough: Numba Acceleration](#performance-breakthrough-numba-acceleration)
+- [Quick Start](#quick-start)
+- [AI-Integrated Laboratory (MCP)](#ai-integrated-laboratory-mcp)
+- [Validation & Audit Tools](#validation--audit-tools)
+- [Deliverables & Repository Structure](#deliverables--repository-structure)
+- [Metadata Standard: DICOM 2026b Compliant](#metadata-standard-dicom-2026b-compliant)
+  - [Verification (hex-tag method)](#verification-hex-tag-method)
+- [Regulatory Framework](#regulatory-framework)
+- [Technical Contact](#technical-contact)
+- [References](#references)
+
+---
+
 ## Overview
 
 This is the **reference evaluation framework** for conducting standardized **Interlaboratory Studies (ILS)** on CT **Metal Artifact Reduction (MAR)** algorithms. Following the task-based signal detection framework of **Vaishnav et al. (Medical Physics, 2020)**, this toolset provides:
@@ -136,3 +154,15 @@ print(f'(0018,9391) Metal Artifact Reduction Applied = {mar_applied}')
 
 **Christopher D. Cocchiaraley** Consumer Member, ASTM International Committee F04  
 Executor of the Estate of Veronica M. Cocchiaraley
+
+---
+
+## References
+
+1. **Vaishnav, J.Y., Ghammraoui, B., Leifer, M., Zeng, R., Jiang, L., and Myers, K.J.** "CT metal artifact reduction algorithms: Toward a framework for objective performance assessment." *Medical Physics*, August 2020, Vol. 47, No. 8, pp. 3344–3355. [[DOI](https://doi.org/10.1002/mp.14231)]
+
+2. **Gjesteby, L., De Man, B., Jin, Y., Paganetti, H., Verburg, J., Giantsoudi, D., and Wang, G.** "Metal Artifact Reduction in CT: Where Are We After Four Decades?" *IEEE Access*, 2016, Vol. 4, pp. 5826–5849. [[DOI](https://doi.org/10.1109/ACCESS.2016.2608621)]
+
+3. **Barrett, H.H., and Myers, K.J.** *Foundations of Image Science*, Chapter 14 — Image Quality, pp. 913–1000. Wiley-Interscience, Hoboken (NJ), 2004. [[Publisher](https://www.wiley.com/en-us/Foundations+of+Image+Science-p-9780471153009)]
+
+4. **American Association of Physicists in Medicine.** *AAPM Report No. 233 — Performance Evaluation of CT Systems*, 2019. [[AAPM / issuu](https://issuu.com/aapmdocs/docs/tg-233_final_8ec461f2715a5e?mode=embed&viewMode=singlePage&backgroundColor=eeeeee)]
