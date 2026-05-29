@@ -164,6 +164,18 @@ class TestProcessRealization:
         with pytest.raises(FileNotFoundError):
             li.process_realization(tmp_path, tmp_path / "o", "LP", 0, 0.0, slice_index=0)
 
+    def test_wrong_sinogram_shape_raises(self, tmp_path):
+        # Build a valid tiny dataset, then overwrite the sinogram with a
+        # geometry-mismatched one (wrong detector count).
+        _build_tiny_dataset(tmp_path)
+        sdir = tmp_path / "sinograms" / "LP"
+        with h5py.File(str(sdir / "realization_001.h5"), "w") as f:
+            f.create_dataset("line_integrals", data=np.zeros((1, 720, 256), np.float32))
+        with pytest.raises(ValueError, match="geometry mismatch"):
+            li.process_realization(
+                tmp_path, tmp_path / "o", "LP", 0, 0.0, slice_index=0,
+            )
+
 
 class TestMain:
     def test_runs_over_tiny_dataset(self, tmp_path):

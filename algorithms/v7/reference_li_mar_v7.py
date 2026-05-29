@@ -30,7 +30,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice  # noqa: E402
 from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
-from mar_ils_core.constants import LESION_SLICE_INDEX  # noqa: E402
+from mar_ils_core.constants import LESION_SLICE_INDEX, N_ANGLES, N_DET  # noqa: E402
 
 # Metal reconstructs to 3000 HU (hard-set) in the noMAR series; 2000 HU is a
 # robust detection floor.
@@ -138,6 +138,12 @@ def process_realization(
 
     with h5py.File(str(h5_path), "r") as f:
         sino = f["line_integrals"][slice_index].astype(np.float64)  # (720, 512)
+
+    if sino.shape != (N_ANGLES, N_DET):
+        raise ValueError(
+            f"unexpected sinogram slice shape {sino.shape}; expected "
+            f"{(N_ANGLES, N_DET)} (fan-beam geometry mismatch in {h5_path})"
+        )
 
     ds = pydicom.dcmread(str(dcm_path))
     nomar_hu = (
