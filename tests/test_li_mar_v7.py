@@ -101,3 +101,15 @@ class TestLoadDcOffset:
         (tmp_path / "generator_provenance.json").write_text(_json.dumps({"x": 1}))
         with pytest.raises(KeyError):
             li.load_dc_offset(tmp_path)
+
+
+class TestDiscoverRealizations:
+    def test_counts_h5_files(self, tmp_path):
+        d = tmp_path / "sinograms" / "LP"
+        d.mkdir(parents=True)
+        for n in (1, 2, 3):
+            (d / f"realization_{n:03d}.h5").touch()
+        assert li.discover_realizations(tmp_path, "LP") == 3
+
+    def test_zero_when_absent(self, tmp_path):
+        assert li.discover_realizations(tmp_path, "LP") == 0

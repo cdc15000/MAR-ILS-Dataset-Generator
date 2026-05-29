@@ -108,3 +108,9 @@ def load_dc_offset(dataset_dir) -> float:
             "dc_offset_cm missing from provenance; pass --dc-offset-cm explicitly"
         )
     return float(data["dc_offset_cm"])
+
+
+def discover_realizations(dataset_dir, cond: str = "LP") -> int:
+    """Count realization_*.h5 files under <dataset_dir>/sinograms/<cond>/."""
+    d = Path(dataset_dir) / "sinograms" / cond
+    return len(list(d.glob("realization_*.h5")))
