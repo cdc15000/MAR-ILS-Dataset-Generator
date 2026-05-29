@@ -1,0 +1,57 @@
+"""
+LI-MAR v7 reference — parameter-free linear-interpolation Metal Artifact
+Reduction on the v7.0.0 fan-beam dataset.
+
+Non-normative. Serves as (a) a positive control for the CHO pipeline and
+(b) a reproducible delta-AUC anchor. The ASTM type test measures the *lab's*
+algorithm; this reference is for validation and calibration only.
+
+Pipeline (per realization, slice 128 / slice_0129.dcm only):
+  1. metal_mask  = noMAR_HU > METAL_HU_THRESH       (textbook detection)
+  2. metal_trace = forward_project_slice(metal_mask) -> clean-ray weights W
+  3. sino_li     = linear interpolation across the metal trace, per view
+  4. hu_corr     = fbp_reconstruct_slice(sino_li, dc_offset_cm)
+  5. write slice_0129.dcm (metal hard-set to 3000 HU, as in noMAR)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+import h5py
+import pydicom
+from pydicom.uid import generate_uid
+from tqdm import tqdm
+
+# Run from algorithms/v7/ -> prepend repo root so the shared modules import.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice  # noqa: E402
+from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
+from mar_ils_core.constants import LESION_SLICE_INDEX, X_DIM, Y_DIM  # noqa: E402
+
+# Metal reconstructs to 3000 HU (hard-set) in the noMAR series; 2000 HU is a
+# robust detection floor.
+METAL_HU_THRESH = 2000.0
+# Clean-ray fraction (matches the v6 references' threshold).
+CLEAN_RAY_FRAC = 0.05
+
+
+def linear_interp_metal(sino: np.ndarray, W: np.ndarray) -> np.ndarray:
+    """Linear interpolation along the detector axis to fill metal-traced rays.
+
+    W convention: >= 0.5 is a clean ray, < 0.5 is a metal-traced ray.
+    Ported from algorithms/reference_nmar.py (geometry-agnostic).
+    """
+    sino_out = sino.copy()
+    for a in range(sino.shape[0]):
+        metal = np.where(W[a] < 0.5)[0]
+        if metal.size == 0:
+            continue
+        clean = np.where(W[a] >= 0.5)[0]
+        if clean.size < 2:
+            continue
+        sino_out[a, metal] = np.interp(metal, clean, sino[a, clean])
+    return sino_out
