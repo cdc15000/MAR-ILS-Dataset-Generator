@@ -30,7 +30,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice  # noqa: E402
 from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
-from mar_ils_core.constants import LESION_SLICE_INDEX, X_DIM, Y_DIM  # noqa: E402
+from mar_ils_core.constants import LESION_SLICE_INDEX  # noqa: E402
 
 # Metal reconstructs to 3000 HU (hard-set) in the noMAR series; 2000 HU is a
 # robust detection floor.

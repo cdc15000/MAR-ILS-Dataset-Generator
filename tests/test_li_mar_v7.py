@@ -2,6 +2,7 @@ import json as _json
 import sys
 from pathlib import Path
 
+import h5py
 import numpy as np
 import pydicom
 import pytest
@@ -10,6 +11,7 @@ from pydicom.uid import generate_uid
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "algorithms" / "v7"))
 import reference_li_mar_v7 as li  # noqa: E402
 from mar_ils_core.phantom import build_metal_mask, build_attenuation_map  # noqa: E402
+from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
 
 
 class TestLinearInterpMetal:
@@ -117,14 +119,9 @@ class TestDiscoverRealizations:
         assert li.discover_realizations(tmp_path, "LP") == 0
 
 
-from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
-
-
 def _build_tiny_dataset(root: Path):
     """One-slice (slice_index 0) LP realization: sinogram H5 + noMAR DICOM."""
     from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice
-    import h5py
-    import numpy as np
     mu = build_attenuation_map(place_lesion=True, jitter_deg=0.0)
     sino = forward_project_slice(mu).astype(np.float32)        # (720, 512)
     nomar_hu = fbp_reconstruct_slice(sino, dc_offset_cm=0.0)   # (512, 512)
@@ -136,7 +133,6 @@ def _build_tiny_dataset(root: Path):
 
     ndir = root / "noMAR_recon" / "LP" / "realization_001"
     yy, xx = np.mgrid[0:512, 0:512]
-    from mar_ils_core.phantom import build_metal_mask
     write_dicom_slice(
         nomar_hu, 0, output_dir=ndir, realization_idx=0, condition_label="LP",
         study_uid=generate_uid(), series_uid=generate_uid(),
