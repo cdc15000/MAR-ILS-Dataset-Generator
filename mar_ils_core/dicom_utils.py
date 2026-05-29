@@ -51,9 +51,9 @@ def write_dicom_slice(
     file_meta.MediaStorageSOPInstanceUID = generate_uid()
     file_meta.TransferSyntaxUID = '1.2.840.10008.1.2.1'
 
+    # Encoding (Explicit VR Little Endian) is derived from
+    # file_meta.TransferSyntaxUID at save time via enforce_file_format=True.
     ds = FileDataset(str(output_dir), {}, file_meta=file_meta, preamble=b'\0' * 128)
-    ds.is_implicit_VR = False
-    ds.is_little_endian = True
 
     now = datetime.now(timezone.utc)
     ds.ContentDate = now.strftime('%Y%m%d')
@@ -90,4 +90,4 @@ def write_dicom_slice(
 
     add_mar_macro(ds)
 
-    ds.save_as(str(output_dir / f'slice_{z + 1:04d}.dcm'), write_like_original=False)
+    ds.save_as(str(output_dir / f'slice_{z + 1:04d}.dcm'), enforce_file_format=True)
