@@ -156,3 +156,39 @@ def process_realization(
         series_uid=generate_uid(),
         metal_mask=metal_mask,
     )
+
+
+def main(argv=None, *, slice_index: int = LESION_SLICE_INDEX) -> None:
+    ap = argparse.ArgumentParser(
+        description="LI-MAR v7 reference (non-normative): linear-interpolation "
+                    "MAR on the v7.0.0 fan-beam dataset; writes slice_0129.dcm."
+    )
+    ap.add_argument("--dataset-dir", required=True,
+                    help="generator_v7_0_0.py output directory")
+    ap.add_argument("--output-dir", default="./li_mar_recon",
+                    help="destination for {LP,LA}/realization_NNN/slice_0129.dcm")
+    ap.add_argument("--realizations", type=int, default=None,
+                    help="count per condition (default: auto-detect)")
+    ap.add_argument("--metal-hu-thresh", type=float, default=METAL_HU_THRESH)
+    ap.add_argument("--dc-offset-cm", type=float, default=None,
+                    help="override; default reads generator_provenance.json")
+    args = ap.parse_args(argv)
+
+    dc = (args.dc_offset_cm if args.dc_offset_cm is not None
+          else load_dc_offset(args.dataset_dir))
+
+    for cond in ("LP", "LA"):
+        sino_dir = Path(args.dataset_dir) / "sinograms" / cond
+        if not sino_dir.is_dir():
+            continue  # condition not present in this dataset
+        n = (args.realizations if args.realizations is not None
+             else discover_realizations(args.dataset_dir, cond))
+        for i in tqdm(range(n), desc=f"LI-MAR {cond}"):
+            process_realization(
+                args.dataset_dir, args.output_dir, cond, i, dc,
+                args.metal_hu_thresh, slice_index=slice_index,
+            )
+
+
+if __name__ == "__main__":
+    main()

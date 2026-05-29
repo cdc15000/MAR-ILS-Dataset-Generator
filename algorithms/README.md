@@ -17,6 +17,7 @@ They are **not compatible** with v7.0.0 fan-beam sinograms (SID=570mm, SDD=1040m
 | ASD-iMAR | `reference_asd_imar.py` | Parallel-beam (360 angles) | No |
 | DLSC-iMAR | `reference_dlsc_imar.py` | Parallel-beam (360 angles) | No |
 | Spectral MAR | `reference_spectral_mar.py` | Parallel-beam (360 angles) | No |
+| LI-MAR | `v7/reference_li_mar_v7.py` | **Fan-beam (720 angles)** | **Yes** |
 
 ## Usage
 

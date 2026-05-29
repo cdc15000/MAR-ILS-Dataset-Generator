@@ -167,3 +167,26 @@ class TestProcessRealization:
     def test_missing_input_raises(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             li.process_realization(tmp_path, tmp_path / "o", "LP", 0, 0.0, slice_index=0)
+
+
+class TestMain:
+    def test_runs_over_tiny_dataset(self, tmp_path):
+        _build_tiny_dataset(tmp_path)          # LP only
+        out = tmp_path / "li_mar_recon"
+        li.main(
+            ["--dataset-dir", str(tmp_path), "--output-dir", str(out),
+             "--realizations", "1"],
+            slice_index=0,
+        )
+        assert (out / "LP" / "realization_001" / "slice_0001.dcm").exists()
+
+    def test_dc_offset_override_skips_provenance(self, tmp_path):
+        _build_tiny_dataset(tmp_path)
+        (tmp_path / "generator_provenance.json").unlink()  # force reliance on override
+        out = tmp_path / "li_mar_recon"
+        li.main(
+            ["--dataset-dir", str(tmp_path), "--output-dir", str(out),
+             "--realizations", "1", "--dc-offset-cm", "0.0"],
+            slice_index=0,
+        )
+        assert (out / "LP" / "realization_001" / "slice_0001.dcm").exists()
