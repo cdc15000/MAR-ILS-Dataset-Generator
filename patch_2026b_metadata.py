@@ -45,7 +45,7 @@ def patch_dicom(dcm_path: Path, dry_run: bool = False) -> bool:
     ds.add_new(TAG_MAR_SEQ, 'SQ', [mar_item])
 
     if not dry_run:
-        ds.save_as(str(dcm_path), write_like_original=False)
+        ds.save_as(str(dcm_path), enforce_file_format=True)
     return True
 
 

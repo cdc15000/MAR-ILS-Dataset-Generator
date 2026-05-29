@@ -49,11 +49,9 @@ Date    : 2026-04-05
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
 import json
 import os
-import sys
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import date, datetime, timezone
@@ -62,8 +60,6 @@ from pathlib import Path
 import numpy as np
 import scipy.ndimage
 import h5py
-import pydicom
-from pydicom.dataset import Dataset, FileDataset, FileMetaDataset
 from pydicom.uid import generate_uid
 
 from reportlab.lib.pagesizes import letter
@@ -71,8 +67,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether,
+    SimpleDocTemplate, Paragraph, Table, TableStyle,
+    HRFlowable,
 )
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -83,15 +79,12 @@ import math
 from mar_ils_core.constants import (
     X_DIM, Y_DIM, Z_DIM, VOXEL_MM, VOXEL_CM,
     PHANTOM_CENTER_X, PHANTOM_CENTER_Y,
-    SID_MM, SDD_MM, SID_CM, SDD_CM, SID_VOX, SDD_VOX,
-    N_ANGLES, N_DET,
+    SID_MM, SDD_MM, SID_CM, SID_VOX, N_ANGLES, N_DET,
     GAMMA_MAX_RAD, DELTA_GAMMA_RAD, DET_FAN_ANGLES_RAD, COS_DET_FAN,
     ANGLES_DEG, ANGLES_RAD,
     _RAY_T_VALS, _N_RAY_SAMPLES, _RAY_STEP,
     MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM,
-    BACKGROUND_HU, METAL_HU,
-    BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
-    METAL_RADIUS_VOX, LESION_RADIUS_VOX,
+    BACKGROUND_HU, BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
     LESION_CENTER_X, LESION_SLICE_INDEX,
     LESION_DELTA_HU, MU_LESION_CM,
     SCATTER_FRAC, SIGMA_E_COUNTS, NOISE_SIGMA_TARGET_HU,
@@ -101,7 +94,6 @@ from mar_ils_core.constants import (
 from mar_ils_core.phantom import (
     build_body_mask as _build_body_mask,
     build_metal_mask as _build_metal_mask,
-    build_lesion_mask as _build_lesion_mask,
     build_attenuation_map,
 )
 from mar_ils_core.noise import apply_noise
@@ -882,10 +874,10 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             "Run the following command (--internal-noise-sigma 15 is normative):", B,
         ),
         Paragraph(
-            f"python run_cho_analysis_v7_0.py "
-            f"--dataset-dir &lt;output_dir&gt; "
-            f"--mar-output-dir ./mar_recon "
-            f"--internal-noise-sigma 15",
+            "python run_cho_analysis_v7_0.py "
+            "--dataset-dir &lt;output_dir&gt; "
+            "--mar-output-dir ./mar_recon "
+            "--internal-noise-sigma 15",
             ParagraphStyle("code", parent=styles["Normal"], fontName="Courier",
                            fontSize=9, leading=12,
                            backColor=colors.HexColor("#F5F5F5"), spaceAfter=8),
@@ -952,7 +944,7 @@ def main() -> None:
         print(f"Acceleration      : Numba {numba.__version__} "
               f"(JIT + batch geometry sharing)")
     else:
-        print(f"Acceleration      : none (install numba for ~4-8x speedup)")
+        print("Acceleration      : none (install numba for ~4-8x speedup)")
     print()
 
     if num_real < 40:
@@ -1020,10 +1012,10 @@ def main() -> None:
     print()
     print(f"Dataset complete → {output_dir}")
     print("Next step:")
-    print(f"  python run_cho_analysis_v7_0.py \\")
+    print("  python run_cho_analysis_v7_0.py \\")
     print(f"      --dataset-dir {output_dir} \\")
-    print(f"      --mar-output-dir ./mar_recon \\")
-    print(f"      --internal-noise-sigma 15")
+    print("      --mar-output-dir ./mar_recon \\")
+    print("      --internal-noise-sigma 15")
 
 
 if __name__ == "__main__":

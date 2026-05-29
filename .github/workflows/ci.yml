@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.10"
       - run: pip install ruff
-      - run: ruff check mar_ils_core/ tests/
+      - run: ruff check mar_ils_core/ tests/ generator_v7_0_0.py run_cho_analysis_v7_0.py
 
   test:
     runs-on: ubuntu-latest
@@ -25,6 +25,19 @@ jobs:
         with:
           python-version: "3.10"
       - run: pip install -r requirements.txt pytest
+      - run: python -m pytest tests/ -v
+
+  test-numba:
+    # Exercises the Numba JIT code paths (forward projection, single-slice and
+    # batch FBP) that the default `test` job skips. Guards the documented
+    # batch-vs-per-slice bit-exactness claim via tests/test_batch_fbp.py.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install -r requirements.txt pytest numba
       - run: python -m pytest tests/ -v
 
   dry-run:

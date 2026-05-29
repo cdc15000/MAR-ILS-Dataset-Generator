@@ -434,7 +434,7 @@ def main() -> None:
 
     num_real = args.realizations
 
-    print(f"ASTM WKXXXXX Rev 04 — 2D CHO Analysis")
+    print("ASTM WKXXXXX Rev 04 — 2D CHO Analysis")
     print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  centre=({ROI_CENTER_X},{ROI_CENTER_Y})")
     print(f"LG channel width a = {CHANNEL_WIDTH_A:.1f} vox")
     print(f"Internal noise σ = {args.internal_noise_sigma}")
@@ -554,7 +554,7 @@ def main() -> None:
     # Summary
     print()
     print("=" * 66)
-    print(f"ASTM WKXXXXX Rev 04 — CHO Result")
+    print("ASTM WKXXXXX Rev 04 — CHO Result")
     print("=" * 66)
     r_n = results["noMAR"]
     r_m = results["MAR"]
