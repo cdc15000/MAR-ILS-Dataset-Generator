@@ -15,8 +15,8 @@
   "internal_noise_sigma": 15.0,
   "num_realizations": 40,
   "auc_tolerance": 0.005,
-  "ils_mode": false,
-  "reconstruction_pipeline": "N/A (self-test)",
+  "ils_mode": true,
+  "reconstruction_pipeline": "not declared",
   "noMAR": {
     "AUC": 0.829375,
     "Bias": 0.11812500000000004,
@@ -135,29 +135,29 @@
     }
   },
   "MAR": {
-    "AUC": 0.829375,
-    "Bias": 0.11812500000000004,
+    "AUC": 0.599375,
+    "Bias": 0.12187499999999996,
     "CI_95": [
-      0.7612187499999999,
-      0.9025156249999999
+      0.568734375,
+      0.661265625
     ],
     "bias_5050": {
-      "AUC_resub": 0.9475,
-      "AUC_5050": 0.7225,
-      "Bias_5050": 0.22499999999999998
+      "AUC_resub": 0.72125,
+      "AUC_5050": 0.593125,
+      "Bias_5050": 0.12812499999999993
     },
     "wilcoxon": {
-      "wilcoxon_stat": 817.0,
-      "p_one_sided": 4.547473508864641e-12,
+      "wilcoxon_stat": 760.0,
+      "p_one_sided": 9.133600542554632e-08,
       "significant_p05": true
     }
   },
-  "delta_AUC": 0.0,
+  "delta_AUC": -0.22999999999999998,
   "delta_AUC_CI_95": [
-    0.0,
-    0.0
+    -0.29690625,
+    -0.14749999999999996
   ],
-  "delta_wilcoxon_p_twosided": NaN,
-  "self_test": true,
+  "delta_wilcoxon_p_twosided": 3.456079866737127e-11,
+  "self_test": false,
   "screening_mode": false
 }
