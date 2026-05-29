@@ -114,3 +114,45 @@ def discover_realizations(dataset_dir, cond: str = "LP") -> int:
     """Count realization_*.h5 files under <dataset_dir>/sinograms/<cond>/."""
     d = Path(dataset_dir) / "sinograms" / cond
     return len(list(d.glob("realization_*.h5")))
+
+
+def process_realization(
+    dataset_dir,
+    output_dir,
+    cond: str,
+    idx: int,
+    dc_offset_cm: float,
+    thresh: float = METAL_HU_THRESH,
+    *,
+    slice_index: int = LESION_SLICE_INDEX,
+) -> None:
+    """Read one realization's sinogram + noMAR slice, apply LI-MAR, write DICOM."""
+    dataset_dir = Path(dataset_dir)
+    output_dir = Path(output_dir)
+    tag = f"realization_{idx + 1:03d}"
+    h5_path = dataset_dir / "sinograms" / cond / f"{tag}.h5"
+    dcm_path = dataset_dir / "noMAR_recon" / cond / tag / f"slice_{slice_index + 1:04d}.dcm"
+    for p in (h5_path, dcm_path):
+        if not p.exists():
+            raise FileNotFoundError(f"required input missing: {p}")
+
+    with h5py.File(str(h5_path), "r") as f:
+        sino = f["line_integrals"][slice_index].astype(np.float64)  # (720, 512)
+
+    ds = pydicom.dcmread(str(dcm_path))
+    nomar_hu = (
+        ds.pixel_array.astype(np.float64) * float(ds.RescaleSlope)
+        + float(ds.RescaleIntercept)
+    )
+
+    hu_corr, metal_mask = li_mar_slice(sino, nomar_hu, dc_offset_cm, thresh)
+
+    write_dicom_slice(
+        hu_corr, slice_index,
+        output_dir=output_dir / cond / tag,
+        realization_idx=idx,
+        condition_label=cond,
+        study_uid=generate_uid(),
+        series_uid=generate_uid(),
+        metal_mask=metal_mask,
+    )

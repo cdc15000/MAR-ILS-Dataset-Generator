@@ -3,7 +3,9 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pydicom
 import pytest
+from pydicom.uid import generate_uid
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "algorithms" / "v7"))
 import reference_li_mar_v7 as li  # noqa: E402
@@ -113,3 +115,55 @@ class TestDiscoverRealizations:
 
     def test_zero_when_absent(self, tmp_path):
         assert li.discover_realizations(tmp_path, "LP") == 0
+
+
+from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
+
+
+def _build_tiny_dataset(root: Path):
+    """One-slice (slice_index 0) LP realization: sinogram H5 + noMAR DICOM."""
+    from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice
+    import h5py
+    import numpy as np
+    mu = build_attenuation_map(place_lesion=True, jitter_deg=0.0)
+    sino = forward_project_slice(mu).astype(np.float32)        # (720, 512)
+    nomar_hu = fbp_reconstruct_slice(sino, dc_offset_cm=0.0)   # (512, 512)
+
+    sdir = root / "sinograms" / "LP"
+    sdir.mkdir(parents=True)
+    with h5py.File(str(sdir / "realization_001.h5"), "w") as f:
+        f.create_dataset("line_integrals", data=sino[np.newaxis, :, :])  # (1,720,512)
+
+    ndir = root / "noMAR_recon" / "LP" / "realization_001"
+    yy, xx = np.mgrid[0:512, 0:512]
+    from mar_ils_core.phantom import build_metal_mask
+    write_dicom_slice(
+        nomar_hu, 0, output_dir=ndir, realization_idx=0, condition_label="LP",
+        study_uid=generate_uid(), series_uid=generate_uid(),
+        metal_mask=build_metal_mask(yy, xx),
+    )
+    (root / "generator_provenance.json").write_text(_json.dumps({"dc_offset_cm": 0.0}))
+
+
+class TestProcessRealization:
+    def test_writes_readable_corrected_dicom(self, tmp_path):
+        _build_tiny_dataset(tmp_path)
+        out = tmp_path / "li_mar_recon"
+        li.process_realization(
+            tmp_path, out, "LP", 0, dc_offset_cm=0.0, slice_index=0,
+        )
+        dcm = out / "LP" / "realization_001" / "slice_0001.dcm"
+        assert dcm.exists()
+        ds = pydicom.dcmread(str(dcm))
+        hu = ds.pixel_array.astype(float) * float(ds.RescaleSlope) + float(ds.RescaleIntercept)
+        assert hu.shape == (512, 512)
+        # metal hard-set to 3000 HU by the writer. Check the rod *core* (always
+        # detected); the geometric boundary can blur below the 2000 HU threshold.
+        yy, xx = np.mgrid[0:512, 0:512]
+        core = (xx - 256) ** 2 + (yy - 256) ** 2 <= 5 ** 2
+        assert hu[256, 256] == pytest.approx(3000.0)
+        assert np.allclose(hu[core], 3000.0)
+
+    def test_missing_input_raises(self, tmp_path):
+        with pytest.raises(FileNotFoundError):
+            li.process_realization(tmp_path, tmp_path / "o", "LP", 0, 0.0, slice_index=0)
