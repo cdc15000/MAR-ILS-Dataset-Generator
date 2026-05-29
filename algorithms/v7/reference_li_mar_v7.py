@@ -60,3 +60,14 @@ def linear_interp_metal(sino: np.ndarray, W: np.ndarray) -> np.ndarray:
 def detect_metal_mask(hu: np.ndarray, thresh: float = METAL_HU_THRESH) -> np.ndarray:
     """Boolean metal mask from a noMAR HU image (textbook threshold detection)."""
     return hu > thresh
+
+
+def metal_trace_weights(
+    metal_mask: np.ndarray, clean_frac: float = CLEAN_RAY_FRAC
+) -> np.ndarray:
+    """Forward-project the metal mask through fan-beam geometry, then mark each
+    ray clean (1.0) where its metal path length is below ``clean_frac`` of the
+    per-view peak, else metal-traced (0.0)."""
+    trace = forward_project_slice(metal_mask.astype(np.float64))
+    peak = trace.max(axis=1, keepdims=True)
+    return (trace < clean_frac * np.maximum(peak, 1e-9)).astype(np.float64)
