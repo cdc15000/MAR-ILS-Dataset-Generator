@@ -35,9 +35,35 @@ Options: `--realizations N` (default auto-detect), `--metal-hu-thresh 2000`,
 
 ### delta-AUC anchor
 
-Run the two commands above on the locked reference dataset (N=40, sigma=15) and
-record the result here:
+Measured on the locked reference dataset (N=40, σ=15), 2026-05-29:
 
-> delta-AUC (LI-MAR vs noMAR) = _TBD — fill in after the manual anchor run_
+| Quantity | Value | 95% CI |
+|---|---|---|
+| AUC_noMAR | **0.8294** | [0.7612, 0.9025] |
+| AUC_MAR (LI-MAR) | **0.5994** | [0.5687, 0.6613] |
+| **ΔAUC (LI-MAR − noMAR)** | **−0.2300** | [−0.2969, −0.1475] |
 
-This is a manual step (a full dataset is ~35 GB / ~10 min), not part of CI.
+Wilcoxon (ΔAUC ≠ 0): p < 0.0001. AUC_noMAR reproduces the locked baseline
+(0.8294) exactly, confirming the regenerated dataset matches the reference.
+
+**Interpretation.** LI-MAR *significantly degrades* detectability (ΔAUC ≈ −0.23),
+establishing the **floor** — a MAR algorithm that cannot clearly beat this (ideally
+ΔAUC ≥ 0) is not helping.
+
+The mechanism was verified to be genuine secondary artifacts, not an
+implementation artifact of over-aggressive trace removal:
+
+- The metal trace covers only **20 of 512 detector bins per view** (matching the
+  r=10-voxel rod's projected width), so LI-MAR does *not* interpolate away the
+  lesion's own projections — the lesion sits well outside the replaced trace.
+- Yet across the 40 LP realizations the lesion-region signal variance inflates
+  **~10×** under LI-MAR (≈ ±1.8 HU noMAR → ≈ ±17 HU LI-MAR), i.e. crude per-view
+  interpolation injects new streak artifacts near the lesion that swamp the
+  ~12 HU signal and drive detection toward chance.
+
+Directionally consistent with the earlier parallel-beam study (LI-MAR below noMAR
+in both); the magnitude differs (≈ −0.057 there vs −0.230 here), as expected given
+the different geometry and operating point.
+
+This is a manual step (a full dataset is ~35 GB), not part of CI. To reproduce,
+run the two commands above and read `cho_results.json`.

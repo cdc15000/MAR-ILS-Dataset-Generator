@@ -92,8 +92,9 @@ class TestLiMarSlice:
 
 class TestLoadDcOffset:
     def test_reads_value(self, tmp_path):
+        # Mirrors the generator's nested structure: noise_model.dc_offset_cm.
         (tmp_path / "generator_provenance.json").write_text(
-            _json.dumps({"dc_offset_cm": -0.029})
+            _json.dumps({"noise_model": {"dc_offset_cm": -0.029}})
         )
         assert li.load_dc_offset(tmp_path) == pytest.approx(-0.029)
 
@@ -102,7 +103,10 @@ class TestLoadDcOffset:
             li.load_dc_offset(tmp_path)
 
     def test_missing_key_raises(self, tmp_path):
-        (tmp_path / "generator_provenance.json").write_text(_json.dumps({"x": 1}))
+        # provenance present but without noise_model.dc_offset_cm
+        (tmp_path / "generator_provenance.json").write_text(
+            _json.dumps({"noise_model": {"I0_calibrated": 310853}})
+        )
         with pytest.raises(KeyError):
             li.load_dc_offset(tmp_path)
 
@@ -138,7 +142,9 @@ def _build_tiny_dataset(root: Path):
         study_uid=generate_uid(), series_uid=generate_uid(),
         metal_mask=build_metal_mask(yy, xx),
     )
-    (root / "generator_provenance.json").write_text(_json.dumps({"dc_offset_cm": 0.0}))
+    (root / "generator_provenance.json").write_text(
+        _json.dumps({"noise_model": {"dc_offset_cm": 0.0}})
+    )
 
 
 class TestProcessRealization:

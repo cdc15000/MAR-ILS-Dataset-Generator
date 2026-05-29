@@ -29,7 +29,7 @@ For per-version status, performance work, tooling, DICOM 2026b compliance detail
 This is the **reference evaluation framework** for conducting standardized **Interlaboratory Studies (ILS)** on CT **Metal Artifact Reduction (MAR)** algorithms. Following the task-based signal detection framework of **Vaishnav et al. (Medical Physics, 2020)**, this toolset provides:
 
 1.  **Standardized Dataset Generation:** Physics-based fan-beam sinogram synthesis (v7.0.0).
-2.  **Reference MAR Algorithms:** Implementations of iMAR, MBIR, and Dual-Energy Spectral MAR.
+2.  **Reference MAR Algorithms:** A parameter-free linear-interpolation reference (**LI-MAR**) for the v7.0.0 fan-beam geometry ([`algorithms/v7/`](algorithms/v7/)), plus legacy parallel-beam implementations (iMAR, MBIR, Dual-Energy Spectral MAR) retained for the v6 research framework ([`algorithms/`](algorithms/)).
 3.  **Objective Statistical Scoring:** Quantifying lesion detectability ($\Delta AUC$) using a **Channelized Hotelling Observer (CHO)** with normative internal noise ($\sigma=15$).
 4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
 
@@ -124,14 +124,33 @@ python run_cho_analysis_v7_0.py \
 
 `--internal-noise-sigma 15` is the locked normative default — do not change it for submissions scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
 
-### 3. Visualize sinograms
+### 3. Apply the reference LI-MAR (positive control / ΔAUC anchor)
+
+A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale — every commercial MAR is expected to beat it.
+
+```bash
+# Produce a CHO-ready LI-MAR reconstruction set (slice_0129.dcm per realization)
+python algorithms/v7/reference_li_mar_v7.py \
+    --dataset-dir ./astm_reference_dataset \
+    --output-dir  ./li_mar_recon
+
+# Score it against the noMAR baseline
+python run_cho_analysis_v7_0.py \
+    --dataset-dir ./astm_reference_dataset \
+    --mar-output-dir ./li_mar_recon \
+    --internal-noise-sigma 15
+```
+
+See [`algorithms/v7/README.md`](algorithms/v7/README.md) for the measured ΔAUC anchor on the locked $N=40$ dataset.
+
+### 4. Visualize sinograms
 
 ```bash
 python view_sinograms.py sinograms/LP/realization_001.h5
 python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ```
 
-### 4. Patch legacy datasets with DICOM 2026b metadata
+### 5. Patch legacy datasets with DICOM 2026b metadata
 
 ```bash
 python patch_2026b_metadata.py --dataset-dir ./astm_reference_dataset

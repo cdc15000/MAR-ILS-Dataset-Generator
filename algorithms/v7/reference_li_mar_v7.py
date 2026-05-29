@@ -103,11 +103,15 @@ def load_dc_offset(dataset_dir) -> float:
             f"{prov} not found; pass --dc-offset-cm to supply it explicitly"
         )
     data = json.loads(prov.read_text())
-    if "dc_offset_cm" not in data:
+    # The generator nests the offset under "noise_model" (see
+    # generator_v7_0_0.write_provenance_json).
+    noise_model = data.get("noise_model", {})
+    if "dc_offset_cm" not in noise_model:
         raise KeyError(
-            "dc_offset_cm missing from provenance; pass --dc-offset-cm explicitly"
+            "noise_model.dc_offset_cm missing from provenance; "
+            "pass --dc-offset-cm explicitly"
         )
-    return float(data["dc_offset_cm"])
+    return float(noise_model["dc_offset_cm"])
 
 
 def discover_realizations(dataset_dir, cond: str = "LP") -> int:
