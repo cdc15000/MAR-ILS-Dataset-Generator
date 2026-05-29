@@ -89,3 +89,22 @@ def li_mar_slice(
     sino_li = linear_interp_metal(np.asarray(sino, dtype=np.float64), W)
     hu_corr = fbp_reconstruct_slice(sino_li, dc_offset_cm=dc_offset_cm)
     return hu_corr, metal_mask
+
+
+def load_dc_offset(dataset_dir) -> float:
+    """Read dc_offset_cm from <dataset_dir>/generator_provenance.json.
+
+    Raises rather than silently defaulting to 0.0 (a wrong offset mis-calibrates
+    HU by ~141 HU). Callers may bypass this with an explicit --dc-offset-cm.
+    """
+    prov = Path(dataset_dir) / "generator_provenance.json"
+    if not prov.exists():
+        raise FileNotFoundError(
+            f"{prov} not found; pass --dc-offset-cm to supply it explicitly"
+        )
+    data = json.loads(prov.read_text())
+    if "dc_offset_cm" not in data:
+        raise KeyError(
+            "dc_offset_cm missing from provenance; pass --dc-offset-cm explicitly"
+        )
+    return float(data["dc_offset_cm"])

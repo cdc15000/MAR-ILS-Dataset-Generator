@@ -1,3 +1,4 @@
+import json as _json
 import sys
 from pathlib import Path
 
@@ -83,3 +84,20 @@ class TestLiMarSlice:
         sino, nomar_hu = slice_inputs
         hu_corr, metal_mask = li.li_mar_slice(sino, nomar_hu, dc_offset_cm=0.0)
         assert hu_corr[metal_mask].mean() < nomar_hu[metal_mask].mean()
+
+
+class TestLoadDcOffset:
+    def test_reads_value(self, tmp_path):
+        (tmp_path / "generator_provenance.json").write_text(
+            _json.dumps({"dc_offset_cm": -0.029})
+        )
+        assert li.load_dc_offset(tmp_path) == pytest.approx(-0.029)
+
+    def test_missing_file_raises(self, tmp_path):
+        with pytest.raises(FileNotFoundError):
+            li.load_dc_offset(tmp_path)
+
+    def test_missing_key_raises(self, tmp_path):
+        (tmp_path / "generator_provenance.json").write_text(_json.dumps({"x": 1}))
+        with pytest.raises(KeyError):
+            li.load_dc_offset(tmp_path)
