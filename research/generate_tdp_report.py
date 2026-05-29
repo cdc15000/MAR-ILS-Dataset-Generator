@@ -58,6 +58,10 @@ from reportlab.platypus import (
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+# tier_config lives at the repo root; add it to the path so this script runs
+# from research/ (matches the shim pattern used in algorithms/).
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from tier_config import TierConfig, TIER_REGISTRY
 
 # ─── Font paths ───────────────────────────────────────────────────────────────
