@@ -71,3 +71,21 @@ def metal_trace_weights(
     trace = forward_project_slice(metal_mask.astype(np.float64))
     peak = trace.max(axis=1, keepdims=True)
     return (trace < clean_frac * np.maximum(peak, 1e-9)).astype(np.float64)
+
+
+def li_mar_slice(
+    sino: np.ndarray,
+    nomar_hu: np.ndarray,
+    dc_offset_cm: float,
+    thresh: float = METAL_HU_THRESH,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Run LI-MAR on one fan-beam slice.
+
+    Returns (hu_corrected, metal_mask). Metal is NOT hard-set here; the writer
+    applies the 3000 HU hard-set via metal_mask.
+    """
+    metal_mask = detect_metal_mask(nomar_hu, thresh)
+    W = metal_trace_weights(metal_mask)
+    sino_li = linear_interp_metal(np.asarray(sino, dtype=np.float64), W)
+    hu_corr = fbp_reconstruct_slice(sino_li, dc_offset_cm=dc_offset_cm)
+    return hu_corr, metal_mask

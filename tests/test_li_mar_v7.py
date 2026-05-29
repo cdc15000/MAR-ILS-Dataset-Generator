@@ -6,7 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "algorithms" / "v7"))
 import reference_li_mar_v7 as li  # noqa: E402
-from mar_ils_core.phantom import build_metal_mask  # noqa: E402
+from mar_ils_core.phantom import build_metal_mask, build_attenuation_map  # noqa: E402
 
 
 class TestLinearInterpMetal:
@@ -57,3 +57,29 @@ class TestMetalTraceWeights:
         # Metal-traced bins cluster near detector centre.
         metal_cols = np.where(W[0] < 0.5)[0]
         assert abs(metal_cols.mean() - 256) < 60
+
+
+class TestLiMarSlice:
+    @pytest.fixture(scope="class")
+    def slice_inputs(self):
+        from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice
+        mu = build_attenuation_map(place_lesion=True, jitter_deg=0.0)
+        sino = forward_project_slice(mu).astype(np.float64)
+        nomar_hu = fbp_reconstruct_slice(sino, dc_offset_cm=0.0)
+        return sino, nomar_hu
+
+    def test_returns_finite_corrected_slice_and_mask(self, slice_inputs):
+        sino, nomar_hu = slice_inputs
+        hu_corr, metal_mask = li.li_mar_slice(sino, nomar_hu, dc_offset_cm=0.0)
+        assert hu_corr.shape == (512, 512)
+        assert np.isfinite(hu_corr).all()
+        assert metal_mask.dtype == bool
+        assert metal_mask.sum() > 0          # rod detected
+        assert metal_mask.sum() < 2000       # but not the whole image
+
+    def test_metal_trace_is_replaced(self, slice_inputs):
+        # After LI, the metal region reconstructs to ~tissue, far below the
+        # ~10000 HU raw metal in the noMAR image. Confirms the trace was filled.
+        sino, nomar_hu = slice_inputs
+        hu_corr, metal_mask = li.li_mar_slice(sino, nomar_hu, dc_offset_cm=0.0)
+        assert hu_corr[metal_mask].mean() < nomar_hu[metal_mask].mean()
