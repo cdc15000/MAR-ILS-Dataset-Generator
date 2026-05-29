@@ -161,6 +161,7 @@ Historical baselines (superseded):
 - **Batch geometry sharing**: All 256 slices backprojected together; geometry (arctan2, L², detector index) computed once per (pixel, angle) pair, applied to all slices. ~4x additional speedup.
 - **Combined**: 61s per realization (single-threaded worker), down from ~1300s (NumPy). ~24x total speedup.
 - **N=40 estimated wall time**: ~10 minutes with 8 workers (M3 MacBook Pro, 18+ GB RAM).
+- **Memory / worker tuning (IMPORTANT on ≤8 GB RAM)**: each worker holds several `(256,720,512)` float64 arrays (~750 MB each) plus the sinogram and DICOM buffers — ~2–3 GB peak per worker. On an **8 GB machine, `--workers 8` blows past RAM and thrashes swap** (observed ~3 min/realization, 14 GB swap, ~4 h for N=40, workers stuck at ~40% CPU on swap I/O). Use **`--workers 2`** on 8 GB: it keeps the working set in RAM, workers run at ~98% CPU, and N=40 finishes in ~20 min. Fewer workers is *faster* here — the bottleneck is memory, not compute. (GPU offload does not help: Apple unified memory shares the same exhausted RAM, Numba can't target Metal, and a Metal/MPS rewrite would change numerics and break the locked bit-exact baseline.)
 - **Bit-exactness**: Batch FBP matches per-slice FBP within float32 precision (max 0.0005 HU difference).
 - **Fallback**: All Numba code is conditional (`if _HAS_NUMBA`). Without numba installed, generator falls back to original NumPy implementation.
 - **Thread management**: Workers set `numba.set_num_threads(1)`; parallelism is across workers via `ProcessPoolExecutor`. Calibration uses all cores.
