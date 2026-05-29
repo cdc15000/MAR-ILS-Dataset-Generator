@@ -25,3 +25,18 @@ class TestLinearInterpMetal:
         W = np.ones_like(sino)  # all clean
         out = li.linear_interp_metal(sino, W)
         assert np.array_equal(out, sino)
+
+
+class TestDetectMetalMask:
+    def test_finds_high_hu_disc(self):
+        hu = np.full((512, 512), 40.0)
+        yy, xx = np.mgrid[0:512, 0:512]
+        disc = (xx - 256) ** 2 + (yy - 256) ** 2 <= 10 ** 2
+        hu[disc] = 3000.0
+        mask = li.detect_metal_mask(hu)
+        assert np.array_equal(mask, disc)
+
+    def test_threshold_is_configurable(self):
+        hu = np.full((4, 4), 1500.0)
+        assert li.detect_metal_mask(hu, thresh=1000.0).all()
+        assert not li.detect_metal_mask(hu, thresh=2000.0).any()

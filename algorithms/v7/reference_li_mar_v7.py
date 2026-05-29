@@ -55,3 +55,8 @@ def linear_interp_metal(sino: np.ndarray, W: np.ndarray) -> np.ndarray:
             continue
         sino_out[a, metal] = np.interp(metal, clean, sino[a, clean])
     return sino_out
+
+
+def detect_metal_mask(hu: np.ndarray, thresh: float = METAL_HU_THRESH) -> np.ndarray:
+    """Boolean metal mask from a noMAR HU image (textbook threshold detection)."""
+    return hu > thresh
