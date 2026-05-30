@@ -1,13 +1,11 @@
-# ASTM WKXXXXX — Revision 04
+# ASTM WKXXXXX — Revision 05
 
 **Designation:** WKXXXXX
 **Work Item Number:** WKXXXXX
-**Date:** 2026-04-05
-**Supersedes:** Revision 03 (03/14/2026)
+**Date:** 2026-05-29
+**Supersedes:** Revision 04 (04/05/2026)
 
-> **Change summary (Rev 03 → Rev 04):** Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360° full rotation). FBP reconstruction changed from parallel-beam rotation-sum to fan-beam cosine-weighted distance-weighted backprojection. CHO implementation equivalence tolerance relaxed from ±0.001 to ±0.005 AUC (§6.4 and §11.2 updated for consistency). Screening mode (20 realizations) added for pilot evaluation; 40 remains the minimum for formal reporting. Acceptance criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance. Baseline AUC_noMAR established at 0.8294 under fan-beam geometry (N=40, σ=15, 2026-04-07). Scope-boundary clause §1.9 added clarifying type-test vs. clinical-validation distinction. §1A.5 (Scope and Precedent) added citing F2119, IEC 62220-1, AAPM TG-233, ACR CT Accreditation precedents and F2119 complementarity. §1A.6 (Metal-Material Rationale) added. §2 expanded to cite F2119, IEC 60601-2-44, DICOM PS3.3, Wunderlich & Noo, Kak & Slaney. §14.12 preset-reporting clause added. §16(o) DICOM 2026b MAR Macro verification item added. §A1.5.3 clarified that 2D constraint applies to observer not to MAR algorithm. Subcommittee of jurisdiction: F04.15 Material Test Methods. Annex A2 (Informational) added specifying optional multi-point signal-amplitude and dose sweeps per Vaishnav et al. (2020). Reference scripts updated to v7.0.0.
->
-> **Change summary (Rev 02 → Rev 03):** Observer dimensionality changed from 3D to 2D (Slice 128 only); lesion geometry changed from full z-extent cylinder to single-slice disc; lesion HU implementation changed from 120 HU post-FBP hard-set to ~12 HU sinogram-domain physics contrast (no hard-set); minimum realizations increased from 20 to 40 per condition; Vaishnav internal observer noise regularisation (σ = 15) added as normative requirement; Vaishnav Transition AUC baseline (0.7063) recorded in §1A.2.
+> **Revision 05 (highlights).** Formalizes the channelized Hotelling observer test statistic, the leave-one-out (LOO) training/scoring protocol, and the paired ΔAUC bootstrap so the normative text fully specifies the computation previously defined only by the reference implementation (§A1.5.5, §A1.6). Pins the channel-output scale and clarifies the internal-noise units (§A1.5.2(d)). Adds the projection-domain (line-integral sinogram) deliverable and the "MAR-ready series" definition (§3.1.12–3.1.13, §8.1.1, §4). Records the dataset physics-generation constants in the immutable-parameter table (§A1.8). Three items are flagged for committee decision rather than resolved unilaterally: the scope/modality-independence framing (§1.4), the statistical basis for N = 40 (§10.2, §17.1.6), and identification of a positive-control MAR algorithm for the pilot (§17.1.6). Revision history consolidated into the Summary of Changes at the end of this document. Normative changes are marked **[Rev 05]**.
 
 ---
 
@@ -17,7 +15,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
 
-*This test method is under the jurisdiction of ASTM Committee F04 on Medical and Surgical Materials and Devices and is the direct responsibility of Subcommittee F04.15 on Material Test Methods. Current edition (Revision 04) approved 2026-04-05; editorial pass 2026-04-18. DOI:10.1520/XXXXX-XX*
+*This test method is under the jurisdiction of ASTM Committee F04 on Medical and Surgical Materials and Devices and is the direct responsibility of Subcommittee F04.15 on Material Test Methods. Current edition (Revision 05) approved 2026-05-29. DOI:10.1520/XXXXX-XX*
 
 ---
 
@@ -30,6 +28,8 @@ This test method establishes a procedure for measuring MAR performance using a s
 **1.3** The measurand is the scalar difference in area under the receiver operating characteristic curve (ΔAUC) derived from a signal-known-exactly, background-known-statistically (SKE/BKS) detection task using a fixed channelized Hotelling observer (CHO) implementation, predefined regions of interest, and specified statistical estimation procedures as defined in Annex A1.
 
 **1.4** This method is modality-independent in the sense that the measurand (ΔAUC) is computed exclusively from reconstructed volumetric image data and does not depend on acquisition hardware, raw projection data, or reconstruction physics. The canonical dataset (§10.1.1) is defined in Hounsfield Unit (HU) space and is therefore directly applicable to systems that produce HU-calibrated reconstructed images, including but not limited to computed tomography (CT). Application to modalities that do not produce HU-calibrated output requires a modality-specific canonical dataset established by a separate work item; results from such datasets shall not be reported as compliant with this standard unless the relevant modality annex has been approved.
+
+> **[Rev 05] Note — scope/modality framing (flagged for committee decision).** The *measurand* (ΔAUC, computed by the CHO from reconstructed HU images) is genuinely image-domain and modality-independent, as stated above. However, most MAR algorithms under test operate in the **projection (sinogram) domain**, and the canonical dataset distributes line-integral sinograms (§8.1.1) for that purpose; the artifact physics and acquisition geometry (§A1.1(f,g), §A1.7.4) are likewise CT-specific. The present wording of §1.4 ("does not depend on … raw projection data") describes the measurand but may be read as describing the whole method, which is not the case for the algorithm under test. The subcommittee shall decide between (a) retaining §1.4 as a statement scoped explicitly to the measurand and adding an apparatus clause acknowledging projection-domain input for the algorithm under test, or (b) narrowing the modality-independence claim. This Note records the issue; it does not by itself resolve the scope philosophy.
 
 **1.5** This standard defines a single canonical test configuration intended for type testing and conformity assessment. No additional configurations are permitted under this standard.
 
@@ -116,13 +116,17 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **3.1.11** artifact jitter — per-realization rotation of the artifact template by a specified random angle, providing background variability that prevents CHO overtraining on static artifact patterns.
 
+**3.1.12** **[Rev 05]** line-integral sinogram — the projection-domain representation of a realization, stored as fan-beam line integrals (neper) on the canonical acquisition geometry (§A1.1(f)). The sinograms are the projection-domain input on which a projection-domain MAR algorithm operates; they are distributed with the dataset (§8.1.1) in addition to the reconstructed image series.
+
+**3.1.13** **[Rev 05]** MAR-ready series — a per-realization line-integral sinogram (§3.1.12) supplied so that the laboratory may apply its MAR algorithm and reconstruct the result into a DICOM image series for observer analysis. The MAR-ready series is the projection-domain counterpart of the reconstructed noMAR reference series; both derive from the identical phantom, noise seed, and acquisition geometry, so that the MAR enable/disable state is the only difference between the two reconstructed image series ultimately scored (§4.2, §14).
+
 ---
 
 ## 4. Summary of Test Method
 
-**4.1** A standardized reconstructed digital volumetric dataset is provided to participating laboratories. The dataset represents a simplified anthropomorphic torso cross-section containing a single cylindrical metallic rod and background tissue. The dataset is fully synthetic, generated from defined geometric primitives, and does not require clinical scanner acquisition.
+**4.1** A standardized synthetic digital dataset is provided to participating laboratories. The dataset represents a simplified anthropomorphic torso cross-section containing a single cylindrical metallic rod and background tissue. **[Rev 05]** It comprises, for each realization and condition, (i) a reconstructed reference image series with MAR disabled (the noMAR series), and (ii) a line-integral sinogram (the MAR-ready series, §3.1.13) on the canonical fan-beam geometry (§A1.1(f)). The dataset is fully synthetic, generated from defined geometric primitives, and does not require clinical scanner acquisition.
 
-**4.2** The standardized volumetric dataset shall be processed: (a) with MAR disabled, and (b) with MAR enabled, using identical reconstruction, preprocessing, postprocessing, and display parameters. The MAR enable/disable state shall be the only permitted difference between conditions.
+**4.2** **[Rev 05]** Two reconstructed image series are obtained for observer analysis: (a) the **noMAR** series — the provided reference reconstruction (MAR disabled); and (b) the **MAR** series — produced by the laboratory applying its MAR algorithm to the provided MAR-ready sinograms (§3.1.13) and reconstructing the result. All reconstruction, preprocessing, postprocessing, and display parameters shall be identical to those used for the provided noMAR reference series except for the MAR processing itself; the MAR enable/disable state shall be the only permitted difference between the two image series. Laboratories whose MAR operates in the image domain rather than the projection domain shall apply it to the provided noMAR reference series and document this in the report (§16(c)).
 
 **4.3** A specified lesion disc is present in a defined spatial relationship to the metallic object in the lesion-present series, at Slice 128 only. **[Rev 03]** The lesion is a single-slice disc (not a full z-extent cylinder); its contrast (~12 HU above background) is established in the sinogram domain via physics-based attenuation. The lesion-absent series contains no lesion.
 
@@ -166,7 +170,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 7. Apparatus
 
-**7.1** Imaging system or processing platform capable of applying MAR processing to the supplied volumetric dataset in DICOM CT format.
+**7.1** **[Rev 05]** Imaging system or processing platform capable of applying the MAR algorithm under test to the supplied line-integral sinograms (§8.1.1) and reconstructing the corrected result into a DICOM CT image series. (Image-domain MAR algorithms instead operate on the supplied reconstructed noMAR reference series; see §4.2.)
 
 **7.2** **[Rev 04]** Computational platform capable of executing the reference 2D CHO analysis software (`run_cho_analysis_v7_0.py`).
 
@@ -180,7 +184,14 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 8. Reagents and Materials
 
-**8.1** **[Rev 03]** Standardized reconstructed digital volumetric dataset distributed with this standard, SHA-256 checksum verified per §11.1. The dataset consists of 160 DICOM CT series: 40 lesion-present / noMAR, 40 lesion-absent / noMAR, 40 lesion-present / MAR-ready, and 40 lesion-absent / MAR-ready, each comprising 256 axial slices at 512 × 512 × 0.5 mm isotropic. The reference dataset is `./astm_reference_dataset/`.
+**8.1** **[Rev 05]** Standardized synthetic dataset distributed with this standard, SHA-256 checksum verified per §11.1, consisting of two co-registered parts derived from the identical phantom, noise seeds, and acquisition geometry:
+
+- (a) *Reconstructed reference image series (noMAR)* — 80 DICOM CT series (40 lesion-present, 40 lesion-absent), each 256 axial slices at 512 × 512 × 0.5 mm isotropic, reconstructed with MAR disabled per §A1.1(g).
+- (b) *MAR-ready line-integral sinograms* (§3.1.13) — 80 sinograms (40 lesion-present, 40 lesion-absent) on the canonical fan-beam geometry (§A1.1(f)), supplied for the laboratory to apply MAR and reconstruct per §4.2.
+
+The reference dataset directory is `./astm_reference_dataset/`, containing `noMAR_recon/{LP,LA}/` (part a) and `sinograms/{LP,LA}/` (part b). The 80 MAR image series scored under §14 are produced by the laboratory from part (b) and are not distributed.
+
+**8.1.1** **[Rev 05]** *Sinogram format* — Each MAR-ready sinogram is a single-precision (float32) array of fan-beam line integrals in neper, shape (256 slices × 720 projection angles × 512 detector elements), accompanied by the acquisition-geometry parameters of §A1.1(f) and the noise parameters of §A1.7 as metadata. The reference distribution stores each as HDF5 at `sinograms/{LP,LA}/realization_NNN.h5` (dataset `line_integrals`, geometry and noise attributes per the distribution manifest).
 
 **8.2** Laguerre–Gauss channel template definitions as specified in §A1.5.1 and provided in machine-readable form with the dataset distribution.
 
@@ -226,6 +237,8 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **10.2** **[Rev 03]** For the canonical test configuration, a minimum of 40 statistically independent lesion-present and 40 lesion-absent image volumetric realizations shall be analyzed per condition. The minimum total is therefore 160 volumetric image sets (40 LP-noMAR, 40 LA-noMAR, 40 LP-MAR, 40 LA-MAR).
 
+> **[Rev 05] Open item — statistical basis for N = 40 (committee decision required).** The N = 40 minimum is provisional. A formal basis — a power/precision analysis demonstrating that N = 40 achieves the within-laboratory precision and bias targets of §17.1.6 (SD(ΔAUC) ≤ 0.05; resubstitution-minus-hold-out bias ≤ 0.02) at the canonical operating point — has not yet been established and **shall be established by the pilot precision study (§17.1.6) before first ballot.** Should the pilot show N = 40 to be insufficient for those targets, the minimum shall be revised accordingly. No numerical power claim is asserted here pending that analysis.
+
 **10.2.1** **[Rev 04]** *Screening mode* — For pilot evaluation and feasibility assessment, a reduced configuration of 20 realizations per condition (80 total) may be used. Results obtained with fewer than 40 realizations per condition are informative only and shall not be reported as compliant with this standard. Screening-mode results shall be clearly labelled as such in any documentation.
 
 **10.3** Statistical independence shall be achieved using the predefined set of independent volumetric realizations provided with the standardized dataset, each generated with a unique, non-overlapping random seed. Laboratories shall not generate additional noise realizations or alter the provided image volumes. Each full 3D volume (256 slices) constitutes one independent realization; individual slices within a volume are not independent samples and shall not be treated as such in CHO training or testing.
@@ -260,9 +273,9 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **14.1** Verify dataset checksums per §11.1.
 
-**14.2** **[Rev 03]** Process the standardized noMAR volumetric dataset (40 LP and 40 LA volumes) through the imaging system with MAR disabled.
+**14.2** **[Rev 05]** Use the provided reconstructed noMAR reference series (40 LP and 40 LA volumes; §8.1(a)) as the MAR-disabled condition. Confirm its checksums per §11.1; do not re-reconstruct it.
 
-**14.3** Process the identical standardized dataset through the imaging system with MAR enabled, using identical reconstruction and postprocessing parameters. The MAR enable/disable state is the only permitted difference.
+**14.3** **[Rev 05]** Produce the MAR-enabled condition by applying the MAR algorithm under test to the provided MAR-ready sinograms (40 LP and 40 LA; §8.1(b)) and reconstructing the corrected result, using reconstruction and postprocessing parameters identical to those of the provided noMAR reference series (§A1.1(g)). The MAR processing is the only permitted difference. (Image-domain MAR algorithms instead operate on the noMAR reference series per §4.2.)
 
 **14.4** Verify that the processed output volumes match the expected matrix dimensions, voxel size, and bit depth specified in §A1.1 before proceeding.
 
@@ -342,6 +355,10 @@ This test method establishes a procedure for measuring MAR performance using a s
 **17.1.5** The digital, checksum-verified nature of this test method minimizes the resource barriers traditionally associated with interlaboratory studies by eliminating physical phantoms, shipping logistics, and clinical scanner time requirements.
 
 **17.1.6** Pilot precision data requirement: Before this standard proceeds to first ASTM ballot, the sponsoring subcommittee shall provide pilot precision data from a minimum of 3 laboratories demonstrating that: (a) mean ΔAUC is statistically distinguishable from zero for a MAR algorithm known to improve detectability; (b) the within-laboratory standard deviation of ΔAUC does not exceed 0.05 AUC units; and (c) the AUC estimation bias (resubstitution minus hold-out) does not exceed 0.02 AUC units at N=40 realizations.
+
+> **[Rev 05] Open item — control algorithms for the pilot (committee decision required).**
+> - *Positive control (item (a)) — not yet identified.* Item (a) presupposes a MAR algorithm "known to improve detectability" under the canonical configuration. No such algorithm has yet been validated against this configuration; characterization work to date has found ΔAUC at or below zero for the reference methods evaluated. The subcommittee shall identify and document a qualifying positive-control algorithm before the pilot, or item (a) shall be revised to require only that the pipeline resolves a *known, signed* ΔAUC of the expected magnitude and direction (which a negative control can also demonstrate).
+> - *Negative-control floor — available.* A parameter-free linear-interpolation MAR (LI-MAR) reference, distributed with the dataset tooling, provides a reproducible negative-control anchor: on the canonical configuration (N = 40, σ_internal = 15) it yields ΔAUC ≈ **−0.23** (95% CI excluding zero), establishing a floor that any clinically useful MAR is expected to exceed. The pilot may use this LI-MAR floor to verify that each laboratory's pipeline reproduces a known signed, significant ΔAUC within tolerance, independent of the (still open) positive-control selection.
 
 **17.2** *Bias* — Bias in the absolute sense cannot be determined because no accepted reference value for true lesion detectability exists independently of the measurement method. Systematic effects identified during interlaboratory evaluation shall be reported. Sources of systematic effect include: CHO implementation differences, floating-point accumulation errors, and covariance regularization choices.
 
@@ -426,7 +443,7 @@ The phantom cross-section represents a simplified torso geometry consisting of a
 - (a) The CHO covariance matrix K shall be estimated from lesion-absent (LA) volumes exclusively.
 - (b) **[Rev 03]** Covariance shall be estimated by pooling channel output vectors across all 40 LA realizations of the relevant condition (MAR or noMAR). Separate covariance matrices shall be estimated for the MAR and noMAR conditions.
 - (c) Regularization: Tikhonov regularization shall be applied as K_reg = K + λI, where λ = 0.01 × trace(K) / p, p = number of channels = 10. This normalization ensures λ scales with the data and is invariant to HU units. λ is fixed by this formula and shall not be user-modified.
-- **(d) [Rev 03] Internal Observer Noise** — To prevent infinite SNR on low-variance pixels and to match human observer thresholds consistent with the Vaishnav framework, an internal noise variance shall be added to the diagonal of the covariance matrix before inversion: K_total = K_external + σ_internal² × I, where **σ_internal = 15** (HU, in channel space). The total regularized matrix used for Hotelling template estimation shall be: K_final = K_total + λI = K_external + σ_internal² × I + λI. This parameter is normative and shall not be user-modified. In the reference software, this is implemented as `--internal-noise-sigma 15`. Omission of this parameter or substitution of a different value invalidates interlaboratory comparability.
+- **(d) [Rev 03] Internal Observer Noise** — To prevent infinite SNR on low-variance pixels and to match human observer thresholds consistent with the Vaishnav framework, an internal noise variance shall be added to the diagonal of the covariance matrix before inversion: K_total = K_external + σ_internal² × I, where **σ_internal = 15** HU. **[Rev 05]** The channel outputs are in HU and K_external is in HU² (the channel templates are dimensionless and L2-normalized per §A1.5.1(e); see §A1.5.5(a)); σ_internal = 15 is therefore in the same HU units, and its numerical meaning is fixed only because the channel definition, L2-normalization, and ROI (§A1.5.1, §A1.5.4) are fixed. Any deviation in channel scaling convention changes the meaning of "15" and is prohibited. The total regularized matrix used for Hotelling template estimation shall be: K_final = K_total + λI = K_external + σ_internal² × I + λI. This parameter is normative and shall not be user-modified. In the reference software, this is implemented as `--internal-noise-sigma 15`. Omission of this parameter or substitution of a different value invalidates interlaboratory comparability.
 
 #### A1.5.3 Observer Dimensionality
 
@@ -446,13 +463,25 @@ The phantom cross-section represents a simplified torso geometry consisting of a
 - (d) ROI center coordinates are fixed per this annex and shall not be adjusted between conditions or realizations.
 - (e) The same ROI shall be used for MAR-enabled and MAR-disabled conditions.
 
+#### A1.5.5 Channel Features, Hotelling Template, and Test Statistic
+
+**[Rev 05]** This subsection specifies the central CHO computation normatively. Let **U** denote the 10 × P matrix whose rows are the L2-normalized Laguerre–Gauss channel templates of §A1.5.1, P = ROI_SIZE² = 121² = 14 641.
+
+- (a) *Channel feature vector* — For a single ROI extracted from Slice 128 (§A1.5.4) and vectorized as **v** ∈ ℝ^P in Hounsfield Units, the channel feature vector is **g = U v** ∈ ℝ¹⁰. Because the channel templates are dimensionless and L2-normalized (§A1.5.1(e)), the channel outputs **g** are in HU; consequently the channel covariance **K** (§A1.5.2) is in HU² and the internal-noise term σ_internal²·I (§A1.5.2(d)) is added in HU² with σ_internal in HU. With the fixed channel definition, normalization, and ROI of §A1.5.1 and §A1.5.4, the numerical scale of **g** — and therefore the meaning of σ_internal = 15 — is fully determined; no other channel scaling convention is permitted.
+
+- (b) *Hotelling template* — The CHO template is **w = K_final⁻¹ (ḡ_LP − ḡ_LA)**, where ḡ_LP and ḡ_LA are the sample means of the channel feature vectors over the **training** lesion-present and lesion-absent realizations respectively, and **K_final** is the LA-only regularized covariance of §A1.5.2 (K_final = K_external + σ_internal²·I + λI). The signal template is the **estimated** difference of class sample means; the known-exactly signal shall not be substituted. The inverse shall be realized by solving the linear system K_final **w** = (ḡ_LP − ḡ_LA) rather than forming K_final⁻¹ explicitly.
+
+- (c) *Test statistic* — For any feature vector **g**, the scalar CHO decision variable (test statistic) is **t = wᵀ g**. Larger t indicates greater evidence for lesion presence. AUC (§A1.6) is computed from the t values of lesion-present versus lesion-absent test realizations under the training/scoring protocol of §A1.6(a).
+
 ---
 
 ### A1.6 Statistical Procedures
 
-- (a) AUC shall be estimated via the Mann–Whitney statistic applied to CHO test statistics from LP and LA volumes.
+- (a) **[Rev 05]** *Primary protocol — leave-one-out (LOO) hold-out.* The unit of cross-validation and resampling throughout this section is the **realization index** i = 1 … N. Lesion-present realization i and lesion-absent realization i constitute a single fold i (**N folds total, not 2N**); they are always withheld, resampled, and scored together by index. For each fold i: (1) estimate the Hotelling template w⁽ⁱ⁾ per §A1.5.5(b) from all realizations except i (training set = the N−1 LP and N−1 LA realizations with index ≠ i); (2) record the held-out test statistics t_LP,i = w⁽ⁱ⁾ᵀ g_LP,i and t_LA,i = w⁽ⁱ⁾ᵀ g_LA,i for the withheld realization. This yields N held-out LP and N held-out LA test statistics. The reported AUC for a condition is the Mann–Whitney statistic (§A1.6(b)) over these N held-out LP versus N held-out LA test statistics. **This LOO hold-out AUC is the normative test result.** A resubstitution AUC (template estimated from, and scored on, all N realizations) shall be computed only for the bias estimate of §A1.6(d) and shall not be reported as the test result. An implementation that treats the 40 LP and 40 LA realizations as 80 independent samples, rather than pairing them by index, does not conform to this standard.
 - (b) Ties in the Mann–Whitney statistic shall be handled using mid-rank assignment.
-- (c) Bootstrap confidence intervals shall be computed using 1000 resamples (sampling LP and LA test statistics jointly with replacement). The 2.5th and 97.5th percentiles of the bootstrap AUC distribution define the 95% CI.
+- (c) **[Rev 05]** *Bootstrap confidence intervals.* All bootstrap procedures resample the fixed per-realization held-out test statistics produced in §A1.6(a); the Hotelling template shall **not** be re-estimated within bootstrap replicates. Use 1000 resamples in all cases.
+  - (c.1) *Single-condition CI.* For each replicate, draw one set of N realization indices uniformly with replacement and apply the **same** index set to both the held-out LP and held-out LA test-statistic vectors of the condition (resampling by realization index, preserving the LP/LA fold pairing); recompute the Mann–Whitney AUC. The 2.5th and 97.5th percentiles of the 1000 bootstrap AUCs define the 95% CI for that condition's AUC.
+  - (c.2) *Paired ΔAUC CI.* ΔAUC is a paired quantity: AUC_MAR and AUC_noMAR derive from the same underlying realizations and are correlated. For each replicate, draw one set of N realization indices and apply it **jointly to both conditions** — i.e., use the identical resampled indices for the noMAR and MAR held-out test statistics — then compute ΔAUC* = AUC_MAR* − AUC_noMAR* on that common resample. The 2.5th and 97.5th percentiles of the 1000 ΔAUC* values define the 95% CI for ΔAUC. Independent (unpaired) resampling of the two conditions is prohibited, as it ignores the cross-condition correlation and inflates the interval.
 - (d) AUC estimation bias shall be quantified using resubstitution and hold-out CHO training / testing strategies per Wunderlich and Noo (IEEE Trans Med Imaging, 34(2), 2015). The bias estimate is defined as b = AUC_resubstitution − AUC_hold-out. Both estimates and the bias shall be reported.
 - (e) Minimum 64-bit (double-precision) floating-point arithmetic shall be used throughout CHO computation, including channel projection, covariance estimation, matrix inversion, and test statistic computation.
 
@@ -501,6 +530,13 @@ The following parameters shall not be modified under any circumstance. Modificat
 | **Reconstruction [Rev 04]** | **Fan-beam FBP, Ram-Lak, cosine pre-weight, (SID/L)²** | **§A1.1(g)** |
 | **CHO equivalence tolerance [Rev 04]** | **±0.005 AUC** | **§8.3** |
 | **Baseline AUC_noMAR [Rev 04]** | **0.8294, 95% CI [0.7612, 0.9025] (N=40 LP + 40 LA, σ_internal=15, 2026-04-07)** | **§1A.2** |
+| **Monochromatic energy [Rev 05]** | **60 keV** | §10.1.1, §A1.7.4 |
+| **μ soft tissue / μ iron [Rev 05]** | **0.2059 / 2.408 cm⁻¹ (at 60 keV)** | §1A.6, §A1.4(e) |
+| **Calibrated photon flux I₀ [Rev 05]** | **310,853 (calibrated to 30 HU soft-tissue noise)** | §1A.3, §A2.2 |
+| **Scatter fraction / electronic noise σ_e [Rev 05]** | **0.05 / 5.0 counts** | §10.1.1, §A1.7 |
+| **DC calibration offset [Rev 05]** | **−0.029 cm⁻¹ (≈ −141 HU)** | §10.1.2, §A1.1(g) |
+
+**[Rev 05]** The five physics-generation constants above (energy, μ values, I₀, scatter/σ_e, DC offset) are fixed in the distributed dataset and are listed here for completeness and for any party reproducing the dataset; laboratories use the provided checksum-verified dataset and do not regenerate it (§A1.7.5), so these values cannot be altered in normal use.
 
 ---
 
@@ -544,6 +580,16 @@ The scalar ΔAUC at the canonical operating point (§10.1.1) remains the normati
 
 ---
 
-*End of ASTM WKXXXXX Revision 04*
+## Summary of Changes
 
-*Revision 04 (2026-04-05, editorial pass 2026-04-18) updates the acquisition geometry from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm), relaxes the CHO equivalence tolerance to ±0.005 AUC, adds a screening mode (20 realizations), establishes a layered acceptance criteria framework with cross-reference to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 (via its proposed compliance-statement amendment binding this TYPE TEST) and FDA guidance, aligns title and structure with ASTM F2119 conventions, documents subcommittee of jurisdiction (F04.15), clarifies type-test vs. clinical-validation scope boundary, adds F2119 complementarity and precedent clauses, adds preset-reporting and DICOM 2026b MAR Macro verification requirements, and introduces Annex A2 (Informational) specifying optional multi-point characterization per Vaishnav et al. (2020). All **[Rev 04]** markers indicate normative changes from Rev 03. Prior **[Rev 03]** markers are retained for traceability.*
+**[Rev 05]** (2026-05-29) — *Reproducibility formalization and dataset-deliverable corrections.* (1) §A1.5.5 added — channel feature vector g = U·v, estimated Hotelling template w = K_final⁻¹(ḡ_LP − ḡ_LA), and test statistic t = wᵀg, with the channel-output (HU) scale pinned. (2) §A1.6(a) rewritten to designate the LOO hold-out AUC as the normative test result and to fix the realization-index pairing (N folds, not 2N). (3) §A1.6(c) rewritten to specify the single-condition and paired ΔAUC bootstraps over the fixed held-out statistics (template not re-estimated within replicates). (4) §A1.5.2(d) clarifies σ_internal units. (5) §3.1.12–3.1.13, §4.1–4.2, §7.1, §8.1–8.1.1, and §14.2–14.3 add the line-integral sinogram ("MAR-ready series") deliverable and align the procedure with the projection-domain workflow. (6) §A1.8 records the dataset physics-generation constants. Three items are flagged for committee decision rather than unilaterally resolved: §1.4 scope/modality framing; §10.2 / §17.1.6 statistical basis for N = 40; and §17.1.6 positive-control identification (with a LI-MAR negative-control floor, ΔAUC ≈ −0.23, added as an available anchor). Reference scripts: generator v7.0.0, `run_cho_analysis_v7_0.py`.
+
+**[Rev 04]** (2026-04-05, editorial pass 2026-04-18) — Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360°); FBP changed to fan-beam cosine-weighted distance-weighted backprojection; CHO equivalence tolerance relaxed from ±0.001 to ±0.005 AUC; screening mode (20 realizations) added (40 remains the minimum for formal reporting); acceptance-criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 and FDA guidance; baseline AUC_noMAR established at 0.8294 (fan-beam, N=40, σ=15, 2026-04-07); scope-boundary clause §1.9, §1A.5 (Scope and Precedent), and §1A.6 (Metal-Material Rationale) added; §2 expanded; §14.12 preset-reporting and §16(o) DICOM 2026b MAR Macro verification added; §A1.5.3 clarified that the 2D constraint applies to the observer, not the MAR algorithm; subcommittee of jurisdiction documented (F04.15); Annex A2 (Informational, multi-point sweeps per Vaishnav et al. 2020) added.
+
+**[Rev 03]** — Observer dimensionality changed from 3D to 2D (Slice 128 only); lesion geometry changed from full z-extent cylinder to single-slice disc; lesion HU implementation changed from 120 HU post-FBP hard-set to ~12 HU sinogram-domain physics contrast (no hard-set); minimum realizations increased from 20 to 40 per condition; Vaishnav internal observer noise regularisation (σ = 15) added as normative; Vaishnav Transition AUC baseline (0.7063) recorded in §1A.2.
+
+Markers **[Rev 03]**, **[Rev 04]**, and **[Rev 05]** in the body indicate the revision that introduced each normative change; earlier markers are retained for traceability.
+
+---
+
+*End of ASTM WKXXXXX Revision 05*
