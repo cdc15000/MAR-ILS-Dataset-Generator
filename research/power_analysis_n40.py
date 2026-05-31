@@ -2,11 +2,17 @@
 """
 Model-based power / precision analysis for the N = 40 minimum.
 
-Supports ASTM WKXXXXX §10.2 and §17.1.6 with a *pre-pilot, informational*
-estimate of how the test result's precision and bias scale with the number of
-realizations N. The pilot precision study (§17.1.6) provides the definitive,
-data-driven statement; this script only establishes that N = 40 is a defensible
-choice ahead of that study.
+Illustrates, informally, how the estimator's precision and bias scale with the
+number of realizations N (approximately 1/√N).
+
+IMPORTANT — this script is illustrative only and is NOT the basis cited in the
+standard. Its operating point is calibrated to a *population* AUC of 0.8294, so
+the LOO mean it produces (~0.76 at N=40) is lower than the reference LOO baseline
+(0.8294); its absolute SD/bias figures therefore differ from the real data and
+should not be quoted as the §10.2 basis. The §10.2 statistical basis is taken
+from the reference characterization (cho_results.json) cross-checked with the
+analytic Hanley–McNeil standard error; the pilot precision study (§17.1.6) is
+definitive. This script is retained to show the scaling behaviour only.
 
 Method
 ------
