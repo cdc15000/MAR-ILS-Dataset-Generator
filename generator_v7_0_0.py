@@ -113,8 +113,21 @@ DATASET_VERSION: str = "v7.0.0"
 STANDARD_REF: str = "ASTM-WKXXXXX-Rev04"
 
 # PDF fonts
-_DEJAVU_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-_DEJAVU_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+def _find_font(name: str) -> str:
+    candidates = [
+        f"/usr/share/fonts/truetype/dejavu/{name}",
+        os.path.expanduser(f"~/Library/Fonts/{name}"),
+        f"/Library/Fonts/{name}",
+        f"/System/Library/Fonts/{name}",
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return ""
+
+_DEJAVU_REGULAR = _find_font("DejaVuSans.ttf")
+_DEJAVU_BOLD = _find_font("DejaVuSans-Bold.ttf")
+_DEJAVU_MONO = _find_font("DejaVuSansMono.ttf")
 PDF_FONT = "DejaVuSans"
 PDF_FONT_BOLD = "DejaVuSans-Bold"
 
@@ -784,6 +797,8 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
         try:
             pdfmetrics.registerFont(TTFont(PDF_FONT, _DEJAVU_REGULAR))
             pdfmetrics.registerFont(TTFont(PDF_FONT_BOLD, _DEJAVU_BOLD))
+            if _DEJAVU_MONO:
+                pdfmetrics.registerFont(TTFont("DejaVuMono", _DEJAVU_MONO))
             _font_ok = True
         except Exception:
             pass
@@ -862,16 +877,17 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
         ),
         Paragraph(
             f"&lt;dataset_dir&gt;/<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;sinograms/<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LP/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LA/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;noMAR_recon/<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LP/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LA/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;checksums_sha256.txt<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;generator_provenance.json<br/>"
-            f"&nbsp;&nbsp;&nbsp;&nbsp;MAR_ILS_Lab_Instructions.pdf",
-            ParagraphStyle("tree", parent=styles["Normal"], fontName="Courier",
+            f"&#x251C;&#x2500;&#x2500; sinograms/<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x251C;&#x2500;&#x2500; LP/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x2514;&#x2500;&#x2500; LA/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&#x251C;&#x2500;&#x2500; noMAR_recon/<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x251C;&#x2500;&#x2500; LP/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x2514;&#x2500;&#x2500; LA/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&#x251C;&#x2500;&#x2500; checksums_sha256.txt<br/>"
+            f"&#x251C;&#x2500;&#x2500; generator_provenance.json<br/>"
+            f"&#x2514;&#x2500;&#x2500; MAR_ILS_Lab_Instructions.pdf",
+            ParagraphStyle("tree", parent=styles["Normal"],
+                           fontName="DejaVuMono" if _font_ok else "Courier",
                            fontSize=8, leading=11,
                            backColor=colors.HexColor("#F5F5F5"), spaceAfter=4),
         ),
