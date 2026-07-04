@@ -68,7 +68,7 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Table, TableStyle,
-    HRFlowable,
+    HRFlowable, PageBreak,
 )
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -870,7 +870,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             ["Noise", "30 HU σ in soft tissue", "§A1.7.3"],
             ["Realizations", f"{num_realizations} LP + {num_realizations} LA",
              "§10.2"],
-        ], [2.0 * inch, 2.8 * inch, 1.8 * inch]),
+        ], [1.78 * inch, 2.9 * inch, 1.67 * inch]),
         Paragraph("2. Dataset Directory Structure", H1),
         Paragraph(
             "The distributed dataset has the following layout:", B,
@@ -905,7 +905,8 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             ["generator_provenance.json",
              "Generation parameters and software version",
              "JSON"],
-        ], [2.0 * inch, 2.8 * inch, 1.8 * inch]),
+        ], [1.78 * inch, 2.9 * inch, 1.67 * inch]),
+        PageBreak(),
         Paragraph("3. Submission Instructions", H1),
         Paragraph(
             "Apply your MAR algorithm to the sinograms in sinograms/LP/ and "
@@ -918,7 +919,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
              f"Only slice_{LESION_SLICE_INDEX + 1:04d}.dcm is scored."],
             [f"mar_recon/LA/realization_001/ ... /{num_realizations:03d}/",
              "MAR-corrected DICOMs for LA realizations."],
-        ], [3.0 * inch, 3.6 * inch]),
+        ], [2.75 * inch, 3.6 * inch]),
         Paragraph("4. CHO Analysis", H1),
         Paragraph(
             "Run the following command (--internal-noise-sigma 15 is normative):", B,
