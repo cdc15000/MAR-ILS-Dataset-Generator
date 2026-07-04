@@ -5,7 +5,7 @@
 **Date:** 2026-05-29
 **Supersedes:** Revision 04 (04/05/2026)
 
-> **Revision 05 (highlights).** Formalizes the channelized Hotelling observer test statistic, the leave-one-out (LOO) training/scoring protocol, and the paired ΔAUC bootstrap so the normative text fully specifies the computation previously defined only by the reference implementation (§A1.5.5, §A1.6). Pins the channel-output scale and clarifies the internal-noise units (§A1.5.2(d)). Adds the projection-domain (line-integral sinogram) deliverable and the "MAR-ready series" definition (§3.1.12, §8.1.1, §4). Records the dataset physics-generation constants in the immutable-parameter table (§A1.8). Resolves three previously-open items: §1.4 modality-independence is scoped to the measurand with the projection-domain apparatus requirement stated in §7.1; §10.2 records an N = 40 precision/bias basis from the reference data (ΔAUC SD ≈ 0.038 and ΔAUC bias ≈ 0.004 both meet the §17.1.6 targets; the large per-condition AUC optimism ≈ 0.12 is common-mode and cancels in ΔAUC), and §17.1.6(c) is clarified to gate the ΔAUC test-result bias rather than the per-condition AUC bias; and §17.1.6(a) is revised to use the LI-MAR negative control, with a positive control optional and not a pilot gate. Revision history consolidated into the Summary of Changes at the end of this document. Normative changes are marked **[Rev 05]**.
+> **Revision 05 (highlights).** Formalizes the channelized Hotelling observer test statistic, the leave-one-out (LOO) training/scoring protocol, and the paired ΔAUC bootstrap so the normative text fully specifies the computation previously defined only by the reference implementation (§A1.5.5, §A1.6). Pins the channel-output scale and clarifies the internal-noise units (§A1.5.2(d)). Adds the projection-domain (line-integral sinogram) deliverable and the "MAR-ready series" definition (§3.1.12, §8.2.1, §4). Records the dataset physics-generation constants in the immutable-parameter table (§A1.8). Resolves three previously-open items: §1.4 modality-independence is scoped to the measurand with the projection-domain apparatus requirement stated in §7.1; §10.2 records an N = 40 precision/bias basis from the reference data (ΔAUC SD ≈ 0.038 and ΔAUC bias ≈ 0.004 both meet the §17.1.6 targets; the large per-condition AUC optimism ≈ 0.12 is common-mode and cancels in ΔAUC), and §17.1.6(c) is clarified to gate the ΔAUC test-result bias rather than the per-condition AUC bias; and §17.1.6(a) is revised to use the LI-MAR negative control, with a positive control optional and not a pilot gate. Revision history consolidated into the Summary of Changes at the end of this document. Normative changes are marked **[Rev 05]**.
 
 ---
 
@@ -29,7 +29,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **1.4** This method is modality-independent in the sense that the measurand (ΔAUC) is computed exclusively from reconstructed volumetric image data and does not depend on acquisition hardware, raw projection data, or reconstruction physics. The canonical dataset (§10.1.1) is defined in Hounsfield Unit (HU) space and is therefore directly applicable to systems that produce HU-calibrated reconstructed images, including but not limited to computed tomography (CT). Application to modalities that do not produce HU-calibrated output requires a modality-specific canonical dataset established by a separate work item; results from such datasets shall not be reported as compliant with this standard unless the relevant modality annex has been approved.
 
-> **[Rev 05] Note — scope of the modality-independence claim.** The modality-independence asserted in this section is a property of the **measurand** (ΔAUC, computed by the CHO from reconstructed HU images), not of the test method as a whole. The MAR algorithm under test typically operates in the **projection (sinogram) domain**: the canonical dataset distributes line-integral sinograms (§8.1.1, §3.1.12) for that purpose, and the artifact physics and acquisition geometry (§A1.1(f,g), §A1.7.4) are CT-specific. Accordingly, §1.4 is to be read as scoped to the measurand, and the apparatus requirement for projection-domain input is stated in §7.1. The image-domain modality-independence of the measurand does not imply that the algorithm under test is acquisition-independent.
+> **[Rev 05] Note — scope of the modality-independence claim.** The modality-independence asserted in this section is a property of the **measurand** (ΔAUC, computed by the CHO from reconstructed HU images), not of the test method as a whole. The MAR algorithm under test typically operates in the **projection (sinogram) domain**: the canonical dataset distributes line-integral sinograms (§8.2.1, §3.1.12) for that purpose, and the artifact physics and acquisition geometry (§A1.1(f,g), §A1.7.4) are CT-specific. Accordingly, §1.4 is to be read as scoped to the measurand, and the apparatus requirement for projection-domain input is stated in §7.1. The image-domain modality-independence of the measurand does not imply that the algorithm under test is acquisition-independent.
 
 **1.5** This standard defines a single canonical test configuration intended for type testing and conformity assessment. No additional configurations are permitted under this standard.
 
@@ -116,7 +116,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **3.1.11** artifact jitter — per-realization rotation of the artifact template by a specified random angle, providing background variability that prevents CHO overtraining on static artifact patterns.
 
-**3.1.12** **[Rev 05]** line-integral sinogram (MAR-ready series) — the projection-domain representation of a realization, stored as fan-beam line integrals (neper) on the canonical acquisition geometry (§A1.1(f)), supplied so that the laboratory may apply its MAR algorithm and reconstruct the result into a DICOM image series for observer analysis. Each sinogram derives from the identical phantom, noise seed, and acquisition geometry as the corresponding noMAR reference reconstruction, so that the MAR enable/disable state is the only difference between the two image series ultimately scored (§4.2, §14). The sinograms are distributed with the dataset (§8.1.1) in addition to the reconstructed image series.
+**3.1.12** **[Rev 05]** line-integral sinogram (MAR-ready series) — the projection-domain representation of a realization, stored as fan-beam line integrals (neper) on the canonical acquisition geometry (§A1.1(f)), supplied so that the laboratory may apply its MAR algorithm and reconstruct the result into a DICOM image series for observer analysis. Each sinogram derives from the identical phantom, noise seed, and acquisition geometry as the corresponding noMAR reference reconstruction, so that the MAR enable/disable state is the only difference between the two image series ultimately scored (§4.2, §14). The sinograms are distributed with the dataset (§8.2.1) in addition to the reconstructed image series.
 
 ---
 
@@ -160,7 +160,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **6.3** Alteration of the standardized dataset, including resampling, interpolation, windowing before CHO input, or truncation of the HU range, invalidates the test.
 
-**6.4** Use of floating-point arithmetic below 64-bit precision may introduce numerical bias exceeding the ±0.005 AUC equivalence tolerance specified in §8.3.
+**6.4** Use of floating-point arithmetic below 64-bit precision may introduce numerical bias exceeding the ±0.005 AUC equivalence tolerance specified in §8.4.
 
 **6.5** Failure to verify the SHA-256 checksum prior to analysis invalidates the test result.
 
@@ -168,7 +168,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 7. Apparatus
 
-**7.1** **[Rev 05]** Imaging system or processing platform capable of applying the MAR algorithm under test to the supplied line-integral sinograms (§8.1.1) and reconstructing the corrected result into a DICOM CT image series. (Image-domain MAR algorithms instead operate on the supplied reconstructed noMAR reference series; see §4.2.)
+**7.1** **[Rev 05]** Imaging system or processing platform capable of applying the MAR algorithm under test to the supplied line-integral sinograms (§8.2.1) and reconstructing the corrected result into a DICOM CT image series. (Image-domain MAR algorithms instead operate on the supplied reconstructed noMAR reference series; see §4.2.)
 
 **7.2** **[Rev 04]** Computational platform capable of executing the reference 2D CHO analysis software (`run_cho_analysis_v7_0.py`).
 
@@ -182,22 +182,22 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 ## 8. Reagents and Materials
 
-No reagents are required for this test method.
+**8.1** No reagents are required for this test method.
 
-**8.1** **[Rev 05]** Standardized synthetic dataset distributed with this standard, SHA-256 checksum verified per §11.1, consisting of two co-registered parts derived from the identical phantom, noise seeds, and acquisition geometry:
+**8.2** **[Rev 05]** Standardized synthetic dataset distributed with this standard, SHA-256 checksum verified per §11.1, consisting of two co-registered parts derived from the identical phantom, noise seeds, and acquisition geometry:
 
 - (a) *Reconstructed reference image series (noMAR)* — 80 DICOM CT series (40 lesion-present, 40 lesion-absent), each 256 axial slices at 512 × 512 × 0.5 mm isotropic, reconstructed with MAR disabled per §A1.1(g).
-- (b) *MAR-ready line-integral sinograms* (§3.1.12) — 80 sinograms (40 lesion-present, 40 lesion-absent) on the canonical fan-beam geometry (§A1.1(f)), supplied for the laboratory to apply MAR and reconstruct per §4.2.
+- (b) *MAR-ready line-integral sinograms* (§3.1.12) — 80 sinograms (40 lesion-present, 40 lesion-absent) on the canonical fan-beam geometry (§A1.1(f)), supplied for the laboratory to apply MAR and reconstruct per §4.1.
 
 The reference dataset directory is `./astm_reference_dataset/`, containing `noMAR_recon/{LP,LA}/` (part a) and `sinograms/{LP,LA}/` (part b). The 80 MAR image series scored under §14 are produced by the laboratory from part (b) and are not distributed.
 
-**8.1.1** **[Rev 05]** *Sinogram format* — Each MAR-ready sinogram is a single-precision (float32) array of fan-beam line integrals in neper, shape (256 slices × 720 projection angles × 512 detector elements), accompanied by the acquisition-geometry parameters of §A1.1(f) and the noise parameters of §A1.7 as metadata. The reference distribution stores each as HDF5 at `sinograms/{LP,LA}/realization_NNN.h5` (dataset `line_integrals`, geometry and noise attributes per the distribution manifest).
+**8.2.1** **[Rev 05]** *Sinogram format* — Each MAR-ready sinogram is a single-precision (float32) array of fan-beam line integrals in neper, shape (256 slices × 720 projection angles × 512 detector elements), accompanied by the acquisition-geometry parameters of §A1.1(f) and the noise parameters of §A1.7 as metadata. The reference distribution stores each as HDF5 at `sinograms/{LP,LA}/realization_NNN.h5` (dataset `line_integrals`, geometry and noise attributes per the distribution manifest).
 
-**8.2** Laguerre–Gauss channel template definitions as specified in §A1.5.1 and provided in machine-readable form with the dataset distribution.
+**8.3** Laguerre–Gauss channel template definitions as specified in §A1.5.1 and provided in machine-readable form with the dataset distribution.
 
-**8.3** **[Rev 04]** Reference CHO implementation distributed with this standard (`run_cho_analysis_v7_0.py`). The reference implementation is the normative arbiter of correct CHO output. Alternative implementations shall demonstrate numerical equivalence within ±0.005 AUC on the supplied checksum-verified validation dataset before use.
+**8.4** **[Rev 04]** Reference CHO implementation distributed with this standard (`run_cho_analysis_v7_0.py`). The reference implementation is the normative arbiter of correct CHO output. Alternative implementations shall demonstrate numerical equivalence within ±0.005 AUC on the supplied checksum-verified validation dataset before use.
 
-**8.4** Checksum manifest file (SHA-256) distributed with the dataset.
+**8.5** Checksum manifest file (SHA-256) distributed with the dataset.
 
 ---
 
@@ -260,7 +260,7 @@ The reference dataset directory is `./astm_reference_dataset/`, containing `noMA
 
 **11.1** Verify SHA-256 checksum of every file in the distributed dataset against the manifest provided with the standard. Any checksum mismatch disqualifies the dataset and invalidates any results derived from it.
 
-**11.2** Validate the CHO implementation against the supplied reference validation dataset, confirming AUC agreement within ±0.005 per §8.3.
+**11.2** Validate the CHO implementation against the supplied reference validation dataset, confirming AUC agreement within ±0.005 per §8.4.
 
 **11.3** Configure the imaging system MAR parameters as specified in the test plan. Document all configuration settings.
 
@@ -284,9 +284,9 @@ The reference dataset directory is `./astm_reference_dataset/`, containing `noMA
 
 **14.1** Verify dataset checksums per §11.1.
 
-**14.2** **[Rev 05]** Use the provided reconstructed noMAR reference series (40 LP and 40 LA volumes; §8.1(a)) as the MAR-disabled condition. Confirm its checksums per §11.1; do not re-reconstruct it.
+**14.2** **[Rev 05]** Use the provided reconstructed noMAR reference series (40 LP and 40 LA volumes; §8.2(a)) as the MAR-disabled condition. Confirm its checksums per §11.1; do not re-reconstruct it.
 
-**14.3** **[Rev 05]** Produce the MAR-enabled condition by applying the MAR algorithm under test to the provided MAR-ready sinograms (40 LP and 40 LA; §8.1(b)) and reconstructing the corrected result, using reconstruction and postprocessing parameters identical to those of the provided noMAR reference series (§A1.1(g)). The MAR processing is the only permitted difference. (Image-domain MAR algorithms instead operate on the noMAR reference series per §4.2.)
+**14.3** **[Rev 05]** Produce the MAR-enabled condition by applying the MAR algorithm under test to the provided MAR-ready sinograms (40 LP and 40 LA; §8.2(b)) and reconstructing the corrected result, using reconstruction and postprocessing parameters identical to those of the provided noMAR reference series (§A1.1(g)). The MAR processing is the only permitted difference. (Image-domain MAR algorithms instead operate on the noMAR reference series per §4.2.)
 
 **14.4** Verify that the processed output volumes match the expected matrix dimensions, voxel size, and bit depth specified in §A1.1 before proceeding.
 
@@ -539,7 +539,7 @@ The following parameters shall not be modified under any circumstance. Modificat
 | **Acquisition geometry [Rev 04]** | **Fan-beam, SID=570 mm, SDD=1040 mm** | **§A1.1(f)** |
 | **Projection angles [Rev 04]** | **720 over [0°, 360°)** | **§A1.1(f)** |
 | **Reconstruction [Rev 04]** | **Fan-beam FBP, Ram-Lak, cosine pre-weight, (SID/L)²** | **§A1.1(g)** |
-| **CHO equivalence tolerance [Rev 04]** | **±0.005 AUC** | **§8.3** |
+| **CHO equivalence tolerance [Rev 04]** | **±0.005 AUC** | **§8.4** |
 | **Baseline AUC_noMAR [Rev 04]** | **0.8294, 95% CI [0.7612, 0.9025] (N=40 LP + 40 LA, σ_internal=15, 2026-04-07)** | **§1A.2** |
 | **Monochromatic energy [Rev 05]** | **60 keV** | §10.1.1, §A1.7.4 |
 | **μ soft tissue / μ iron [Rev 05]** | **0.2059 / 2.408 cm⁻¹ (at 60 keV)** | §1A.6, §A1.4(e) |
@@ -593,7 +593,7 @@ The scalar ΔAUC at the canonical operating point (§10.1.1) remains the normati
 
 ## Summary of Changes
 
-**[Rev 05]** (2026-05-29) — *Reproducibility formalization and dataset-deliverable corrections.* (1) §A1.5.5 added — channel feature vector g = U·v, estimated Hotelling template w = K_final⁻¹(ḡ_LP − ḡ_LA), and test statistic t = wᵀg, with the channel-output (HU) scale pinned. (2) §A1.6(a) rewritten to designate the LOO hold-out AUC as the normative test result and to fix the realization-index pairing (N folds, not 2N). (3) §A1.6(c) rewritten to specify the single-condition and paired ΔAUC bootstraps over the fixed held-out statistics (template not re-estimated within replicates). (4) §A1.5.2(d) clarifies σ_internal units. (5) §3.1.12, §4.1–4.2, §7.1, §8.1–8.1.1, and §14.2–14.3 add the line-integral sinogram ("MAR-ready series") deliverable and align the procedure with the projection-domain workflow. (6) §A1.8 records the dataset physics-generation constants. (7) Three previously-open items resolved: §1.4 scoped to the measurand (projection-domain apparatus requirement in §7.1); §10.2 N = 40 statistical basis recorded from the reference data — the ΔAUC test result meets both §17.1.6 targets (SD ≈ 0.038 ≤ 0.05; ΔAUC bias ≈ 0.004 ≤ 0.02), the large per-condition AUC optimism (≈ 0.12) being common-mode and cancelling in ΔAUC — with §17.1.6(c) clarified to gate the ΔAUC bias; §17.1.6(a) revised to use the LI-MAR negative control (ΔAUC ≈ −0.23), with a positive control optional. Reference scripts: generator v7.0.0, `run_cho_analysis_v7_0.py`; informational tooling `research/power_analysis_n40.py`.
+**[Rev 05]** (2026-05-29) — *Reproducibility formalization and dataset-deliverable corrections.* (1) §A1.5.5 added — channel feature vector g = U·v, estimated Hotelling template w = K_final⁻¹(ḡ_LP − ḡ_LA), and test statistic t = wᵀg, with the channel-output (HU) scale pinned. (2) §A1.6(a) rewritten to designate the LOO hold-out AUC as the normative test result and to fix the realization-index pairing (N folds, not 2N). (3) §A1.6(c) rewritten to specify the single-condition and paired ΔAUC bootstraps over the fixed held-out statistics (template not re-estimated within replicates). (4) §A1.5.2(d) clarifies σ_internal units. (5) §3.1.12, §4.1–4.2, §7.1, §8.2–8.2.1, and §14.2–14.3 add the line-integral sinogram ("MAR-ready series") deliverable and align the procedure with the projection-domain workflow. (6) §A1.8 records the dataset physics-generation constants. (7) Three previously-open items resolved: §1.4 scoped to the measurand (projection-domain apparatus requirement in §7.1); §10.2 N = 40 statistical basis recorded from the reference data — the ΔAUC test result meets both §17.1.6 targets (SD ≈ 0.038 ≤ 0.05; ΔAUC bias ≈ 0.004 ≤ 0.02), the large per-condition AUC optimism (≈ 0.12) being common-mode and cancelling in ΔAUC — with §17.1.6(c) clarified to gate the ΔAUC bias; §17.1.6(a) revised to use the LI-MAR negative control (ΔAUC ≈ −0.23), with a positive control optional. Reference scripts: generator v7.0.0, `run_cho_analysis_v7_0.py`; informational tooling `research/power_analysis_n40.py`.
 
 **[Rev 04]** (2026-04-05, editorial pass 2026-04-18) — Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360°); FBP changed to fan-beam cosine-weighted distance-weighted backprojection; CHO equivalence tolerance relaxed from ±0.001 to ±0.005 AUC; screening mode (20 realizations) added (40 remains the minimum for formal reporting); acceptance-criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 and FDA guidance; baseline AUC_noMAR established at 0.8294 (fan-beam, N=40, σ=15, 2026-04-07); scope-boundary clause §1.9, §1A.5 (Scope and Precedent), and §1A.6 (Metal-Material Rationale) added; §2 expanded; §14.12 preset-reporting and §16(o) DICOM 2026b MAR Macro verification added; §A1.5.3 clarified that the 2D constraint applies to the observer, not the MAR algorithm; subcommittee of jurisdiction documented (F04.15); Annex A2 (Informational, multi-point sweeps per Vaishnav et al. 2020) added.
 
