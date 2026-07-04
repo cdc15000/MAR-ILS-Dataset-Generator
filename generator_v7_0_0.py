@@ -856,7 +856,41 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             ["Realizations", f"{num_realizations} LP + {num_realizations} LA",
              "§10.2"],
         ], [2.0 * inch, 2.8 * inch, 1.8 * inch]),
-        Paragraph("2. Submission Instructions", H1),
+        Paragraph("2. Dataset Directory Structure", H1),
+        Paragraph(
+            "The distributed dataset has the following layout:", B,
+        ),
+        Paragraph(
+            f"&lt;dataset_dir&gt;/<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;sinograms/<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LP/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LA/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;noMAR_recon/<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LP/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LA/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;checksums_sha256.txt<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;generator_provenance.json<br/>"
+            f"&nbsp;&nbsp;&nbsp;&nbsp;MAR_ILS_Lab_Instructions.pdf",
+            ParagraphStyle("tree", parent=styles["Normal"], fontName="Courier",
+                           fontSize=8, leading=11,
+                           backColor=colors.HexColor("#F5F5F5"), spaceAfter=4),
+        ),
+        _tbl([
+            ["Directory", "Contents", "Format"],
+            ["sinograms/LP/, sinograms/LA/",
+             "Line-integral sinograms (§3.1.12) — MAR-ready input",
+             "HDF5, float32 (256×720×512)"],
+            ["noMAR_recon/LP/, noMAR_recon/LA/",
+             "Reference reconstructions with MAR disabled",
+             "DICOM CT (512×512×0.5 mm)"],
+            ["checksums_sha256.txt",
+             "SHA-256 manifest for dataset integrity verification (§11.1)",
+             "Text"],
+            ["generator_provenance.json",
+             "Generation parameters and software version",
+             "JSON"],
+        ], [2.0 * inch, 2.8 * inch, 1.8 * inch]),
+        Paragraph("3. Submission Instructions", H1),
         Paragraph(
             "Apply your MAR algorithm to the sinograms in sinograms/LP/ and "
             "sinograms/LA/ and submit reconstructed DICOMs:", B,
@@ -869,7 +903,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             [f"mar_recon/LA/realization_001/ ... /{num_realizations:03d}/",
              "MAR-corrected DICOMs for LA realizations."],
         ], [3.0 * inch, 3.6 * inch]),
-        Paragraph("3. CHO Analysis", H1),
+        Paragraph("4. CHO Analysis", H1),
         Paragraph(
             "Run the following command (--internal-noise-sigma 15 is normative):", B,
         ),
