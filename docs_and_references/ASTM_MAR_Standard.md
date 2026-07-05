@@ -47,7 +47,7 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **1A.1** Metal artifacts in CT arise primarily from beam hardening, photon starvation, and partial volume effects in the presence of highly attenuating objects. MAR algorithms mitigate these artifacts but may alter image statistics in ways that affect clinically relevant tasks, including low-contrast lesion detection. The net effect of MAR on diagnostic utility is not captured by artifact severity metrics alone.
 
-**1A.2** The framework underlying this standard was first described in *Vaishnav, et al.* (Medical Physics, 47(8), 2020), which demonstrated that a model observer-based approach could objectively measure MAR effects on low-contrast detectability. The channelized Hotelling observer (CHO) is a linear model observer that has been extensively validated against human performance in CT detection tasks. The area under the ROC curve (AUC), estimated via the Mann-Whitney statistic, provides a scalar figure of merit that is interpretable, reproducible, and independent of decision threshold. **[Rev 03]** The Vaishnav Transition (2026-03-14) fully operationalized this framework by removing post-FBP hard-set overrides, establishing sinogram-domain physics contrast (~12 HU), and expanding to 40 realizations per condition. **[Rev 04]** The acquisition geometry was updated from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm) to align with clinical CT geometry. The baseline AUC_noMAR under the canonical fan-beam geometry (§A1.1(f,g)) was established at **0.8294** (N=40, σ=15, CI [0.7612, 0.9025], 2026-04-07). The prior parallel-beam baseline (AUC_noMAR = 0.7063) is retained for historical reference only and shall not be used for fan-beam dataset validation.
+**1A.2** The framework underlying this standard was first described in Ref (2), which demonstrated that a model observer-based approach could objectively measure MAR effects on low-contrast detectability. The channelized Hotelling observer (CHO) is a linear model observer that has been extensively validated against human performance in CT detection tasks. The area under the ROC curve (AUC), estimated via the Mann-Whitney statistic, provides a scalar figure of merit that is interpretable, reproducible, and independent of decision threshold. **[Rev 03]** The Vaishnav Transition (2026-03-14) fully operationalized this framework by removing post-FBP hard-set overrides, establishing sinogram-domain physics contrast (~12 HU), and expanding to 40 realizations per condition. **[Rev 04]** The acquisition geometry was updated from parallel-beam to fan-beam (SID=570 mm, SDD=1040 mm) to align with clinical CT geometry. The baseline AUC_noMAR under the canonical fan-beam geometry (§A1.1(f,g)) was established at **0.8294** (N=40, σ=15, CI [0.7612, 0.9025], 2026-04-07). The prior parallel-beam baseline (AUC_noMAR = 0.7063) is retained for historical reference only and shall not be used for fan-beam dataset validation.
 
 **1A.3** The use of a deterministic digital dataset eliminates physical phantom fabrication, scanner time, and shipping logistics from interlaboratory studies. SHA-256 checksums ensure bitwise identity of the dataset across laboratories. The only source of interlaboratory variability under this standard is therefore the CHO implementation and the MAR algorithm under test, which is the intended behavior.
 
@@ -82,10 +82,6 @@ This test method establishes a procedure for measuring MAR performance using a s
 
 **2.5** *Other References:*
 
-- Vaishnav JY et al. CT metal artifact reduction algorithms: Toward a framework for objective performance assessment. Medical Physics 47(8):3344–3355, 2020. DOI: 10.1002/mp.14231
-- Barrett HH, Myers KJ. Foundations of Image Science. Wiley, 2004.
-- Wunderlich A, Noo F. On the efficiency of two-sample tests based on the Mann-Whitney U statistic for imaging tasks. IEEE Trans Med Imaging 34(2):522–533, 2015.
-- Kak AC, Slaney M. Principles of Computerized Tomographic Imaging. IEEE Press, 1988.
 - FIPS PUB 180-4 — Secure Hash Standard (SHA-256)
 
 ---
@@ -395,7 +391,7 @@ metal artifact; metal artifact reduction; MAR; channelized Hotelling observer; C
 - (d) HU range encoded as signed 16-bit integer (INT16) in DICOM pixel data
 - (e) Rescale slope: 1.0; Rescale intercept: 0.0 (HU = stored value)
 - **(f) [Rev 04] Acquisition geometry: 2D fan-beam.** Source-to-isocenter distance (SID) = 570 mm. Source-to-detector distance (SDD) = 1040 mm. Equi-angular curved detector array, 512 elements, angular pitch Δγ = 2·arcsin(FOV/(2·SID))/N_det ≈ 0.0507°. Full 360° rotation, 720 equi-spaced projection angles (0.5° angular spacing). Maximum fan half-angle γ_max = arcsin(128/570) ≈ 12.97°.
-- **(g) [Rev 04] Reconstruction: fan-beam filtered backprojection (FBP)** with cosine pre-weighting, Ram-Lak (ramp) filter, and (SID/L)² distance-weighted backprojection, where L is the source-to-pixel distance. Scaling factor: π / N_angles / (SID × Δγ). This follows the equi-angular fan-beam FBP formulation of Kak & Slaney (1988), §3.4.
+- **(g) [Rev 04] Reconstruction: fan-beam filtered backprojection (FBP)** with cosine pre-weighting, Ram-Lak (ramp) filter, and (SID/L)² distance-weighted backprojection, where L is the source-to-pixel distance. Scaling factor: π / N_angles / (SID × Δγ). This follows the equi-angular fan-beam FBP formulation of Ref (4), §3.4.
 
 ---
 
@@ -493,7 +489,7 @@ The phantom cross-section represents a simplified torso geometry consisting of a
 - (c) **[Rev 05]** *Bootstrap confidence intervals.* All bootstrap procedures resample the fixed per-realization held-out test statistics produced in §A1.6(a); the Hotelling template shall **not** be re-estimated within bootstrap replicates. Use 1000 resamples in all cases.
   - (c.1) *Single-condition CI.* For each replicate, draw one set of N realization indices uniformly with replacement and apply the **same** index set to both the held-out LP and held-out LA test-statistic vectors of the condition (resampling by realization index, preserving the LP/LA fold pairing); recompute the Mann–Whitney AUC. The 2.5th and 97.5th percentiles of the 1000 bootstrap AUCs define the 95% CI for that condition's AUC.
   - (c.2) *Paired ΔAUC CI.* ΔAUC is a paired quantity: AUC_MAR and AUC_noMAR derive from the same underlying realizations and are correlated. For each replicate, draw one set of N realization indices and apply it **jointly to both conditions** — i.e., use the identical resampled indices for the noMAR and MAR held-out test statistics — then compute ΔAUC* = AUC_MAR* − AUC_noMAR* on that common resample. The 2.5th and 97.5th percentiles of the 1000 ΔAUC* values define the 95% CI for ΔAUC. Independent (unpaired) resampling of the two conditions is prohibited, as it ignores the cross-condition correlation and inflates the interval.
-- (d) AUC estimation bias shall be quantified using resubstitution and hold-out CHO training / testing strategies per Wunderlich and Noo (IEEE Trans Med Imaging, 34(2), 2015). The bias estimate is defined as b = AUC_resubstitution − AUC_hold-out. Both estimates and the bias shall be reported.
+- (d) AUC estimation bias shall be quantified using resubstitution and hold-out CHO training / testing strategies per Ref (3). The bias estimate is defined as b = AUC_resubstitution − AUC_hold-out. Both estimates and the bias shall be reported.
 - (e) Minimum 64-bit (double-precision) floating-point arithmetic shall be used throughout CHO computation, including channel projection, covariance estimation, matrix inversion, and test statistic computation.
 
 ---
@@ -553,41 +549,15 @@ The following parameters shall not be modified under any circumstance. Modificat
 
 ## ANNEX A2 (Informational)
 
-### Multi-Point Performance Characterization
+### Multi-Point Characterization
 
-**[Rev 04]** This annex is informational. The normative deliverable of this test method is the scalar ΔAUC at the canonical lesion contrast (12 HU) and dose setpoint (I₀ = 310,853, σ_noise = 30 HU target). The scalar metric supports interlaboratory precision and bias characterization per ASTM E691 and ISO 5725.
+**A2.1** *Signal-amplitude sweep* — To characterize MAR performance across a range of lesion contrasts, laboratories may repeat the normative procedure at signal amplitudes of 4, 8, 12, 16, and 20 HU by substituting the appropriate MU_LESION_CM value. The canonical 12 HU configuration (§A1.4) remains the normative test point.
 
-For investigators, manufacturers, and regulatory reviewers who wish to characterize MAR algorithmic behavior across a range of operating conditions, Vaishnav et al. (Medical Physics 47(8), 2020) recommend presenting full detectability curves as functions of signal amplitude and dose. This annex specifies an optional multi-point reporting protocol that preserves the canonical configuration as the normative anchor while extending the characterization.
+**A2.2** *Dose-level sweep* — To characterize MAR performance across dose levels, laboratories may repeat the normative procedure at I₀ scaling factors of {0.5, 0.71, 1.0, 1.41, 2.0} relative to the calibrated I₀. The canonical I₀ = 310,853 (scaling factor 1.0) remains the normative test point.
 
-### A2.1 Signal-Amplitude Sweep
+**A2.3** Multi-point results shall be reported separately from the normative ΔAUC and clearly labeled as informational. They do not replace the normative scalar test result.
 
-- (a) Signal-amplitude sweep values: 4, 8, 12, 16, 20 HU nominal lesion contrast (five operating points, inclusive of the canonical 12 HU).
-- (b) Each operating point shall use the complete sinogram-domain physics chain specified in §10.1.2 with `MU_LESION_CM = MU_TISSUE_CM × (1 + c/1000)` where c is the contrast in HU.
-- (c) Each operating point shall be generated with N = 40 independent realizations per condition (160 volumes per point, 800 volumes for the full sweep).
-- (d) CHO analysis shall be performed per §14 for each operating point, producing ΔAUC, 95% CI, and standard deviation per operating point.
-- (e) The resulting curve ΔAUC(c) shall be reported as a table of five values with sign, CI, and standard deviation.
-
-### A2.2 Dose Sweep
-
-- (a) Dose sweep values: I₀ × {0.5, 0.71, 1.0, 1.41, 2.0} relative to the canonical I₀ = 310,853 (five operating points, inclusive of the canonical value). These ratios correspond to ±√2 in photon flux and therefore approximately ±√2 in per-pixel SNR in the reconstructed image.
-- (b) Each operating point shall use the complete forward-projection and FBP chain specified in §A1.1 and §A1.7, with I₀ scaled per the sweep value. Gaussian electronic noise (σ_e) scales as 1/√I₀ per the analytic calibration in §1A.3.
-- (c) Each operating point shall be generated with N = 40 independent realizations per condition.
-- (d) CHO analysis shall be performed per §14 for each operating point.
-- (e) The resulting curve ΔAUC(I₀) shall be reported as a table of five values with sign, CI, and standard deviation.
-
-### A2.3 Reporting
-
-**A2.3.1** The multi-point report shall be clearly labelled as informational and shall not be reported as compliant with the normative scalar deliverable of this standard. Laboratories submitting multi-point results shall also submit the canonical scalar ΔAUC at the reference operating point (§10.1.1) as the primary normative result.
-
-**A2.3.2** Recommended labeling claim language derived from multi-point results follows the pattern of Vaishnav et al. (2020):
-
-> "In a Type Test per ASTM FXXXX signal-amplitude sweep (Annex A2.1), [Device X] improved AUC over the no-MAR baseline by up to [value] across lesion contrasts from 4 to 20 HU."
-
-**A2.3.3** Multi-point characterization is recommended but not required for submissions seeking substantial-equivalence determination based on non-degradation. Multi-point characterization is recommended for submissions seeking scoped quantitative improvement claims per the framework of Vaishnav et al. (2020).
-
-### A2.4 Relationship to Normative Scalar
-
-The scalar ΔAUC at the canonical operating point (§10.1.1) remains the normative result under this standard. Precision and bias statistics per §17 shall be computed from the scalar result only. Multi-point results are informational and their precision characterization is outside the scope of ASTM E691 as implemented in §17.1.
+**A2.4** Multi-point characterization does not affect the precision statement (§17). Each operating point would require independent precision evaluation per E691 if normative status were sought.
 
 ---
 
@@ -595,11 +565,20 @@ The scalar ΔAUC at the canonical operating point (§10.1.1) remains the normati
 
 **[Rev 05]** (2026-05-29) — *Reproducibility formalization and dataset-deliverable corrections.* (1) §A1.5.5 added — channel feature vector g = U·v, estimated Hotelling template w = K_final⁻¹(ḡ_LP − ḡ_LA), and test statistic t = wᵀg, with the channel-output (HU) scale pinned. (2) §A1.6(a) rewritten to designate the LOO hold-out AUC as the normative test result and to fix the realization-index pairing (N folds, not 2N). (3) §A1.6(c) rewritten to specify the single-condition and paired ΔAUC bootstraps over the fixed held-out statistics (template not re-estimated within replicates). (4) §A1.5.2(d) clarifies σ_internal units. (5) §3.1.12, §4.1–4.2, §7.1, §8.2–8.2.1, and §14.2–14.3 add the line-integral sinogram ("MAR-ready series") deliverable and align the procedure with the projection-domain workflow. (6) §A1.8 records the dataset physics-generation constants. (7) Three previously-open items resolved: §1.4 scoped to the measurand (projection-domain apparatus requirement in §7.1); §10.2 N = 40 statistical basis recorded from the reference data — the ΔAUC test result meets both §17.1.6 targets (SD ≈ 0.038 ≤ 0.05; ΔAUC bias ≈ 0.004 ≤ 0.02), the large per-condition AUC optimism (≈ 0.12) being common-mode and cancelling in ΔAUC — with §17.1.6(c) clarified to gate the ΔAUC bias; §17.1.6(a) revised to use the LI-MAR negative control (ΔAUC ≈ −0.23), with a positive control optional. Reference scripts: generator v7.0.0, `run_cho_analysis_v7_0.py`; informational tooling `research/power_analysis_n40.py`.
 
-**[Rev 04]** (2026-04-05, editorial pass 2026-04-18) — Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360°); FBP changed to fan-beam cosine-weighted distance-weighted backprojection; CHO equivalence tolerance relaxed from ±0.001 to ±0.005 AUC; screening mode (20 realizations) added (40 remains the minimum for formal reporting); acceptance-criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 and FDA guidance; baseline AUC_noMAR established at 0.8294 (fan-beam, N=40, σ=15, 2026-04-07); scope-boundary clause §1.9, §1A.5 (Scope and Precedent), and §1A.6 (Metal-Material Rationale) added; §2 expanded; §14.12 preset-reporting and §16(o) DICOM 2026b MAR Macro verification added; §A1.5.3 clarified that the 2D constraint applies to the observer, not the MAR algorithm; subcommittee of jurisdiction documented (F04.15); Annex A2 (Informational, multi-point sweeps per Vaishnav et al. 2020) added.
+**[Rev 04]** (2026-04-05, editorial pass 2026-04-18) — Acquisition geometry changed from parallel-beam (360 angles over 180°) to fan-beam (SID=570 mm, SDD=1040 mm, equi-angular curved detector, 720 angles over 360°); FBP changed to fan-beam cosine-weighted distance-weighted backprojection; CHO equivalence tolerance relaxed from ±0.001 to ±0.005 AUC; screening mode (20 realizations) added (40 remains the minimum for formal reporting); acceptance-criteria cross-reference added (§5.5) to IEC 60601-2-44 Ed. 4 §203.6.7.101.1 and FDA guidance; baseline AUC_noMAR established at 0.8294 (fan-beam, N=40, σ=15, 2026-04-07); scope-boundary clause §1.9, §1A.5 (Scope and Precedent), and §1A.6 (Metal-Material Rationale) added; §2 expanded; §14.12 preset-reporting and §16(o) DICOM 2026b MAR Macro verification added; §A1.5.3 clarified that the 2D constraint applies to the observer, not the MAR algorithm; subcommittee of jurisdiction documented (F04.15); Annex A2 (Informational, multi-point characterization) added.
 
 **[Rev 03]** — Observer dimensionality changed from 3D to 2D (Slice 128 only); lesion geometry changed from full z-extent cylinder to single-slice disc; lesion HU implementation changed from 120 HU post-FBP hard-set to ~12 HU sinogram-domain physics contrast (no hard-set); minimum realizations increased from 20 to 40 per condition; Vaishnav internal observer noise regularisation (σ = 15) added as normative; Vaishnav Transition AUC baseline (0.7063) recorded in §1A.2.
 
 Markers **[Rev 03]**, **[Rev 04]**, and **[Rev 05]** in the body indicate the revision that introduced each normative change; earlier markers are retained for traceability.
+
+---
+
+## Bibliography
+
+- (1) Barrett, H.H., and Myers, K.J., *Foundations of Image Science*, Wiley-Interscience, Hoboken, NJ, 2004.
+- (2) Vaishnav, J.Y., et al., "CT metal artifact reduction algorithms: Toward a framework for objective performance assessment," *Med. Phys.*, Vol. 47, No. 8, August 2020, pp. 3344–3355.
+- (3) Wunderlich, A., and Noo, F., "On Efficient Assessment of Image-Quality Metrics Based on Linear Model Observers," *IEEE Trans. Med. Imaging*, Vol. 34, No. 2, February 2015, pp. 508–519.
+- (4) Kak, A.C., and Slaney, M., *Principles of Computerized Tomographic Imaging*, IEEE Press, New York, 1988.
 
 ---
 

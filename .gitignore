@@ -22,3 +22,6 @@ __pycache__/
 *.nbc
 venv/
 .DS_Store
+
+# Scratch/review files
+docs_and_references/ASTM_MAR_Standard_Rev05_Review.md
