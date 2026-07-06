@@ -11,16 +11,33 @@
 
 ## Contents
 
+- [Project Status](#project-status)
 - [Overview](#overview)
 - [Setup](#setup)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
 - [Dataset](#dataset)
 - [References](#references)
+- [Citation](#citation)
 - [License](#license)
+- [Governance](#governance)
 - [Technical Contact](#technical-contact)
 
 For per-version status, performance work, tooling, DICOM 2026b compliance details, repository map, and regulatory positioning, see [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
+
+---
+
+## Project Status
+
+| Phase | Description | Status |
+| :--- | :--- | :--- |
+| 1 | Concept development (Vaishnav framework adaptation) | Complete |
+| 2 | Draft ASTM test method (WKXXXXX Rev 01–05) | Complete |
+| 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7) | Complete |
+| 4 | ILS reference implementation (locked baseline, lab instructions, DICOM 2026b) | Complete |
+| 5 | ASTM interlaboratory study (Form 01 + E691 package designed; lab recruitment pending) | In progress |
+| 6 | Journal publication (*Medical Physics* or equivalent) | Planned |
+| 7 | IEC incorporation (§203.6.7.101.1 binding amendment, post-ASTM-FXXXX publication) | Planned |
 
 ---
 
@@ -218,11 +235,28 @@ Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on
 
 ---
 
+## Citation
+
+If you use this framework in your research, please cite:
+
+> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v7.0.0.
+> ASTM Work Item WKXXXXX — Standard Test Method for Evaluation of CT Metal Artifact Reduction Algorithms Using a Channelized Hotelling Observer.
+> https://github.com/cdc15000/MAR-ILS-Dataset-Generator
+> DOI: &lt;pending Zenodo deposit&gt;
+
+---
+
 ## License
 
 All code and documentation in this repository are released under the **Apache License, Version 2.0** — see [`LICENSE.md`](LICENSE.md) for the full text.
 
 The single third-party figure (axial pelvic CT at the top of this README) is reproduced from Wellenberg et al. 2019 under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache 2.0 license; attribution is given in the figure caption.
+
+---
+
+## Governance
+
+Change control, version freezing, and the approval process for normative parameters are documented in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ---
 
