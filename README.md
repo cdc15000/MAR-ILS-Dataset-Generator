@@ -167,14 +167,6 @@ python view_sinograms.py sinograms/LP/realization_001.h5
 python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ```
 
-### 5. Patch legacy datasets with DICOM 2026b metadata
-
-```bash
-python patch_2026b_metadata.py --dataset-dir ./astm_reference_dataset
-```
-
-Idempotent; regenerates `checksums_sha256.txt` after injecting the MAR Macro (see [Verification (hex-tag method)](RELEASE_NOTES.md#verification-hex-tag-method) in the release notes).
-
 ---
 
 ## Dataset
