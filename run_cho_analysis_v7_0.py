@@ -2,15 +2,15 @@
 """
 run_cho_analysis_v7_0.py
 ========================
-ASTM WKXXXXX Rev 04 — Reference 2D CHO Analysis (Fan-Beam Dataset)
+ASTM WKXXXXX Rev 05 — Reference 2D CHO Analysis (Fan-Beam Dataset)
 
 Changes from run_cho_analysis_v6_0.py
 --------------------------------------
-[SC]  Single canonical configuration — hardcoded v5.3.0/Rev 04 ROI parameters
+[SC]  Single canonical configuration — hardcoded v5.3.0/Rev 05 ROI parameters
       (121×121, centre (281,256), channel width a=7.5 vox). No tier dependency.
 [FB]  References fan-beam generator v7.0.0 dataset (geometry-independent — CHO
       operates on reconstructed DICOM images regardless of projection geometry).
-[AT]  AUC equivalence tolerance relaxed from ±0.001 to ±0.005 (§8.3, Rev 04).
+[AT]  AUC equivalence tolerance relaxed from ±0.001 to ±0.005 (§8.4, Rev 05).
 [RR]  Supports reduced realization count (20 for screening, ≥40 for formal).
 [T2]  50/50 estimation bias (2-fold CV) — informative diagnostic.
 [T3]  Wilcoxon signed-rank test — informative diagnostic.
@@ -21,7 +21,7 @@ All CHO mathematics (Laguerre-Gauss channels, Hotelling template, LOO,
 bootstrap) are identical to v5.3.0/v6.0.0. The observer is geometry-
 independent: it operates on HU-calibrated DICOM images, not sinograms.
 
-Normative Parameters (§A1.5, Rev 04)
+Normative Parameters (§A1.5, Rev 05)
 --------------------------------------
   Observer      : 2D CHO — slice 128 ONLY (§A1.5.3)
   ROI           : 121×121 centred at (281, 256) (§A1.5.4)
@@ -30,7 +30,7 @@ Normative Parameters (§A1.5, Rev 04)
   Regularisation: Tikhonov λ = 0.01 × trace(K) / 10 (§A1.5.2(c))
   Internal noise: σ = 15 (normative default, §A1.5.2(d))
   Metric        : Mann-Whitney AUC (LOO hold-out) (§A1.6)
-  Tolerance     : ±0.005 AUC (§8.3, Rev 04)
+  Tolerance     : ±0.005 AUC (§8.4, Rev 05)
 
 Usage
 -----
@@ -116,7 +116,7 @@ def load_slice_roi(folder_path: Path) -> np.ndarray:
     Load the ROI from LESION_SLICE_INDEX of a DICOM realization folder.
 
     Reads only slice_{LESION_SLICE_INDEX+1:04d}.dcm. 3D integration is
-    prohibited (§A1.5.3).
+    shall not be performed (§A1.5.3).
 
     Returns: roi, shape (ROI_SIZE²,), float64
     """
@@ -402,7 +402,7 @@ def compute_noise_sweep(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="ASTM WKXXXXX Rev 04 — Reference 2D CHO Analysis",
+        description="ASTM WKXXXXX Rev 05 — Reference 2D CHO Analysis",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--dataset-dir", required=True,
@@ -434,7 +434,7 @@ def main() -> None:
 
     num_real = args.realizations
 
-    print("ASTM WKXXXXX Rev 04 — 2D CHO Analysis")
+    print("ASTM WKXXXXX Rev 05 — 2D CHO Analysis")
     print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  centre=({ROI_CENTER_X},{ROI_CENTER_Y})")
     print(f"LG channel width a = {CHANNEL_WIDTH_A:.1f} vox")
     print(f"Internal noise σ = {args.internal_noise_sigma}")
@@ -554,7 +554,7 @@ def main() -> None:
     # Summary
     print()
     print("=" * 66)
-    print("ASTM WKXXXXX Rev 04 — CHO Result")
+    print("ASTM WKXXXXX Rev 05 — CHO Result")
     print("=" * 66)
     r_n = results["noMAR"]
     r_m = results["MAR"]
@@ -595,7 +595,7 @@ def main() -> None:
     out = {
         "generator_version": "v7.0.0",
         "script_version": "run_cho_analysis_v7_0",
-        "standard_reference": "ASTM-WKXXXXX-Rev04",
+        "standard_reference": "ASTM-WKXXXXX-Rev05",
         "acquisition_geometry": "fan-beam (SID=570mm, SDD=1040mm)",
         "observer": "2D CHO, single slice (§A1.5.3)",
         "roi_size": ROI_SIZE,

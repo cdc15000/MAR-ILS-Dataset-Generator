@@ -21,7 +21,7 @@ pip install numba                 # Optional: ~24× speedup (JIT + batch geometr
 
 The **MAR ILS Dataset Generator** produces a standardized, synthetic CT dataset
 for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with
-**ASTM WKXXXXX Revision 04** and **IEC 60601-2-44 Ed. 4**. It implements the
+**ASTM WKXXXXX Revision 05** and **IEC 60601-2-44 Ed. 4**. It implements the
 task-based signal detection approach of Vaishnav et al. (*Medical Physics*,
 47(8), 2020).
 
@@ -43,12 +43,12 @@ task-based signal detection approach of Vaishnav et al. (*Medical Physics*,
 
 3. **Statistical analysis** (`run_cho_analysis_v7_0.py`)
    - 2D Channelized Hotelling Observer (CHO) with 10 Laguerre-Gauss channels on
-     **slice 128 only** (3D integration prohibited, §A1.5.3).
+     **slice 128 only** (3D integration shall not be performed, §A1.5.3).
    - Computes ΔAUC via leave-one-out CV + 1000-resample bootstrap CI.
 
 ### Single canonical configuration (v7.0.0)
 
-v7.0.0 uses **one normative configuration** (ASTM Rev 04). There are **no tiers**
+v7.0.0 uses **one normative configuration** (ASTM Rev 05). There are **no tiers**
 in v7 — the three-tier framework (T1_AB / T2_SB / T3_HEAD, parallel-beam) belongs
 to the **legacy v6** research framework under `legacy/` and `tier_config.py`,
 which is retained for multi-tier research but is **not normative**.
@@ -58,7 +58,7 @@ which is retained for multi-tier research but is **not normative**.
 ## Script Versioning & Usage
 
 **Scripts embed the version in the filename.** **v7.0.0 is the current normative
-reference** (fan-beam, single config, ASTM Rev 04). Always use the highest version
+reference** (fan-beam, single config, ASTM Rev 05). Always use the highest version
 number. v6.0.0 (`legacy/`) is the non-normative parallel-beam tiered framework.
 
 ### Generate the dataset
@@ -101,7 +101,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ## Code Organization
 
 ### `mar_ils_core/` — shared library (single source of truth)
-- `constants.py` — normative ASTM Rev 04 parameters (geometry, μ values, ROI,
+- `constants.py` — normative ASTM Rev 05 parameters (geometry, μ values, ROI,
   HU targets, DICOM tag numbers).
 - `phantom.py` — analytic attenuation map (`build_attenuation_map`) and body /
   metal / lesion masks.
@@ -184,7 +184,7 @@ Metal Artifact Reduction Macro (`(0018,9390)` → `(0018,9391)` = `"NO"` for noM
 | Acquisition | Fan-beam, SID = 570 mm, SDD = 1040 mm, 720 angles, 512 equi-angular detectors, full 360° |
 | Realizations | 40 LP + 40 LA (screening: 20 + 20) |
 | Lesion z-extent | Slice 128 only (single disc) |
-| CHO observer | 2D, slice 128 only — 3D integration PROHIBITED |
+| CHO observer | 2D, slice 128 only — 3D integration shall not be performed |
 | CHO ROI | (281, 256), 121×121 voxels |
 | Channel width a | 7.5 voxels |
 | Background HU | 40 HU |
@@ -215,18 +215,18 @@ approval and full regeneration + re-validation.
    `SeriesInstanceUID`, and include the CP-2575 MAR Macro (via `dicom_utils`).
 4. **HDF5 metadata:** store all realization parameters in HDF5 attributes for
    reproducibility.
-5. **CHO observer:** strictly 2D on slice 128. 3D integration is prohibited (§A1.5.3).
+5. **CHO observer:** strictly 2D on slice 128. 3D integration shall not be performed (§A1.5.3).
 6. **Bootstrap / LOO:** report 95% CI alongside every AUC point estimate.
 
 ---
 
 ## References
 
-- **ASTM WKXXXXX Rev 04** — draft standard for MAR performance assessment via task-based ILS.
+- **ASTM WKXXXXX Rev 05** — draft standard for MAR performance assessment via task-based ILS.
 - **IEC 60601-2-44 Ed. 4** — medical electrical equipment safety & performance (CT).
 - **Vaishnav et al. (2020)** — *Medical Physics*, 47(8), 3858-3866.
 - **`CLAUDE.md`** — authoritative internal documentation (pipeline, physics, design rationale).
 
 ---
 
-*Last updated: 2026-05-28. Reflects the v7.0.0 fan-beam normative reference (ASTM Rev 04).*
+*Last updated: 2026-07-06. Reflects the v7.0.0 fan-beam normative reference (ASTM Rev 05).*

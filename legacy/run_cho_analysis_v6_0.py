@@ -136,7 +136,7 @@ def load_slice_roi(folder_path: Path, tier: TierConfig) -> np.ndarray:
     Load the tier ROI from LESION_SLICE_INDEX of a DICOM realization folder.
 
     Reads only slice_{LESION_SLICE_INDEX+1:04d}.dcm.  3D integration is
-    prohibited (§A1.5.3).
+    shall not be performed (§A1.5.3).
 
     Returns
     -------

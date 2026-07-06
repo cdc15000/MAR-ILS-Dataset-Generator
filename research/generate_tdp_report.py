@@ -300,7 +300,7 @@ def build_tdp_json(
             "wilcoxon":       "One-tailed paired Wilcoxon on d[i] = s_LP[i] − s_LA[i]",
             "estimation_bias":"50/50 2-fold CV",
             "metric":         "Mann-Whitney AUC (mid-rank tie correction)",
-            "note_3d":        "3D integration across z PROHIBITED (§A1.5.3)",
+            "note_3d":        "3D integration across z shall not be performed (§A1.5.3)",
         },
     }
     return tdp
@@ -379,7 +379,7 @@ def build_comparison_tdp(
             "wilcoxon":       "One-tailed paired Wilcoxon on d[i] = s_LP[i] − s_LA[i]",
             "estimation_bias":"50/50 2-fold CV",
             "metric":         "Mann-Whitney AUC (mid-rank tie correction)",
-            "note_3d":        "3D integration across z PROHIBITED (§A1.5.3)",
+            "note_3d":        "3D integration across z shall not be performed (§A1.5.3)",
         },
     }
 

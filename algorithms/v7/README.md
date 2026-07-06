@@ -1,16 +1,16 @@
 # algorithms/v7/ — fan-beam reference MAR
 
 Reference MAR implementations compatible with the **v7.0.0 fan-beam** dataset
-(ASTM Rev 04). Unlike the parallel-beam references in `algorithms/`, these
+(ASTM Rev 05). Unlike the parallel-beam references in `algorithms/`, these
 operate on the (256, 720, 512) fan-beam sinograms and reuse the validated
 `forward_project_slice` / `fbp_reconstruct_slice` from `generator_v7_0_0.py`.
 
 ## reference_li_mar_v7.py — Linear-Interpolation MAR
 
 Parameter-free LI-MAR. **Non-normative**: the ASTM type test measures the
-*lab's* algorithm. This reference exists as a CHO-pipeline positive control and
-a reproducible delta-AUC anchor (LI-MAR is the universal baseline every
-commercial MAR is expected to beat).
+*lab's* algorithm. This reference exists as a CHO-pipeline negative control
+(designated control, ΔAUC ≈ −0.23) and a reproducible delta-AUC anchor — the
+floor every commercial MAR is expected to beat.
 
 It detects metal by thresholding the existing noMAR reconstruction, fills the
 metal trace in the sinogram by linear interpolation along the detector axis,

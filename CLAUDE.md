@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with **ASTM WKXXXXX Revision 04** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
+This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with **ASTM WKXXXXX Revision 05** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
 
 ## Project Root
 
@@ -59,8 +59,8 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ## Architecture
 
 ### Scripts (versioned by filename — use the highest version)
-- **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 04): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
-- **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 04 ROI parameters (121×121, centre (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
+- **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 05): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
+- **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 05 ROI parameters (121×121, centre (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
 - **`patch_2026b_metadata.py`** — One-time utility to inject DICOM 2026b CP-2575 MAR metadata into existing datasets.
 - `legacy/generator_v6_0_0.py` — Research tier framework (T1_AB/T2_SB/T3_HEAD). Not normative. Uses parallel-beam geometry and tier-specific parameters. Retained for multi-tier research.
 - `legacy/run_cho_analysis_v6_0.py` — Tier-aware CHO. Not normative. Uses tier_config.py for ROI parameters.
@@ -76,7 +76,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 7. **Output** — 40 (or 20) realizations × 2 conditions (LP/LA) as HDF5 sinograms + DICOM reconstructions + checksums + metadata + PDF instructions.
 
 ### CHO Analysis Pipeline (`run_cho_analysis_v7_0.py`)
-1. Loads **only `slice_0129.dcm`** (LESION_SLICE_INDEX = 128, 1-indexed) from each realization. 3D integration prohibited (§A1.5.3).
+1. Loads **only `slice_0129.dcm`** (LESION_SLICE_INDEX = 128, 1-indexed) from each realization. 3D integration shall not be performed (§A1.5.3).
 2. Projects each 121×121 ROI through 10 2D Laguerre-Gauss channels → feature vector of shape `(N, 10)`.
 3. Fits Hotelling template with Tikhonov regularisation (λ = 0.01 × trace(K)/10) using **LA covariance only**.
 4. Computes LOO hold-out AUC (Mann-Whitney) with 1000-resample bootstrap CI and paired ΔAUC bootstrap CI.
@@ -118,7 +118,7 @@ CHO analysis reads **only** `slice_0129.dcm` from each folder.
 | Acquisition | **Fan-beam, SID=570 mm, SDD=1040 mm, 720 angles, 512 equi-angular detectors, full 360°** |
 | Realizations | **40 LP + 40 LA** (screening: 20+20) |
 | Lesion z-extent | **Slice 128 only** (single disc) |
-| CHO observer | **2D, slice 128 only** — 3D integration PROHIBITED |
+| CHO observer | **2D, slice 128 only** — 3D integration shall not be performed |
 | CHO ROI | (281, 256), 121×121 voxels |
 | Channel width a | 7.5 voxels |
 | Background HU | 40 HU |
@@ -197,4 +197,4 @@ python run_cho_analysis_v7_0.py \
 See `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` (post-publication Amendment proposal) and `docs_and_references/FDA_guidance_framework.md` for draft regulatory text.
 
 ## Versioning Convention
-Scripts embed version in filename. **v7.0.0** is the current normative reference (fan-beam, single canonical config, ASTM Rev 04). v6.0.0 is the research tier framework (parallel-beam, three tiers).
+Scripts embed version in filename. **v7.0.0** is the current normative reference (fan-beam, single canonical config, ASTM Rev 05). v6.0.0 is the research tier framework (parallel-beam, three tiers).

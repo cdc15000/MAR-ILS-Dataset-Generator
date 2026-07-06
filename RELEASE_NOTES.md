@@ -6,13 +6,26 @@ This file records per-version status, performance work, tooling additions, metad
 
 ## v7.0.0 — April 2026 (current)
 
+### July 2026: ASTM Rev 05 Alignment
+
+All code, documentation, and cross-references updated to reflect **ASTM WKXXXXX Revision 05** (2026-05-29). Rev 05 is an editorial-only revision — no numerical parameters changed. Key changes from Rev 04:
+
+- §16 split into §16.1 (general information) and §16.2 (test results)
+- §8.3 (AUC tolerance) renumbered to §8.4
+- §1.5 (single-configuration constraint) renumbered to §1.7
+- LI-MAR reclassified from "positive control" to "negative control" (designated control) per §17.11
+- ASTM normative language harmonized: "PROHIBITED" → "shall not"
+- E691 reference updated from E691-22 to E691-23
+
+The locked metrology baseline (AUC_noMAR = 0.8294, N=40, σ=15) is unchanged.
+
 ### April 2026 Status: Metrology Baseline Locked
 
 The framework has officially transitioned from parallel-beam research tiers to a **Normative Fan-Beam Geometry** (SID=570mm, SDD=1040mm).
 
 #### ILS Reference Baseline ($N=40$)
 
-The following values are established as the normative floor for ASTM WKXXXXX Rev 04:
+The following values are established as the normative floor for ASTM WKXXXXX Rev 05:
 
 | Metric | Value | Status |
 | :--- | :--- | :--- |
@@ -46,10 +59,10 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 
 | Path | Description |
 | :--- | :--- |
-| `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 04). |
-| `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 04). |
+| `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 05). |
+| `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 05). |
 | `patch_2026b_metadata.py` | One-time DICOM 2026b CP-2575 metadata patcher. |
-| `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 04, machine-readable) |
+| `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 05, machine-readable) |
 | `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` | Post-publication Corrigendum/Amendment proposal for §203.6.7.101.1 (deferred until ASTM FXXXX publishes) |
 | `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
 | `/algorithms` | Reference MAR implementations (iMAR, MBIR, Spectral). |
@@ -88,5 +101,5 @@ print(f'(0018,9391) Metal Artifact Reduction Applied = {mar_applied}')
 |-------|----------|------|
 | **1 — What to record** | DICOM CP-2575 (2026b) | MAR metadata tags in DICOM |
 | **2 — Must have / describe / record** | IEC 60601-2-44 Ed. 4 §203.6.7.101 (.1 method, .2 user info, .3 DICOM) | Regulatory mandate |
-| **3 — How to measure (post-publication binding to §203.6.7.101.1)** | ASTM FXXXX (formerly WKXXXXX Rev 04) — Corrigendum/Amendment submitted after ASTM FXXXX publishes | Quantitative ΔAUC TYPE TEST |
+| **3 — How to measure (post-publication binding to §203.6.7.101.1)** | ASTM FXXXX (formerly WKXXXXX Rev 05) — Corrigendum/Amendment submitted after ASTM FXXXX publishes | Quantitative ΔAUC TYPE TEST |
 | **4 — Acceptance** | FDA guidance (proposed) | Non-degradation / superiority thresholds |

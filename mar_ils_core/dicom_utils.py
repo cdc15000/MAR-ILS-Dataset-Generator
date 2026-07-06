@@ -38,7 +38,7 @@ def write_dicom_slice(
     series_uid: str,
     metal_mask: np.ndarray,
     dataset_version: str = "v7.0.0",
-    standard_ref: str = "ASTM-WKXXXXX-Rev04",
+    standard_ref: str = "ASTM-WKXXXXX-Rev05",
 ) -> None:
     """Write one 2D HU array as DICOM. Metal hard-set to 3000 HU (§A1.3(d,f))."""
     output_dir.mkdir(parents=True, exist_ok=True)

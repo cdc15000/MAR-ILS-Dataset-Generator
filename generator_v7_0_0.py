@@ -2,7 +2,7 @@
 """
 generator_v7_0_0.py
 ====================
-MAR ILS Dataset Generator v7.0.0 — ASTM WKXXXXX Rev 04 (Fan-Beam)
+MAR ILS Dataset Generator v7.0.0 — ASTM WKXXXXX Rev 05 (Fan-Beam)
 
 Changes from v6.0.0 / v5.3.0
 -----------------------------
@@ -14,14 +14,14 @@ Changes from v6.0.0 / v5.3.0
       backprojection with (SID/L)² weighting (replaces parallel-beam FBP).
 [SC]  Single canonical configuration — v5.3.0 parameters (iron rod r=5 mm,
       circular lesion r=2.5 mm at (281,256), ROI 121×121, channel width
-      a=7.5 vox). No tier framework. §1.5: "No additional configurations
+      a=7.5 vox). No tier framework. §1.7: "No additional configurations
       are permitted under this standard."
 [RR]  --realizations flag: 40 (normative default) or 20 (screening mode).
 [AC]  Acceptance criteria cross-reference to IEC 60601-2-44 §203.6.7.101.1
       (via post-publication Corrigendum/Amendment, submitted after ASTM FXXXX
       publishes) and FDA guidance (layered approach per §5.5).
 
-Canonical Parameters (ASTM WKXXXXX Rev 04)
+Canonical Parameters (ASTM WKXXXXX Rev 05)
 -------------------------------------------
   Body        : ellipse 85×60 mm (170×120 vox)
   Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centred at (256,256)
@@ -42,7 +42,7 @@ Usage
     python generator_v7_0_0.py --dry-run                  # validate only
 
 Author  : ASTM F04 Subcommittee Working Draft
-Standard: ASTM WKXXXXX Rev 04
+Standard: ASTM WKXXXXX Rev 05
 Date    : 2026-04-05
 """
 
@@ -110,7 +110,7 @@ except ImportError:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 DATASET_VERSION: str = "v7.0.0"
-STANDARD_REF: str = "ASTM-WKXXXXX-Rev04"
+STANDARD_REF: str = "ASTM-WKXXXXX-Rev05"
 
 # PDF fonts
 def _find_font(name: str) -> str:
@@ -279,7 +279,7 @@ if _HAS_NUMBA:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Fan-beam forward projection [Rev 04]
+# Fan-beam forward projection [Rev 05]
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def forward_project_slice(mu: np.ndarray) -> np.ndarray:
@@ -323,7 +323,7 @@ def forward_project_slice(mu: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Fan-beam FBP reconstruction [Rev 04]
+# Fan-beam FBP reconstruction [Rev 05]
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _fbp_fanbeam_core(sino: np.ndarray) -> np.ndarray:
@@ -946,7 +946,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description=(
             "MAR ILS Dataset Generator v7.0.0 — "
-            "ASTM WKXXXXX Rev 04 (Fan-Beam, Single Canonical Configuration)"
+            "ASTM WKXXXXX Rev 05 (Fan-Beam, Single Canonical Configuration)"
         ),
     )
     ap.add_argument(

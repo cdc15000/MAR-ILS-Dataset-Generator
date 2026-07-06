@@ -1,7 +1,7 @@
 # research/ — non-normative tooling
 
 These are exploratory / research-era utilities. **None are part of the v7.0.0
-normative reference** (ASTM Rev 04, fan-beam). They predate the v7 single-config
+normative reference** (ASTM Rev 05, fan-beam). They predate the v7 single-config
 framework and mostly target the legacy v6 parallel-beam tiered framework
 (`tier_config.py`, `legacy/generator_v6_0_0.py`, `legacy/run_cho_analysis_v6_0.py`).
 

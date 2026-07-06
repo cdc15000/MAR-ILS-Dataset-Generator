@@ -5,7 +5,7 @@
 **Status:** Conceptual framework for future FDA guidance document
 **Date:** 2026-04-05
 **Author:** Christopher D. Cocchiaraley (Consumer Member, ASTM F04)
-**References:** ASTM WKXXXXX Rev 04, IEC 60601-2-44 Ed. 4
+**References:** ASTM WKXXXXX Rev 05, IEC 60601-2-44 Ed. 4
 
 ---
 
@@ -15,7 +15,7 @@ This document outlines a proposed framework for FDA acceptance criteria when
 evaluating Metal Artifact Reduction (MAR) performance in 510(k) submissions.
 The framework builds on:
 
-- **ASTM FXXXX (formerly WKXXXXX Rev 04)** — standardized TYPE TEST that measures ΔAUC
+- **ASTM FXXXX (formerly WKXXXXX Rev 05)** — standardized TYPE TEST that measures ΔAUC
 - **IEC 60601-2-44 Ed. 4 §203.6.7.101.1** — post-publication Corrigendum/Amendment binding the compliance statement to the ASTM TYPE TEST, to be submitted after ASTM FXXXX publishes
 
 FDA's role in the layered approach is to establish the acceptance threshold:
@@ -83,19 +83,19 @@ MAR functionality:
 
 | Item | Reference | Required |
 |------|-----------|----------|
-| System identification | §16(a) | Yes |
-| MAR algorithm name and version | §16(b) | Yes |
-| All imaging parameters (MAR on/off) | §16(c) | Yes |
-| Dataset version and SHA-256 verification | §16(d) | Yes |
-| CHO software version and validation AUC | §16(e) | Yes |
-| Computational environment | §16(f) | Yes |
-| Number of realizations per condition | §16(g) | Yes |
-| Mean ΔAUC (3 decimal places, with sign) | §16(h) | Yes |
-| Standard deviation of ΔAUC | §16(i) | Yes |
-| Bootstrap 95% CI | §16(j) | Yes |
-| AUC estimation bias | §16(k) | Yes |
-| Individual AUC_MAR and AUC_noMAR | §16(l) | Yes |
-| Internal noise σ used | §16(n) | Yes |
+| System identification | §16.1(a) | Yes |
+| MAR algorithm name and version | §16.1(b) | Yes |
+| All imaging parameters (MAR on/off) | §16.1(c) | Yes |
+| Dataset version and SHA-256 verification | §16.1(d) | Yes |
+| CHO software version and validation AUC | §16.1(e) | Yes |
+| Computational environment | §16.1(f) | Yes |
+| Number of realizations per condition | §16.1(g) | Yes |
+| Mean ΔAUC (3 decimal places, with sign) | §16.2(a) | Yes |
+| Standard deviation of ΔAUC | §16.2(b) | Yes |
+| Bootstrap 95% CI | §16.2(c) | Yes |
+| AUC estimation bias | §16.2(d) | Yes |
+| Individual AUC_MAR and AUC_noMAR | §16.2(e) | Yes |
+| Internal noise σ used | §16.1(k) | Yes |
 | Non-degradation assessment vs. T_r | This guidance | Yes |
 | Superiority claim justification (if any) | This guidance | If claimed |
 
@@ -136,7 +136,7 @@ other. The same principle applies here: ASTM WKXXXXX defines how to measure
 
 | Prerequisite | Status | Impact |
 |-------------|--------|--------|
-| ASTM WKXXXXX Rev 04 ballot | Pending | Must be balloted before FDA can reference |
+| ASTM WKXXXXX Rev 05 ballot | Pending | Must be balloted before FDA can reference |
 | ASTM ILS precision study (≥3 labs) | Not started | Required to establish S_r, S_R, T_r |
 | IEC 60601-2-44 Ed. 4 publication | ~Q1 2027 | FDA recognition of IEC standard |
 | §203.6.7.101.1 binding Corrigendum/Amendment (post-ASTM-FXXXX-publication) | Pending ASTM publication | Optional — FDA can act independently |
