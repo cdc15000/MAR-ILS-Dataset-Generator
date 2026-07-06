@@ -1,8 +1,8 @@
 # ASTM WKXXXXX MAR Type Test — Interlaboratory Study Participation Agreement
 
 **Template version:** v0.1 (draft 2026-04-19)
-**Governing procedure:** ASTM E691-22 (Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method)
-**Study subject:** ASTM Work Item WKXXXXX Revision 04 — Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
+**Governing procedure:** ASTM E691-23 (Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method)
+**Study subject:** ASTM Work Item WKXXXXX Revision 05 — Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
 **ILS Coordinator:** Christopher D. Cocchiaraley, WKXXXXX Sponsor, ASTM F04 / F04.15 (Consumer Member)
 
 ---
@@ -25,7 +25,7 @@ This Agreement is between:
 
 ## 2. Purpose
 
-The Participating Laboratory agrees to execute the test method specified in WKXXXXX Revision 04 against the reference dataset provided by the Coordinator, under ASTM E691-22 protocol, and to return results for statistical aggregation by the Coordinator and the ASTM F04.15 committee.
+The Participating Laboratory agrees to execute the test method specified in WKXXXXX Revision 05 against the reference dataset provided by the Coordinator, under ASTM E691-23 protocol, and to return results for statistical aggregation by the Coordinator and the ASTM F04.15 committee.
 
 ---
 
@@ -33,11 +33,11 @@ The Participating Laboratory agrees to execute the test method specified in WKXX
 
 The Participating Laboratory agrees to:
 
-**3.1 Protocol adherence.** Execute the test method strictly as specified in WKXXXXX Revision 04, without substitution, modification, or omission of any normative parameter (fan-beam geometry, N=40 LP + 40 LA realizations, internal noise σ=15, 2D CHO on slice 128 only, 121×121 ROI, 10 Laguerre-Gauss channels with a=7.5, AUC tolerance ±0.005). Any deviation, however minor, shall be reported to the Coordinator in writing with a proposed correction before results are returned.
+**3.1 Protocol adherence.** Execute the test method strictly as specified in WKXXXXX Revision 05, without substitution, modification, or omission of any normative parameter (fan-beam geometry, N=40 LP + 40 LA realizations, internal noise σ=15, 2D CHO on slice 128 only, 121×121 ROI, 10 Laguerre-Gauss channels with a=7.5, AUC tolerance ±0.005). Any deviation, however minor, shall be reported to the Coordinator in writing with a proposed correction before results are returned.
 
 **3.2 MAR algorithm disclosure.** Specify in the submission form which MAR algorithm(s) the lab applies to the dataset — either (i) the lab's own in-house MAR implementation, disclosed by name and version, or (ii) one or more of the reference implementations provided under `/algorithms/` in the WKXXXXX repository.
 
-**3.3 Computational environment disclosure.** Report the computational environment used (OS, Python version, NumPy/SciPy/pydicom/numba versions, CPU or accelerator model) in the submission form per WKXXXXX §16(f).
+**3.3 Computational environment disclosure.** Report the computational environment used (OS, Python version, NumPy/SciPy/pydicom/numba versions, CPU or accelerator model) in the submission form per WKXXXXX §16.1(i).
 
 **3.4 Deliverables.** Return the following to the Coordinator within the timeline of §7:
 - `cho_results.json` from `run_cho_analysis_v7_0.py`
@@ -104,7 +104,7 @@ The ILS Coordinator agrees to:
 
 This Agreement is executed under and governed by:
 
-- **ASTM E691-22** — Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
+- **ASTM E691-23** — Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
 - **ASTM E177-20** — Standard Practice for Use of the Terms Precision and Bias in ASTM Test Methods
 - **ICMJE authorship guidelines** — for peer-reviewed publication co-authorship
 
@@ -118,7 +118,7 @@ The Coordinator provides the reference dataset and reference CHO implementation 
 
 ## 10. Attestation and Signatures
 
-By signing below, the Principal Investigator of the Participating Laboratory attests that (a) the Laboratory will execute the WKXXXXX Revision 04 protocol without modification, (b) results will be returned in good faith within the timeline of §7, and (c) the terms of this Agreement are understood and accepted.
+By signing below, the Principal Investigator of the Participating Laboratory attests that (a) the Laboratory will execute the WKXXXXX Revision 05 protocol without modification, (b) results will be returned in good faith within the timeline of §7, and (c) the terms of this Agreement are understood and accepted.
 
 | Party | Name | Title | Signature | Date |
 |---|---|---|---|---|

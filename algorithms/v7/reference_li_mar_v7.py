@@ -2,8 +2,8 @@
 LI-MAR v7 reference — parameter-free linear-interpolation Metal Artifact
 Reduction on the v7.0.0 fan-beam dataset.
 
-Non-normative. Serves as (a) a positive control for the CHO pipeline and
-(b) a reproducible delta-AUC anchor. The ASTM type test measures the *lab's*
+Non-normative. Serves as (a) a negative control (designated control) for the
+CHO pipeline and (b) a reproducible delta-AUC anchor. The ASTM type test measures the *lab's*
 algorithm; this reference is for validation and calibration only.
 
 Pipeline (per realization, slice 128 / slice_0129.dcm only):

@@ -5,7 +5,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
-![Standard: ASTM WKXXXXX Rev 04](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2004-orange)
+![Standard: ASTM WKXXXXX Rev 05](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2005-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
@@ -124,9 +124,9 @@ python run_cho_analysis_v7_0.py \
 
 `--internal-noise-sigma 15` is the locked normative default — do not change it for submissions scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
 
-### 3. Apply the reference LI-MAR (positive control / ΔAUC anchor)
+### 3. Apply the reference LI-MAR (negative control / ΔAUC anchor)
 
-A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale — every commercial MAR is expected to beat it.
+A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale as the designated control (ΔAUC ≈ −0.23) — every commercial MAR is expected to beat it.
 
 ```bash
 # Produce a CHO-ready LI-MAR reconstruction set (slice_0129.dcm per realization)
@@ -202,7 +202,7 @@ mar_recon/
 └── LA/  realization_001/ ...
 ```
 
-Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on slice 128; 3D integration is prohibited per §A1.5.3 of the draft standard.
+Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on slice 128; 3D integration shall not be performed per §A1.5.3 of the draft standard.
 
 ---
 

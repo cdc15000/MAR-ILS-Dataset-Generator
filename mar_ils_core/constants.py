@@ -1,5 +1,5 @@
 """
-Normative constants for ASTM WKXXXXX Rev 04 (Fan-Beam, v7.0.0).
+Normative constants for ASTM WKXXXXX Rev 05 (Fan-Beam, v7.0.0).
 
 This module is the single source of truth for all physics, geometry, and
 observer parameters. Both generator_v7_0_0.py and run_cho_analysis_v7_0.py
@@ -23,7 +23,7 @@ PHANTOM_CENTER_X: int = 256
 PHANTOM_CENTER_Y: int = 256
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Fan-beam geometry [Rev 04] (§A1.1(f,g))
+# Fan-beam geometry [Rev 05] (§A1.1(f,g))
 # ═══════════════════════════════════════════════════════════════════════════════
 
 SID_MM: float = 570.0       # source-to-isocenter distance
@@ -101,7 +101,7 @@ NUM_REALIZATIONS_DEFAULT: int = 40
 BASE_SEED: int = 20260314
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CHO observer parameters (§A1.5, Rev 04)
+# CHO observer parameters (§A1.5, Rev 05)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ROI_SIZE: int = 121               # 121×121 voxels
@@ -110,7 +110,7 @@ ROI_CENTER_Y: int = 256           # phantom centre y
 NUM_CHANNELS: int = 10            # Laguerre-Gauss channels
 CHANNEL_WIDTH_A: float = 7.5      # 1.5 × r_lesion = 1.5 × 5 = 7.5 voxels
 N_BOOT: int = 1000
-AUC_TOLERANCE: float = 0.005      # ±0.005 AUC (§8.3, Rev 04)
+AUC_TOLERANCE: float = 0.005      # ±0.005 AUC (§8.4, Rev 05)
 DEFAULT_SIGMA_SWEEP: list[float] = [0, 5, 10, 15, 20, 25, 30, 40, 50, 65, 80]
 
 # ═══════════════════════════════════════════════════════════════════════════════
