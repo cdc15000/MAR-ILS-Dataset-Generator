@@ -61,7 +61,6 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 | :--- | :--- |
 | `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 05). |
 | `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 05). |
-| `patch_2026b_metadata.py` | One-time DICOM 2026b CP-2575 metadata patcher. |
 | `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 05, machine-readable) |
 | `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` | Post-publication Corrigendum/Amendment proposal for §203.6.7.101.1 (deferred until ASTM FXXXX publishes) |
 | `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
@@ -72,7 +71,7 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 
 This is the **first reference implementation** of the **DICOM CP-2575 Metal Artifact Reduction Macro** (PS3.3 C.8.15.3.15), finalized in DICOM 2026b.
 
-All DICOM files produced by the generator and the `patch_2026b_metadata.py` utility include:
+All DICOM files produced by the generator include:
 
 | Tag | Keyword | Value |
 | :--- | :--- | :--- |
