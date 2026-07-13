@@ -222,6 +222,24 @@ Each lab executes two conditions, producing two ΔAUC values:
 
 The two-condition design separates method reproducibility (Condition 1 should yield near-zero between-lab variance) from measurand precision (Condition 2 captures real-world variance).
 
+**Section 6A: First Task Group Meeting — MAR Integration Approach**
+
+The first task group meeting after work item registration shall include the following agenda item:
+
+> **Agenda: Sinogram Ingestion and MAR Integration Path**
+>
+> The reference implementation provides lab harness templates (Python, MATLAB, C) in which the lab implements a single function (`apply_mar`) that receives sinogram data and geometry and returns a reconstructed HU volume. The harness handles all HDF5 I/O, DICOM writing, and CP-2575 MAR macro injection.
+>
+> However, commercial MAR implementations are typically embedded in scanner reconstruction pipelines (C/C++/CUDA) and may not be separable as standalone callable functions. Task group members are asked to advise on which integration path is feasible for their organization:
+>
+> - **Path A — Library extraction:** Isolate the MAR algorithm as a callable function that operates on the provided sinograms. The lab harness templates support this directly.
+> - **Path B — Format bridge:** Convert HDF5 sinograms into the lab's proprietary sinogram format, process through the existing reconstruction pipeline with MAR enabled, export DICOM, and reformat output to match the submission spec.
+> - **Path C — Offline reconstruction server:** Import sinograms into an offline reconstruction environment (e.g., vendor workstation software), reconstruct with MAR, export and reformat DICOM output.
+>
+> The sinogram ingestion specification (`sinogram_ingestion_spec.md`) and lab harness templates (`templates/`) are provided as starting points. The task group should determine whether these materials are sufficient or whether additional format support or interface modifications are needed.
+
+This discussion informs whether the ILS protocol requires revision to accommodate vendor-specific integration constraints before the dataset is distributed.
+
 **Section 7: Execution Protocol**
 
 Per-lab procedure (step-by-step):
