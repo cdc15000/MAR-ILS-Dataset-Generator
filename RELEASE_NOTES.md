@@ -61,7 +61,7 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 | :--- | :--- |
 | `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 05). |
 | `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 05). |
-| `docs_and_references/ASTM_MAR_Standard.md` | Draft standard text (Rev 05, machine-readable) |
+| `private/ASTM_MAR_Standard.md` | Draft standard text (Rev 05) — removed from public repo per ASTM IP policy |
 | `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` | Post-publication Corrigendum/Amendment proposal for §203.6.7.101.1 (deferred until ASTM FXXXX publishes) |
 | `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
 | `/algorithms` | Reference MAR implementations (iMAR, MBIR, Spectral). |

@@ -23,5 +23,8 @@ __pycache__/
 venv/
 .DS_Store
 
+# ASTM IP — standard text kept local, not in public repo
+private/
+
 # Scratch/review files
 docs_and_references/ASTM_MAR_Standard_Rev05_Review.md

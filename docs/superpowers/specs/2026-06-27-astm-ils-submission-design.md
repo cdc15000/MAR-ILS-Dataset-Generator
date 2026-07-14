@@ -67,7 +67,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 - **Selection:** "I am submitting original material (i.e. it is not copyrighted, patented, pending patent, or published elsewhere)"
 - **Check** the IP policy acknowledgment box
 
-**IP note:** The draft standard text (`ASTM_MAR_Standard.md`) is currently in a public GitHub repository. ASTM's IP assignment requires that the document not be reproduced or circulated outside of ASTM Committee/Society activities. Before submission, either (a) make the standard text file private, or (b) confirm with ASTM staff (Kate Chalfin, cc'd on the November 2023 Woods correspondence) that prior open publication of a draft does not conflict with the IP assignment. The reference implementation code under Apache 2.0 is separate — ASTM's copyright covers the standard document, not the software.
+**IP note:** ~~The draft standard text (`ASTM_MAR_Standard.md`) is currently in a public GitHub repository.~~ **RESOLVED 2026-07-14:** Standard text removed from public repo and moved to `private/ASTM_MAR_Standard.md` (gitignored). The reference implementation code remains public under Apache 2.0 — ASTM's copyright covers the standard document, not the software.
 
 ### Page 3 — Target
 
@@ -306,13 +306,13 @@ The ILS Coordinator aggregates results, computes E691 statistics, and prepares t
 
 ## Attachment: Rev 05 Draft Standard
 
-The existing `ASTM_MAR_Standard.md` (Rev 05, dated 2026-05-29), exported to Word or PDF in ASTM manuscript format. No content changes needed — the document is attached as-is.
+The existing `private/ASTM_MAR_Standard.md` (Rev 05, dated 2026-05-29), exported to Word or PDF in ASTM manuscript format. No content changes needed — the document is attached as-is.
 
 ---
 
 ## Pre-Submission Checklist
 
-1. [ ] Resolve IP question: make `ASTM_MAR_Standard.md` private on GitHub or confirm with ASTM staff that prior open publication is compatible with IP assignment
+1. [x] ~~Resolve IP question~~ — DONE 2026-07-14: standard text moved to `private/` (gitignored), removed from public repo
 2. [ ] Export Rev 05 draft standard to Word/PDF in ASTM manuscript format
 3. [ ] Write Document 2 (Cover Memorandum) as a standalone PDF
 4. [ ] Write Document 3 (ILS Protocol) as a standalone PDF
