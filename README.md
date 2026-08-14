@@ -11,17 +11,17 @@
 
 ## Contents
 
-- [Project Status](#project-status)
-- [Overview](#overview)
-- [Setup](#setup)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [Dataset](#dataset)
-- [References](#references)
-- [Citation](#citation)
-- [License](#license)
-- [Governance](#governance)
-- [Technical Contact](#technical-contact)
+[**Project Status**](#project-status) |
+[**Overview**](#overview) |
+[**Setup**](#setup) |
+[**Quick Start**](#quick-start) |
+[**Usage**](#usage) |
+[**Dataset**](#dataset) |
+[**References**](#references) |
+[**Citation**](#citation) |
+[**License**](#license) |
+[**Governance**](#governance) |
+[**Technical Contact**](#technical-contact)
 
 For per-version status, performance work, tooling, DICOM 2026b compliance details, repository map, and regulatory positioning, see [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
 
