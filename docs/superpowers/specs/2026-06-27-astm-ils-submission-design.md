@@ -197,7 +197,7 @@ Single measurand: ΔAUC = AUC_MAR − AUC_noMAR, computed by the reference CHO i
 **Section 4: Laboratory Requirements**
 
 Minimum qualifications for participation:
-- Computational platform capable of running the reference CHO implementation (Python 3.10+, 16 GB RAM)
+- Computational platform capable of running the reference CHO implementation (Python 3.11+, 16 GB RAM)
 - Access to at least one MAR algorithm (proprietary, published, or one of the reference implementations provided in the WKXXXXX repository)
 - Principal investigator with expertise in CT reconstruction, medical image quality, or signal detection theory
 - Commitment to execute the protocol without modification and return results within the execution window
@@ -205,7 +205,7 @@ Minimum qualifications for participation:
 **Section 5: Number of Laboratories**
 
 - **Target:** 8 laboratories (provides robust E691 statistics)
-- **Minimum:** 6 laboratories (E691 §6.2 minimum for meaningful precision estimates)
+- **Minimum:** 6 laboratories with acceptable results (E691-23 §9.1.2); E691 recommends starting with 8+ to allow for attrition
 - **Laboratory tiers** (for recruitment purposes, not for stratified analysis):
   - Tier A: CT system manufacturers with proprietary MAR (target 2–3)
   - Tier B: Academic / government imaging physics labs (target 3–4, including FDA CDRH)
@@ -262,8 +262,7 @@ Per E691 §15–17:
 - Compute between-laboratory reproducibility standard deviation (S_R)
 - Compute repeatability limit r = 2.8 × S_r
 - Compute reproducibility limit R = 2.8 × S_R
-- Apply Cochran's test and Grubbs' test for outlier detection (E691 §16)
-- Compute Mandel's h and k statistics for consistency assessment
+- Compute Mandel's h and k statistics, display graphically (E691-23 §16), and flag values exceeding the 0.5 % critical values (§17); investigate and resolve flagged results per §18–19
 - Report all results in an ASTM Research Report
 
 **Section 10: Timeline**
@@ -303,7 +302,7 @@ The ILS Coordinator aggregates results, computes E691 statistics, and prepares t
 - ILS Coordinator: Christopher D. Cocchiaraley (WKXXXXX Sponsor)
 - Upon work item registration, coordination transitions to ASTM staff oversight
 - Disputes regarding protocol adherence are resolved by the F04.15 task group chair
-- The Research Report is submitted to ASTM's Research Report Program per E691 §19
+- The Research Report is submitted to ASTM's Research Report Program per E691-23 §21.5
 
 ---
 
