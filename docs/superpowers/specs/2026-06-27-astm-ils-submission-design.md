@@ -8,7 +8,7 @@
 
 ## Objective
 
-Prepare a complete submission package for registering a new ASTM work item (Form 01) under F04.15 (Material Test Methods) for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the maturity of the Rev 05 draft standard, locked metrology baseline, and existing reference implementation to present a near-complete standard with a concrete plan to populate §17 (Precision and Bias).
+Prepare a complete submission package for registering a new ASTM work item (Form 01) under F04.15 (Material Test Methods) for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the maturity of the Rev 05 draft standard, established reference baseline, and existing reference implementation to present a near-complete standard with a concrete plan to populate §17 (Precision and Bias).
 
 ## Strategic Context
 
@@ -142,7 +142,7 @@ Notes the DICOM 2026b CP-2575 MAR metadata standard (approved, in production) as
 **Section 4: Maturity of the Draft Standard** (~1 paragraph, bulleted)
 
 - Rev 05 draft standard attached (18 normative sections + 2 annexes)
-- Metrology baseline locked (AUC_noMAR = 0.8294, N=40, fan-beam geometry)
+- Reference baseline established (AUC_noMAR = 0.8294, N=40, fan-beam geometry)
 - Reference dataset generated: 80 realizations, 35 GB, SHA-256 verified
 - Reference CHO implementation: `run_cho_analysis_v7_0.py`, hardcoded normative parameters
 - Reference MAR algorithm: LI-MAR v7 (parameter-free linear interpolation)
@@ -191,7 +191,7 @@ Single measurand: ΔAUC = AUC_MAR − AUC_noMAR, computed by the reference CHO i
 **Section 3: Test Materials**
 
 - Reference dataset: 80 realizations (40 LP, 40 LA), fan-beam sinograms (HDF5) + noMAR reconstructions (DICOM), ~35 GB, SHA-256 verified
-- Distribution channel: Zenodo or figshare (DOI-assigned, persistent)
+- Distribution channel: Zenodo, DOI 10.5281/zenodo.23144489 (reserved 2026-10-04; published before distribution to labs)
 - Each lab receives an identical, checksummed copy — dataset variability is zero by design
 
 **Section 4: Laboratory Requirements**
