@@ -10,12 +10,19 @@ import numpy as np
 import scipy.ndimage
 
 from mar_ils_core.constants import (
-    X_DIM, Y_DIM,
-    PHANTOM_CENTER_X, PHANTOM_CENTER_Y,
-    BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
-    METAL_RADIUS_VOX, LESION_RADIUS_VOX,
+    BODY_SEMI_X_VOX,
+    BODY_SEMI_Y_VOX,
     LESION_CENTER_X,
-    MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM, MU_LESION_CM,
+    LESION_RADIUS_VOX,
+    METAL_RADIUS_VOX,
+    MU_AIR_CM,
+    MU_IRON_CM,
+    MU_LESION_CM,
+    MU_TISSUE_CM,
+    PHANTOM_CENTER_X,
+    PHANTOM_CENTER_Y,
+    X_DIM,
+    Y_DIM,
 )
 
 

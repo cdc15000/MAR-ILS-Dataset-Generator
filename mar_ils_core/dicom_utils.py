@@ -15,8 +15,12 @@ from pydicom.dataset import Dataset, FileDataset, FileMetaDataset
 from pydicom.uid import generate_uid
 
 from mar_ils_core.constants import (
-    X_DIM, Y_DIM, VOXEL_MM, METAL_HU,
-    TAG_MAR_SEQ, TAG_MAR_APPLIED,
+    METAL_HU,
+    TAG_MAR_APPLIED,
+    TAG_MAR_SEQ,
+    VOXEL_MM,
+    X_DIM,
+    Y_DIM,
 )
 
 
