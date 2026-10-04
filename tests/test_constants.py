@@ -6,28 +6,49 @@ import numpy as np
 import pytest
 
 from mar_ils_core.constants import (
-    # Volume
-    X_DIM, Y_DIM, Z_DIM, VOXEL_MM, VOXEL_CM,
-    # Fan-beam
-    SID_MM, SDD_MM, N_ANGLES, N_DET,
-    GAMMA_MAX_RAD, DELTA_GAMMA_RAD,
-    DET_FAN_ANGLES_RAD, COS_DET_FAN,
-    ANGLES_DEG, ANGLES_RAD,
-    # Physics
-    MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM,
-    BACKGROUND_HU, METAL_HU,
-    # Phantom
-    BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
-    METAL_RADIUS_VOX, LESION_RADIUS_VOX,
-    LESION_CENTER_X, LESION_SLICE_INDEX,
-    # Lesion
-    LESION_DELTA_HU, MU_LESION_CM,
-    # Noise
-    NUM_REALIZATIONS_DEFAULT, BASE_SEED,
-    # CHO
-    ROI_SIZE, ROI_CENTER_X, ROI_CENTER_Y,
-    NUM_CHANNELS, CHANNEL_WIDTH_A,
+    ANGLES_DEG,
+    ANGLES_RAD,
     AUC_TOLERANCE,
+    BACKGROUND_HU,
+    BASE_SEED,
+    # Phantom
+    BODY_SEMI_X_VOX,
+    BODY_SEMI_Y_VOX,
+    CHANNEL_WIDTH_A,
+    COS_DET_FAN,
+    DELTA_GAMMA_RAD,
+    DET_FAN_ANGLES_RAD,
+    GAMMA_MAX_RAD,
+    LESION_CENTER_X,
+    # Lesion
+    LESION_DELTA_HU,
+    LESION_RADIUS_VOX,
+    LESION_SLICE_INDEX,
+    METAL_HU,
+    METAL_RADIUS_VOX,
+    # Physics
+    MU_AIR_CM,
+    MU_IRON_CM,
+    MU_LESION_CM,
+    MU_TISSUE_CM,
+    N_ANGLES,
+    N_DET,
+    NUM_CHANNELS,
+    # Noise
+    NUM_REALIZATIONS_DEFAULT,
+    ROI_CENTER_X,
+    ROI_CENTER_Y,
+    # CHO
+    ROI_SIZE,
+    SDD_MM,
+    # Fan-beam
+    SID_MM,
+    VOXEL_CM,
+    VOXEL_MM,
+    # Volume
+    X_DIM,
+    Y_DIM,
+    Z_DIM,
 )
 
 

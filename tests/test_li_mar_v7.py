@@ -9,9 +9,10 @@ import pytest
 from pydicom.uid import generate_uid
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "algorithms" / "v7"))
-import reference_li_mar_v7 as li  # noqa: E402
-from mar_ils_core.phantom import build_metal_mask, build_attenuation_map  # noqa: E402
-from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
+import reference_li_mar_v7 as li
+
+from mar_ils_core.dicom_utils import write_dicom_slice
+from mar_ils_core.phantom import build_attenuation_map, build_metal_mask
 
 
 class TestLinearInterpMetal:
@@ -67,7 +68,7 @@ class TestMetalTraceWeights:
 class TestLiMarSlice:
     @pytest.fixture(scope="class")
     def slice_inputs(self):
-        from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice
+        from generator_v7_0_0 import fbp_reconstruct_slice, forward_project_slice
         mu = build_attenuation_map(place_lesion=True, jitter_deg=0.0)
         sino = forward_project_slice(mu).astype(np.float64)
         nomar_hu = fbp_reconstruct_slice(sino, dc_offset_cm=0.0)
@@ -125,7 +126,7 @@ class TestDiscoverRealizations:
 
 def _build_tiny_dataset(root: Path):
     """One-slice (slice_index 0) LP realization: sinogram H5 + noMAR DICOM."""
-    from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice
+    from generator_v7_0_0 import fbp_reconstruct_slice, forward_project_slice
     mu = build_attenuation_map(place_lesion=True, jitter_deg=0.0)
     sino = forward_project_slice(mu).astype(np.float32)        # (720, 512)
     nomar_hu = fbp_reconstruct_slice(sino, dc_offset_cm=0.0)   # (512, 512)

@@ -8,10 +8,14 @@ import pydicom
 import pytest
 
 from mar_ils_core.constants import (
-    X_DIM, Y_DIM, VOXEL_MM, METAL_HU,
-    TAG_MAR_SEQ, TAG_MAR_APPLIED,
+    METAL_HU,
+    TAG_MAR_APPLIED,
+    TAG_MAR_SEQ,
+    VOXEL_MM,
+    X_DIM,
+    Y_DIM,
 )
-from mar_ils_core.dicom_utils import write_dicom_slice, add_mar_macro
+from mar_ils_core.dicom_utils import add_mar_macro, write_dicom_slice
 
 
 class TestDICOMWrite:

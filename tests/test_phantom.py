@@ -6,16 +6,21 @@ import numpy as np
 import pytest
 
 from mar_ils_core.constants import (
-    X_DIM, Y_DIM,
-    PHANTOM_CENTER_X, PHANTOM_CENTER_Y,
-    MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM, MU_LESION_CM,
     LESION_CENTER_X,
+    MU_AIR_CM,
+    MU_IRON_CM,
+    MU_LESION_CM,
+    MU_TISSUE_CM,
+    PHANTOM_CENTER_X,
+    PHANTOM_CENTER_Y,
+    X_DIM,
+    Y_DIM,
 )
 from mar_ils_core.phantom import (
-    build_body_mask,
-    build_metal_mask,
-    build_lesion_mask,
     build_attenuation_map,
+    build_body_mask,
+    build_lesion_mask,
+    build_metal_mask,
 )
 
 

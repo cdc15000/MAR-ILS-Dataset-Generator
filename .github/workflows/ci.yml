@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install ruff
+      - run: pip install ruff==0.16.10
       - run: ruff check mar_ils_core/ tests/ generator_v7_0_0.py run_cho_analysis_v7_0.py
 
   test:

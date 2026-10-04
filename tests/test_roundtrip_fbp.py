@@ -8,7 +8,11 @@ import numpy as np
 import pytest
 
 from mar_ils_core.constants import (
-    BACKGROUND_HU, MU_TISSUE_CM, X_DIM, Y_DIM, PHANTOM_CENTER_Y,
+    BACKGROUND_HU,
+    MU_TISSUE_CM,
+    PHANTOM_CENTER_Y,
+    X_DIM,
+    Y_DIM,
 )
 from mar_ils_core.phantom import build_attenuation_map
 
@@ -19,14 +23,15 @@ class TestRoundTripFBP:
     @pytest.fixture(scope="class")
     def reconstructed_hu(self):
         """Forward project and FBP-reconstruct a noise-free phantom."""
-        from generator_v7_0_0 import forward_project_slice, _fbp_fanbeam_core
+        from generator_v7_0_0 import _fbp_fanbeam_core, forward_project_slice
         mu = build_attenuation_map(place_lesion=False, jitter_deg=0.0)
         sino = forward_project_slice(mu)
         mu_recon = _fbp_fanbeam_core(sino)
 
         # Calibrate: measure DC offset in a clean tissue ROI
         from mar_ils_core.constants import (
-            PHANTOM_CENTER_X, BODY_SEMI_Y_VOX,
+            BODY_SEMI_Y_VOX,
+            PHANTOM_CENTER_X,
         )
         y0 = PHANTOM_CENTER_Y - round(0.90 * BODY_SEMI_Y_VOX)
         y1 = PHANTOM_CENTER_Y - round(0.40 * BODY_SEMI_Y_VOX)
@@ -43,7 +48,8 @@ class TestRoundTripFBP:
     def test_tissue_hu(self, reconstructed_hu):
         """Tissue in calibration ROI should reconstruct to ~40 HU."""
         from mar_ils_core.constants import (
-            PHANTOM_CENTER_X, BODY_SEMI_Y_VOX,
+            BODY_SEMI_Y_VOX,
+            PHANTOM_CENTER_X,
         )
         y0 = PHANTOM_CENTER_Y - round(0.90 * BODY_SEMI_Y_VOX)
         y1 = PHANTOM_CENTER_Y - round(0.40 * BODY_SEMI_Y_VOX)

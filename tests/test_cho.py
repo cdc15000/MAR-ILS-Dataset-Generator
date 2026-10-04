@@ -6,7 +6,8 @@ import numpy as np
 import pytest
 
 from mar_ils_core.constants import (
-    ROI_SIZE, NUM_CHANNELS,
+    NUM_CHANNELS,
+    ROI_SIZE,
 )
 
 

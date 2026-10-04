@@ -51,53 +51,84 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import h5py
 import numpy as np
 import scipy.ndimage
-import h5py
 from pydicom.uid import generate_uid
-
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Table, TableStyle,
-    HRFlowable, PageBreak,
-)
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-
+from reportlab.platypus import (
+    HRFlowable,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Table,
+    TableStyle,
+)
 from tqdm import tqdm
-import math
 
 from mar_ils_core.constants import (
-    X_DIM, Y_DIM, Z_DIM, VOXEL_MM, VOXEL_CM,
-    PHANTOM_CENTER_X, PHANTOM_CENTER_Y,
-    SID_MM, SDD_MM, SID_CM, SID_VOX, N_ANGLES, N_DET,
-    GAMMA_MAX_RAD, DELTA_GAMMA_RAD, DET_FAN_ANGLES_RAD, COS_DET_FAN,
-    ANGLES_DEG, ANGLES_RAD,
-    _RAY_T_VALS, _N_RAY_SAMPLES, _RAY_STEP,
-    MU_AIR_CM, MU_TISSUE_CM, MU_IRON_CM,
-    BACKGROUND_HU, BODY_SEMI_X_VOX, BODY_SEMI_Y_VOX,
-    LESION_CENTER_X, LESION_SLICE_INDEX,
-    LESION_DELTA_HU, MU_LESION_CM,
-    SCATTER_FRAC, SIGMA_E_COUNTS, NOISE_SIGMA_TARGET_HU,
+    _N_RAY_SAMPLES,
+    _RAY_STEP,
+    _RAY_T_VALS,
+    ANGLES_DEG,
+    ANGLES_RAD,
+    BACKGROUND_HU,
+    BASE_SEED,
+    BODY_SEMI_X_VOX,
+    BODY_SEMI_Y_VOX,
+    COS_DET_FAN,
+    DELTA_GAMMA_RAD,
+    DET_FAN_ANGLES_RAD,
+    GAMMA_MAX_RAD,
     JITTER_MAX_DEG,
-    NUM_REALIZATIONS_DEFAULT, BASE_SEED,
+    LESION_CENTER_X,
+    LESION_DELTA_HU,
+    LESION_SLICE_INDEX,
+    MU_AIR_CM,
+    MU_IRON_CM,
+    MU_LESION_CM,
+    MU_TISSUE_CM,
+    N_ANGLES,
+    N_DET,
+    NOISE_SIGMA_TARGET_HU,
+    NUM_REALIZATIONS_DEFAULT,
+    PHANTOM_CENTER_X,
+    PHANTOM_CENTER_Y,
+    SCATTER_FRAC,
+    SDD_MM,
+    SID_CM,
+    SID_MM,
+    SID_VOX,
+    SIGMA_E_COUNTS,
+    VOXEL_CM,
+    VOXEL_MM,
+    X_DIM,
+    Y_DIM,
+    Z_DIM,
+)
+from mar_ils_core.dicom_utils import write_dicom_slice as _write_dicom_slice
+from mar_ils_core.noise import apply_noise
+from mar_ils_core.phantom import (
+    build_attenuation_map,
 )
 from mar_ils_core.phantom import (
     build_body_mask as _build_body_mask,
-    build_metal_mask as _build_metal_mask,
-    build_attenuation_map,
 )
-from mar_ils_core.noise import apply_noise
-from mar_ils_core.dicom_utils import write_dicom_slice as _write_dicom_slice
+from mar_ils_core.phantom import (
+    build_metal_mask as _build_metal_mask,
+)
 
 try:
     import numba
@@ -719,8 +750,10 @@ def write_checksums(output_dir: Path) -> None:
     print(f"Computing SHA-256 checksums ({len(files)} files)...", flush=True)
     with open(manifest, 'w') as fout:
         fout.write(f'# ASTM WKXXXXX {DATASET_VERSION} — SHA-256 manifest\n')
-        for p in tqdm(files, desc='  SHA-256', unit='file'):
-            fout.write(f'{_sha256_file(p)}  {p.relative_to(output_dir)}\n')
+        fout.writelines(
+            f'{_sha256_file(p)}  {p.relative_to(output_dir)}\n'
+            for p in tqdm(files, desc='  SHA-256', unit='file')
+        )
 
 
 def write_provenance_json(
@@ -800,7 +833,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             if _DEJAVU_MONO:
                 pdfmetrics.registerFont(TTFont("DejaVuMono", _DEJAVU_MONO))
             _font_ok = True
-        except Exception:
+        except Exception:  # noqa: BLE001, S110 — any font failure falls back to Helvetica below
             pass
     if not _font_ok:
         globals()['PDF_FONT'] = "Helvetica"
@@ -854,7 +887,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             f"Metal Artifact Reduction ILS — {DATASET_VERSION} ({STANDARD_REF})",
             styles["Heading2"],
         ),
-        Paragraph(f"Generated {date.today().isoformat()}", styles["Italic"]),
+        Paragraph(f"Generated {date.today().isoformat()}", styles["Italic"]),  # noqa: DTZ011 — local date intended
         HRFlowable(width="100%", thickness=1, color=colors.grey, spaceAfter=12),
         Paragraph("1. Canonical Test Configuration", H1),
         _tbl([
@@ -915,8 +948,8 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
         _tbl([
             ["Folder", "Contents"],
             [f"mar_recon/LP/realization_001/ ... /{num_realizations:03d}/",
-             f"MAR-corrected DICOMs (slice_NNNN.dcm, 1-indexed). "
-             f"Only slice_{LESION_SLICE_INDEX + 1:04d}.dcm is scored."],
+             (f"MAR-corrected DICOMs (slice_NNNN.dcm, 1-indexed). "
+              f"Only slice_{LESION_SLICE_INDEX + 1:04d}.dcm is scored.")],
             [f"mar_recon/LA/realization_001/ ... /{num_realizations:03d}/",
              "MAR-corrected DICOMs for LA realizations."],
         ], [2.75 * inch, 3.6 * inch]),
@@ -1046,7 +1079,7 @@ def main() -> None:
                 label = fut.result()
                 done += 1
                 print(f"  [{done:3d}/{n_tasks}] {label}", flush=True)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 — report failed realization, keep the rest
                 t = futs[fut]
                 print(f"  ERROR {t[0]}/realization_{t[2] + 1:03d}: {exc}")
 

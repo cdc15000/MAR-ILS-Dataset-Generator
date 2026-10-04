@@ -63,17 +63,22 @@ from pathlib import Path
 
 import numpy as np
 import pydicom
+from scipy.optimize import curve_fit
 from scipy.special import genlaguerre
 from scipy.stats import wilcoxon
-from scipy.optimize import curve_fit
 
 from mar_ils_core.constants import (
-    LESION_SLICE_INDEX, NUM_REALIZATIONS_DEFAULT,
-    ROI_SIZE, ROI_CENTER_X, ROI_CENTER_Y,
-    NUM_CHANNELS, CHANNEL_WIDTH_A,
-    N_BOOT, AUC_TOLERANCE, DEFAULT_SIGMA_SWEEP,
+    AUC_TOLERANCE,
+    CHANNEL_WIDTH_A,
+    DEFAULT_SIGMA_SWEEP,
+    LESION_SLICE_INDEX,
+    N_BOOT,
+    NUM_CHANNELS,
+    NUM_REALIZATIONS_DEFAULT,
+    ROI_CENTER_X,
+    ROI_CENTER_Y,
+    ROI_SIZE,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Channel templates
@@ -168,11 +173,9 @@ def load_all_rois_parallel(
     else:
         with ProcessPoolExecutor(max_workers=n_workers) as exe:
             futs = {exe.submit(_worker_load, f): f for f in all_folders}
-            done = 0
-            for fut in as_completed(futs):
+            for done, fut in enumerate(as_completed(futs), start=1):
                 f = futs[fut]
                 rois[f] = fut.result()
-                done += 1
                 print(f"  Loaded {done}/{len(all_folders)}...",
                       end="\r", flush=True)
 
@@ -357,7 +360,7 @@ def fit_auc_sigmoid(sigmas: list[float], aucs: list[float]) -> dict:
         r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float('nan')
         return {"A": float(A), "k": float(k), "sigma_0": float(s0),
                 "fit_ok": True, "r_squared": float(r2)}
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — informative fit; failure is recorded, not fatal
         return {"A": None, "k": None, "sigma_0": None,
                 "fit_ok": False, "r_squared": None, "error": str(exc)}
 
@@ -548,7 +551,7 @@ def main() -> None:
     try:
         _, p_delta = wilcoxon(d_delta, alternative='two-sided',
                               zero_method='wilcox')
-    except Exception:
+    except Exception:  # noqa: BLE001 — older SciPy lacks `alternative`; fall back
         _, p_delta = wilcoxon(d_delta, zero_method='wilcox')
 
     # Summary
