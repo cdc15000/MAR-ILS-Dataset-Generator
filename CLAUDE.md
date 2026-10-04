@@ -8,14 +8,14 @@ This is the **MAR ILS Dataset Generator** — a reference implementation for gen
 
 ## Project Root
 
-The persistent working directory is `~/projects/mar-ils/`. A convenience symlink exists at `/tmp/mar-ils` → `~/projects/mar-ils/`.
+The persistent working directory is `~/projects/claude/mar-ils/`.
 
 ## Commands
 
 ### Environment Setup
 ```bash
-cd ~/projects/mar-ils
-source mar-ils/bin/activate   # activate virtual environment (Python 3.10)
+cd ~/projects/claude/mar-ils
+source mar-ils/bin/activate   # activate virtual environment (Python 3.11)
 pip install -r requirements.txt
 pip install numba              # optional: ~24x speedup via JIT + batch geometry
 ```

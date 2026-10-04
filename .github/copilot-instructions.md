@@ -3,7 +3,7 @@
 ## Quick Setup
 
 ```bash
-source mar-ils/bin/activate       # Activate venv (Python 3.10)
+source mar-ils/bin/activate       # Activate venv (Python 3.11)
 pip install -r requirements.txt   # Install dependencies
 pip install numba                 # Optional: ~24× speedup (JIT + batch geometry)
 ```
