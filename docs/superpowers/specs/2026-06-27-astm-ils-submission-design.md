@@ -204,11 +204,11 @@ Minimum qualifications for participation:
 
 **Section 5: Number of Laboratories**
 
-- **Target:** 8 laboratories (provides robust E691 statistics)
-- **Minimum:** 6 laboratories with acceptable results (E691-23 §9.1.2); E691 recommends starting with 8+ to allow for attrition
+- **Target:** 8 or more laboratories (E691-23 §9.1.2 recommends starting with 8+ to allow for attrition)
+- **Minimum:** 6 laboratories with acceptable results (E691-23 §9.1.2)
 - **Laboratory tiers** (for recruitment purposes, not for stratified analysis):
   - Tier A: CT system manufacturers with proprietary MAR (target 2–3)
-  - Tier B: Academic / government imaging physics labs (target 3–4, including FDA CDRH)
+  - Tier B: Academic / government imaging physics labs (target 5–6, including FDA CDRH)
   - Tier C: Independent testing / CRO labs (target 1–2)
 
 **Section 6: Test Conditions**
@@ -272,7 +272,7 @@ Per E691 §15–17:
 | Work item registered (WK number assigned) | November 2026 |
 | ILS Protocol distributed to potential labs | December 2026 |
 | First task group meeting (MAR integration discussion, virtual) | January 2027 |
-| Lab recruitment complete (≥6 signed agreements) | February 2027 |
+| Lab recruitment complete (≥8 signed agreements) | February 2027 |
 | Dataset distributed to participating labs | March 2027 |
 | Execution window opens | March 2027 |
 | 30-day check-in | April 2027 |
