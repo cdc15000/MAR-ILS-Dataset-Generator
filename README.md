@@ -4,7 +4,7 @@
 # MAR ILS Dataset Generator and Evaluation Framework
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
 ![Standard: ASTM WKXXXXX Rev 05](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2005-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
@@ -56,7 +56,7 @@ This is the **reference evaluation framework** for conducting standardized **Int
 
 ### Requirements
 
-* **Python** 3.10 or newer
+* **Python** 3.11 or newer
 * **~40 GB free disk** for a full $N=40$ dataset (~35 GB of HDF5 sinograms + DICOM reconstructions)
 * **16+ GB RAM** recommended; 8 CPU cores gets full-$N$ generation under 30 minutes
 * macOS, Linux, or Windows (paths below use POSIX)
@@ -67,7 +67,7 @@ This is the **reference evaluation framework** for conducting standardized **Int
 git clone https://github.com/cdc15000/MAR-ILS-Dataset-Generator.git
 cd MAR-ILS-Dataset-Generator
 
-python3.10 -m venv mar-ils
+python3.11 -m venv mar-ils
 source mar-ils/bin/activate
 
 pip install -r requirements.txt

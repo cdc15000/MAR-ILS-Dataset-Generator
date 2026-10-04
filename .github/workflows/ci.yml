@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - run: pip install ruff
       - run: ruff check mar_ils_core/ tests/ generator_v7_0_0.py run_cho_analysis_v7_0.py
 
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - run: pip install -r requirements.txt pytest
       - run: python -m pytest tests/ -v
 
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - run: pip install -r requirements.txt pytest numba
       - run: python -m pytest tests/ -v
 
@@ -46,6 +46,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: python generator_v7_0_0.py --dry-run
