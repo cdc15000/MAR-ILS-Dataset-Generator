@@ -16,7 +16,7 @@ Prepare a complete submission package for registering a new ASTM work item (Form
 
 | Layer | Document | Role | Status |
 |---|---|---|---|
-| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | RFDIS; publication forecast Oct 2026 |
+| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; publication scheduled 2026-10-23 |
 | 2 | ASTM FXXXX (this submission) | TYPE TEST measuring ΔAUC | Form 01 not yet submitted |
 | 3 | FDA guidance | Acceptance criteria (non-degradation threshold) | Conceptual framework drafted |
 
@@ -73,9 +73,9 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 
 | Field | Value | Rationale |
 |---|---|---|
-| Target date for Subcommittee ballot | **December 2027** | ILS needs ~12 months; task group review after ILS completion |
+| Target date for Subcommittee ballot | **April 2028** | ILS execution Mar–Jul 2027; Research Report Oct 2027; ballot Jan–Apr 2028 (re-baselined 2026-10-04) |
 | Authorized at a Subcommittee meeting? | **No** | Submission itself requests authorization |
-| Authorization date | **06 / 2026** | Current month |
+| Authorization date | **10 / 2026** | Month of submission (adjust if submitted later) |
 | Emergency / regulatory requirement? | **Yes** | IEC 60601-2-44 Ed. 4 publishes ~Oct 2026 with a 3-year transition window; the ASTM standard must publish within that window for incorporation by normative reference |
 | Patented or pending patent? | **No** | |
 | Expected target date for approval | **12–18 months** | Select the longest available option in the dropdown; if only "3–6 months" is offered, select it and note the actual 12–18 month timeline in the rationale field — the dropdown constrains presentation, not commitment |
@@ -95,7 +95,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 > metal artifact reduction; computed tomography; channelized Hotelling observer; model observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
 
 **Rationale:**
-> Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4 (publication forecast Q4 2026) establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata (per DICOM 2026b CP-2575, approved). However, the current compliance statement verifies documentation only — not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions (510(k), CE marking), regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement (§17).
+> Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4 (publication scheduled 23 October 2026) establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata (per DICOM 2026b CP-2575, approved). However, the current compliance statement verifies documentation only — not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions (510(k), CE marking), regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement (§17).
 
 **Existing Standards:**
 > ASTM F2119-24 — Standard Test Method for Evaluation of MR Image Artifacts from Passive Implants. F2119 characterizes the physical extent of image artifacts produced by passive implants under standardized MR scanning conditions. The proposed standard is complementary, not duplicative: it quantifies the observer-based task-detectability impact of an algorithmic countermeasure (MAR) applied within CT imaging systems. The two methods address non-overlapping axes — modality (MR vs. CT) and object of measurement (physical artifact extent vs. algorithmic task impact). No existing ASTM, ISO, IEC, or NEMA standard defines a task-based, model-observer test method for MAR performance evaluation. IEC 60601-2-44 Ed. 4 requires MAR availability but does not specify a test method for performance verification.
@@ -162,7 +162,7 @@ Notes that per Dr. Woods' recommendation, the sponsor joined IEC SC 62B WG30 (CT
 
 **Section 6: Regulatory Context and Timeline** (~1 paragraph)
 
-Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures ΔAUC → FDA guidance establishes acceptance criteria. The IEC 3-year transition window (~2029) establishes the deadline for ASTM publication. Target: ILS complete mid-2027, ballot late 2027, F-designation early 2028.
+Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures ΔAUC → FDA guidance establishes acceptance criteria. The IEC 3-year transition window (~2029) establishes the deadline for ASTM publication. Target: ILS execution March–July 2027, Research Report October 2027, ballot January–April 2028, F-designation mid-2028.
 
 **Section 7: Requested Actions** (~3 bullets)
 
@@ -182,7 +182,7 @@ Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures
 
 **Section 1: Objective**
 
-To determine the within-laboratory repeatability (S_r) and between-laboratory reproducibility (S_R) of the ΔAUC measurand defined in ASTM WKXXXXX, in accordance with ASTM E691-22 and ISO 5725-2.
+To determine the within-laboratory repeatability (S_r) and between-laboratory reproducibility (S_R) of the ΔAUC measurand defined in ASTM WKXXXXX, in accordance with ASTM E691-23 and ISO 5725-2.
 
 **Section 2: Measurand**
 
@@ -270,20 +270,23 @@ Per E691 §15–17:
 
 | Milestone | Target Date |
 |---|---|
-| Work item registered (WK number assigned) | July 2026 |
-| ILS Protocol distributed to potential labs | August 2026 |
-| Lab recruitment complete (≥6 signed agreements) | October 2026 |
-| Dataset distributed to participating labs | November 2026 |
-| Execution window opens | November 2026 |
-| 30-day check-in | December 2026 |
-| 60-day check-in | January 2027 |
-| 90-day check-in | February 2027 |
-| Execution window closes (results due) | March 2027 |
-| Statistical analysis complete | April 2027 |
-| Draft Research Report circulated to labs | May 2027 |
-| Research Report finalized | June 2027 |
-| Draft standard updated with §17 P&B data | June 2027 |
-| Subcommittee ballot | September–December 2027 |
+| Work item registered (WK number assigned) | November 2026 |
+| ILS Protocol distributed to potential labs | December 2026 |
+| First task group meeting (MAR integration discussion, virtual) | January 2027 |
+| Lab recruitment complete (≥6 signed agreements) | February 2027 |
+| Dataset distributed to participating labs | March 2027 |
+| Execution window opens | March 2027 |
+| 30-day check-in | April 2027 |
+| 60-day check-in | May 2027 |
+| 90-day check-in | June 2027 |
+| Execution window closes (results due) | July 2027 |
+| Statistical analysis complete | August 2027 |
+| Draft Research Report circulated to labs | September 2027 |
+| Research Report finalized | October 2027 |
+| Draft standard updated with §17 P&B data | October 2027 |
+| Subcommittee ballot | January–April 2028 |
+
+_Re-baselined 2026-10-04 (original plan assumed July 2026 registration)._
 
 **Section 11: Reporting**
 
@@ -314,8 +317,8 @@ The existing `private/ASTM_MAR_Standard.md` (Rev 05, dated 2026-05-29), exported
 
 1. [x] ~~Resolve IP question~~ — DONE 2026-07-14: standard text moved to `private/` (gitignored), removed from public repo
 2. [ ] Export Rev 05 draft standard to Word/PDF in ASTM manuscript format
-3. [ ] Write Document 2 (Cover Memorandum) as a standalone PDF
-4. [ ] Write Document 3 (ILS Protocol) as a standalone PDF
+3. [x] Write Document 2 (Cover Memorandum) as a standalone PDF — drafted 2026-07-27, re-dated 2026-10-04 (`~/Desktop/ASTM Submission Package/`)
+4. [x] Write Document 3 (ILS Protocol) as a standalone PDF — drafted 2026-07-27, re-dated 2026-10-04
 5. [ ] Complete ASTM online wizard (Document 1 field content)
 6. [ ] Attach Documents 2, 3, and the Rev 05 draft to the work item registration
 7. [ ] Update ILS Participation Agreement template to reference the assigned WK number once received
