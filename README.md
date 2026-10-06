@@ -34,8 +34,8 @@ For per-version status, performance work, tooling, DICOM 2026b compliance detail
 | 1 | Concept development (Vaishnav framework adaptation) | Complete |
 | 2 | Draft ASTM test method (WKXXXXX Rev 01–05) | Complete |
 | 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7) | Complete |
-| 4 | ILS reference implementation (locked baseline, lab instructions, DICOM 2026b) | Complete |
-| 5 | ASTM interlaboratory study (Form 01 + E691 package designed; lab recruitment pending) | In progress |
+| 4 | ILS reference implementation (reference baseline, lab instructions, DICOM 2026b) | Complete |
+| 5 | ASTM interlaboratory study (Form 01 package ready for submission; dataset DOI reserved; lab recruitment pending) | In progress |
 | 6 | Journal publication (*Medical Physics* or equivalent) | Planned |
 | 7 | IEC incorporation (§203.6.7.101.1 binding amendment, post-ASTM-FXXXX publication) | Planned |
 
@@ -58,7 +58,7 @@ This is the **reference evaluation framework** for conducting standardized **Int
 
 * **Python** 3.11 or newer
 * **~40 GB free disk** for a full $N=40$ dataset (~35 GB of HDF5 sinograms + DICOM reconstructions)
-* **16+ GB RAM** recommended; 8 CPU cores gets full-$N$ generation under 30 minutes
+* **16+ GB RAM** recommended; 8 CPU cores gets full-$N$ generation under 30 minutes. On an 8 GB machine, use `--workers 2`: more workers exhaust RAM and run slower.
 * macOS, Linux, or Windows (paths below use POSIX)
 
 ### Installation
@@ -81,6 +81,8 @@ python generator_v7_0_0.py --dry-run
 ```
 
 A clean `--dry-run` prints the locked constants and exits 0 without writing any files.
+
+Once a dataset is available, the self-test in [Quick Start](#quick-start) should report AUC_noMAR = 0.8294, 95% CI [0.7612, 0.9025]. The archived reference record is in [`docs_and_references/baseline/`](docs_and_references/baseline/).
 
 ---
 
@@ -188,6 +190,10 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 
 Total size: **~35 GB** for $N=40$; **~18 GB** for $N=20$ screening.
 
+### Distribution
+
+The canonical $N=40$ dataset will be distributed to ILS laboratories through Zenodo under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489), licensed CC BY 4.0. The DOI is reserved; the record will be published, and the link will resolve, before the dataset is distributed to laboratories. Until then, generate the dataset locally with the command above.
+
 ### HDF5 sinogram format
 
 Each `realization_NNN.h5` contains:
@@ -232,9 +238,14 @@ Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on
 If you use this framework in your research, please cite:
 
 > Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v7.0.0.
-> ASTM Work Item WKXXXXX — Standard Test Method for Evaluation of CT Metal Artifact Reduction Algorithms Using a Channelized Hotelling Observer.
+> ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of CT Metal Artifact Reduction Algorithms Using a Channelized Hotelling Observer.
 > https://github.com/cdc15000/MAR-ILS-Dataset-Generator
-> DOI: &lt;pending Zenodo deposit&gt;
+
+To cite the reference dataset:
+
+> Cocchiaraley, C. *MAR ILS Reference Dataset v7.0.0: Synthetic Fan-Beam CT Sinograms and Reference Reconstructions for a Metal Artifact Reduction Interlaboratory Study*. Zenodo, 2026. https://doi.org/10.5281/zenodo.23144489
+
+The dataset DOI is reserved and resolves once the Zenodo record is published.
 
 ---
 
@@ -255,4 +266,5 @@ Change control, version freezing, and the approval process for normative paramet
 ## Technical Contact
 
 **Christopher D. Cocchiaraley** Consumer Member, ASTM International Committee F04  
-Executor of the Estate of Veronica M. Cocchiaraley
+Executor of the Estate of Veronica M. Cocchiaraley  
+ORCID: [0009-0006-4995-566X](https://orcid.org/0009-0006-4995-566X)
