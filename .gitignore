@@ -28,3 +28,10 @@ private/
 
 # Scratch/review files
 docs_and_references/ASTM_MAR_Standard_Rev05_Review.md
+# CHO output written to the working directory on every run
+# (archived reference record: docs_and_references/baseline/)
+/cho_results.json
+
+# Dataset symlink (e.g., to Google Drive); the trailing-slash rule above
+# does not match a symlink
+astm_reference_dataset

@@ -61,7 +61,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ### Scripts (versioned by filename — use the highest version)
 - **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 05): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
 - **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 05 ROI parameters (121×121, centre (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
-- **`patch_2026b_metadata.py`** — One-time utility to inject DICOM 2026b CP-2575 MAR metadata into existing datasets.
+- `patch_2026b_metadata.py` — Legacy one-time utility that retrofits DICOM 2026b CP-2575 MAR metadata into datasets generated before the generator wrote the macro natively. Not needed for v7.0.0 output and not part of the lab workflow.
 - `legacy/generator_v6_0_0.py` — Research tier framework (T1_AB/T2_SB/T3_HEAD). Not normative. Uses parallel-beam geometry and tier-specific parameters. Retained for multi-tier research.
 - `legacy/run_cho_analysis_v6_0.py` — Tier-aware CHO. Not normative. Uses tier_config.py for ROI parameters.
 - `tier_config.py` — Three-tier registry (v6 research framework only).
@@ -184,7 +184,7 @@ python run_cho_analysis_v7_0.py \
   ds = pydicom.dcmread('path/to/slice.dcm')
   print(ds[0x00189390].value[0][0x00189391].value)  # → "NO"
   ```
-- `patch_2026b_metadata.py` retrofits existing datasets (idempotent, regenerates checksums).
+- `generator_v7_0_0.py` writes the macro on every slice. The legacy `patch_2026b_metadata.py` only retrofits older datasets (idempotent, regenerates checksums).
 
 ## Regulatory Framework (Layered Approach)
 
