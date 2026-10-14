@@ -25,6 +25,38 @@ class TestGeneratorDryRun:
         assert "570.0" in result.stdout
         assert "720 angles" in result.stdout
 
+    def test_dry_run_warns_when_workers_exceed_memory(self):
+        """Far more workers than RAM supports should print a memory warning."""
+        result = subprocess.run(
+            [sys.executable, "generator_v7_0_0.py", "--dry-run", "--workers", "512"],
+            capture_output=True, text=True, timeout=60, check=False,
+        )
+        assert result.returncode == 0
+        assert "Memory" in result.stdout
+        assert "WARNING: 512 workers" in result.stdout
+
+    def test_dry_run_no_memory_warning_for_one_worker(self):
+        result = subprocess.run(
+            [sys.executable, "generator_v7_0_0.py", "--dry-run", "--workers", "1"],
+            capture_output=True, text=True, timeout=60, check=False,
+        )
+        assert "workers need about" not in result.stdout
+
+
+class TestRecommendedWorkers:
+    def test_8gb_machine_gets_2_workers(self):
+        """CLAUDE.md: --workers 2 keeps N=40 in RAM on an 8 GB Mac."""
+        from generator_v7_0_0 import recommended_workers
+        assert recommended_workers(8.0) == 2
+
+    def test_never_below_one(self):
+        from generator_v7_0_0 import recommended_workers
+        assert recommended_workers(2.0) == 1
+
+    def test_scales_with_ram(self):
+        from generator_v7_0_0 import recommended_workers
+        assert recommended_workers(32.0) > recommended_workers(16.0) > 2
+
 
 class TestImports:
     def test_generator_imports(self):

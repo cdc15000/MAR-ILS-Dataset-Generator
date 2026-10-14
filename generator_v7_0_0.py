@@ -975,6 +975,26 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
 # Main
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Peak memory per worker: several (256, 720, 512) float64 arrays plus the
+# sinogram and DICOM buffers. Beyond RAM, workers thrash swap and N=40 takes
+# hours instead of ~20 minutes (observed on an 8 GB Mac with 8 workers).
+WORKER_PEAK_GB = 2.5
+SYSTEM_RESERVE_GB = 2.0
+
+
+def total_ram_gb() -> float | None:
+    """Physical RAM in GB, or None where the platform does not report it."""
+    try:
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024**3
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
+def recommended_workers(ram_gb: float) -> int:
+    """Largest worker count whose peak memory fits in RAM (8 GB -> 2)."""
+    return max(1, int((ram_gb - SYSTEM_RESERVE_GB) // WORKER_PEAK_GB))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=(
@@ -1024,6 +1044,10 @@ def main() -> None:
           f"({'SCREENING' if num_real < 40 else 'FORMAL'})")
     print(f"Output directory  : {output_dir}")
     print(f"Workers           : {n_workers}")
+    ram_gb = total_ram_gb()
+    if ram_gb is not None:
+        print(f"Memory            : {ram_gb:.0f} GB RAM "
+              f"(~{WORKER_PEAK_GB:g} GB peak per worker)")
     if _HAS_NUMBA:
         print(f"Acceleration      : Numba {numba.__version__} "
               f"(JIT + batch geometry sharing)")
@@ -1034,6 +1058,14 @@ def main() -> None:
     if num_real < 40:
         print("WARNING: Screening mode (< 40 realizations). Results are not "
               "reportable under ASTM WKXXXXX §10.2.", flush=True)
+        print()
+
+    if ram_gb is not None and n_workers > recommended_workers(ram_gb):
+        rec = recommended_workers(ram_gb)
+        print(f"WARNING: {n_workers} workers need about "
+              f"{n_workers * WORKER_PEAK_GB:.0f} GB but this machine has "
+              f"{ram_gb:.0f} GB RAM. Workers will thrash swap and run far "
+              f"slower. Use --workers {rec}.", flush=True)
         print()
 
     if args.dry_run:
