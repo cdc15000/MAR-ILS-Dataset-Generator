@@ -79,6 +79,27 @@ class TestCP2575:
         mar_applied = mar_seq.value[0][TAG_MAR_APPLIED].value
         assert mar_applied == "NO"
 
+    def test_write_slice_mar_applied_yes(self, tmp_path):
+        from pydicom.uid import generate_uid
+        hu = np.full((Y_DIM, X_DIM), 40.0, dtype=np.float32)
+        write_dicom_slice(
+            hu, 0, output_dir=tmp_path, realization_idx=0, condition_label="LP",
+            study_uid=generate_uid(), series_uid=generate_uid(),
+            metal_mask=np.zeros((Y_DIM, X_DIM), dtype=bool), mar_applied="YES",
+        )
+        ds = pydicom.dcmread(str(tmp_path / "slice_0001.dcm"))
+        assert ds[TAG_MAR_SEQ].value[0][TAG_MAR_APPLIED].value == "YES"
+
+    def test_write_slice_rejects_invalid_mar_applied(self, tmp_path):
+        from pydicom.uid import generate_uid
+        hu = np.full((Y_DIM, X_DIM), 40.0, dtype=np.float32)
+        with pytest.raises(ValueError):
+            write_dicom_slice(
+                hu, 0, output_dir=tmp_path, realization_idx=0, condition_label="LP",
+                study_uid=generate_uid(), series_uid=generate_uid(),
+                metal_mask=np.zeros((Y_DIM, X_DIM), dtype=bool), mar_applied="yes",
+            )
+
     def test_add_mar_macro_standalone(self):
         ds = pydicom.Dataset()
         add_mar_macro(ds, applied="YES")

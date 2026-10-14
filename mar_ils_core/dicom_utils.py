@@ -43,8 +43,15 @@ def write_dicom_slice(
     metal_mask: np.ndarray,
     dataset_version: str = "v7.0.0",
     standard_ref: str = "ASTM-WKXXXXX-Rev05",
+    mar_applied: str = "NO",
 ) -> None:
-    """Write one 2D HU array as DICOM. Metal hard-set to 3000 HU (§A1.3(d,f))."""
+    """Write one 2D HU array as DICOM. Metal hard-set to 3000 HU (§A1.3(d,f)).
+
+    ``mar_applied`` sets CP-2575 Metal Artifact Reduction Applied (0018,9391):
+    "NO" for noMAR reconstructions, "YES" for MAR-corrected output.
+    """
+    if mar_applied not in ("YES", "NO"):
+        raise ValueError(f"mar_applied must be 'YES' or 'NO', got {mar_applied!r}")
     output_dir.mkdir(parents=True, exist_ok=True)
     hu = hu.copy()
     hu[metal_mask] = METAL_HU
@@ -92,6 +99,6 @@ def write_dicom_slice(
     ds.RescaleSlope = 1
     ds.PixelData = hu_clipped.tobytes()
 
-    add_mar_macro(ds)
+    add_mar_macro(ds, applied=mar_applied)
 
     ds.save_as(str(output_dir / f'slice_{z + 1:04d}.dcm'), enforce_file_format=True)
