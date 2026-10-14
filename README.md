@@ -160,6 +160,8 @@ python run_cho_analysis_v7_0.py \
     --internal-noise-sigma 15
 ```
 
+LI-MAR output is tagged Metal Artifact Reduction Applied = `YES`, as the ILS protocol requires for MAR-corrected submissions.
+
 See [`algorithms/v7/README.md`](algorithms/v7/README.md) for the measured ΔAUC anchor on the locked $N=40$ dataset.
 
 ### 4. Visualize sinograms
@@ -189,6 +191,8 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ```
 
 Total size: **~35 GB** for $N=40$; **~18 GB** for $N=20$ screening.
+
+Every DICOM file the generator writes includes the DICOM 2026b CP-2575 Metal Artifact Reduction Macro with Metal Artifact Reduction Applied `(0018,9391)` = `NO`. The generator has written the macro natively since April 7, 2026, so no separate patch step is needed. `patch_2026b_metadata.py` is kept only to retrofit datasets generated before that date.
 
 ### Distribution
 

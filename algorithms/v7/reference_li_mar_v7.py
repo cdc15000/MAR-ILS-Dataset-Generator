@@ -165,6 +165,7 @@ def process_realization(
         study_uid=generate_uid(),
         series_uid=generate_uid(),
         metal_mask=metal_mask,
+        mar_applied="YES",
     )
 
 

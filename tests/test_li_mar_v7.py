@@ -167,6 +167,17 @@ class TestProcessRealization:
         assert hu[256, 256] == pytest.approx(3000.0)
         assert np.allclose(hu[core], 3000.0)
 
+    def test_output_tagged_mar_applied_yes(self, tmp_path):
+        """LI-MAR output is MAR-corrected, so CP-2575 MAR Applied must be YES."""
+        from mar_ils_core.constants import TAG_MAR_APPLIED, TAG_MAR_SEQ
+        _build_tiny_dataset(tmp_path)
+        out = tmp_path / "li_mar_recon"
+        li.process_realization(
+            tmp_path, out, "LP", 0, dc_offset_cm=0.0, slice_index=0,
+        )
+        ds = pydicom.dcmread(str(out / "LP" / "realization_001" / "slice_0001.dcm"))
+        assert ds[TAG_MAR_SEQ].value[0][TAG_MAR_APPLIED].value == "YES"
+
     def test_missing_input_raises(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             li.process_realization(tmp_path, tmp_path / "o", "LP", 0, 0.0, slice_index=0)

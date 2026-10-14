@@ -78,7 +78,9 @@ All DICOM files produced by the generator include:
 | `(0018,9390)` | Metal Artifact Reduction Sequence | Present (1 item) |
 | `(0018,9391)` | Metal Artifact Reduction Applied | `NO` |
 
-The `noMAR` reconstructions are tagged `NO` by definition. Laboratories applying MAR algorithms must set `(0018,9391)` to `YES` and optionally populate `(0018,9392)` Metal Artifact Reduction Algorithm with a value from **CID 10036** (e.g., `MAR_IMAR`, `MAR_SPECTRAL`).
+The generator has written the macro natively since 2026-04-07. `patch_2026b_metadata.py` is a legacy tool that only retrofits datasets generated before then; it is not needed for v7.0.0 output.
+
+The `noMAR` reconstructions are tagged `NO` by definition. The reference LI-MAR (`algorithms/v7/reference_li_mar_v7.py`) tags its output `YES` via the `mar_applied` argument of `mar_ils_core.dicom_utils.write_dicom_slice()`. Laboratories applying MAR algorithms must set `(0018,9391)` to `YES` and optionally populate `(0018,9392)` Metal Artifact Reduction Algorithm with a value from **CID 10036** (e.g., `MAR_IMAR`, `MAR_SPECTRAL`).
 
 #### Verification (hex-tag method)
 
