@@ -20,17 +20,17 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
 import h5py
+import numpy as np
 import pydicom
 from pydicom.uid import generate_uid
 from tqdm import tqdm
 
 # Run from algorithms/v7/ -> prepend repo root so the shared modules import.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from generator_v7_0_0 import forward_project_slice, fbp_reconstruct_slice  # noqa: E402
-from mar_ils_core.dicom_utils import write_dicom_slice  # noqa: E402
-from mar_ils_core.constants import LESION_SLICE_INDEX, N_ANGLES, N_DET  # noqa: E402
+from generator_v7_0_0 import fbp_reconstruct_slice, forward_project_slice
+from mar_ils_core.constants import LESION_SLICE_INDEX, N_ANGLES, N_DET
+from mar_ils_core.dicom_utils import write_dicom_slice
 
 # Metal reconstructs to 3000 HU (hard-set) in the noMAR series; 2000 HU is a
 # robust detection floor.
