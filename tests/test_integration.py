@@ -58,6 +58,20 @@ class TestRecommendedWorkers:
         assert recommended_workers(32.0) > recommended_workers(16.0) > 2
 
 
+class TestChecksumManifest:
+    def test_os_metadata_files_excluded(self, tmp_path):
+        from generator_v7_0_0 import write_checksums
+        (tmp_path / "sinograms").mkdir()
+        (tmp_path / "sinograms" / "realization_001.h5").write_bytes(b"data")
+        for junk in (".DS_Store", "sinograms/.DS_Store", "sinograms/._x.h5",
+                     "Thumbs.db"):
+            (tmp_path / junk).write_bytes(b"junk")
+        write_checksums(tmp_path)
+        lines = (tmp_path / "checksums_sha256.txt").read_text().splitlines()
+        entries = [ln.split("  ", 1)[1] for ln in lines if not ln.startswith("#")]
+        assert entries == ["sinograms/realization_001.h5"]
+
+
 class TestImports:
     def test_generator_imports(self):
         """Verify generator_v7_0_0.py can be imported without errors."""
