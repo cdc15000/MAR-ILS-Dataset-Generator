@@ -198,7 +198,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 | A10 Statistical tools | E691-23 §15–19; digit retention; software verification | Table 4 A10, §10.3 |
 | A11 Data acceptance | Committed runs, baseline check, completeness, cross-check, timeliness, h/k handling, 5 % cap | Table 4 A11, §10.7–10.8 |
 | A12 Questionnaire | Attachment 3 | Table 4 A12, Fig. X1.4 |
-| B1–B9 | Subcommittee notice, solicitation, materials, pilot, full run, review, statistics, presentation, Research Report | Table 4 B1–B9, §8, §10, §11, §12.1 |
+| B1–B9 | Subcommittee notice, solicitation, materials, pilot, full run, review, statistics, presentation, Research Report in the RR:F04-2001 format | Table 4 B1–B9, §8, §10, §11 |
 | C1–C3 | Timeline, confidentiality, amendments | |
 | Attachments 1–3 | Coordinator letter, return form, questionnaire | Figs. X1.1, X1.3, X1.4 |
 
@@ -208,6 +208,8 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 - **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
 - **Number of materials:** one, the canonical 12 HU configuration. E691-23 §10.2.2 recommends at least three; the protocol justifies one normative test point under Rev 05 A2.3–A2.4 and limits the precision statement to it, per E691-23 §10.2.3 and D7778 §6.6.4.
 - **Funding and staffing:** self-funded by participants; statistician to be appointed by the task group.
+- **Precision basis:** Condition 1 only. Every laboratory runs the same LI-MAR control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
+- **Laboratory identification:** the Research Report names participating laboratories with contacts and addresses and codes every result, following RR:F04-2001, the F2052 study. Decided 2026-10-17.
 - **Familiarization dataset:** a small labeled dataset with different noise seeds, for trial runs and tuning, so that no laboratory tunes on the ILS dataset, per D7778 Fig. X1.2 item 8 and E691-23 §9.3.
 
 ### Blinded Distribution

@@ -61,9 +61,9 @@ The ILS Coordinator agrees to:
 
 **4.2 Technical support.** Respond to protocol and implementation questions from the Participating Laboratory within 5 business days during the execution window.
 
-**4.3 Central aggregation.** Aggregate all participating laboratories' results under ASTM E691 methodology, compute the repeatability (s_r) and reproducibility (s_R) standard deviations, and circulate the draft Research Report to all participating laboratories for review and approval prior to ASTM submission.
+**4.3 Central aggregation.** Aggregate all participating laboratories' results under ASTM E691 methodology, compute the repeatability (s_r) and reproducibility (s_R) standard deviations from the Condition 1 results, summarize the Condition 2 results by algorithm class, and circulate the draft Research Report to all participating laboratories for review and approval prior to ASTM submission.
 
-**4.4 Anonymization.** Identify laboratories only by alphabetical code ("Lab A," "Lab B," ...) in all public-facing artifacts (Research Report, final standard). Lab-identity → code mapping retained only by the Coordinator and ASTM F04.15 staff.
+**4.4 Identification of laboratories.** List the Participating Laboratory by name, contact and address among the participants in the ASTM Research Report, as F04.15 Research Reports do, but identify every result only by a random laboratory code. The standard itself identifies no laboratory. The mapping from laboratory to code is retained only by the Coordinator and ASTM F04.15 staff.
 
 **4.5 ASTM registration.** Register the ILS with the ASTM Research Report Program and transition coordination responsibility to ASTM staff upon registration. At that point, ASTM procedures supersede the administrative provisions of this Agreement.
 
