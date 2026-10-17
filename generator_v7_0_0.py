@@ -741,11 +741,21 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+# Desktop metadata files that Finder or Explorer can drop into the folder.
+OS_METADATA_FILES = {'.DS_Store', 'Thumbs.db', 'desktop.ini'}
+
+
+def _is_dataset_file(p: Path) -> bool:
+    return (
+        p.is_file()
+        and p.name != 'checksums_sha256.txt'
+        and p.name not in OS_METADATA_FILES
+        and not p.name.startswith('._')
+    )
+
+
 def write_checksums(output_dir: Path) -> None:
-    files = [
-        p for p in sorted(output_dir.rglob('*'))
-        if p.is_file() and p.name != 'checksums_sha256.txt'
-    ]
+    files = [p for p in sorted(output_dir.rglob('*')) if _is_dataset_file(p)]
     manifest = output_dir / 'checksums_sha256.txt'
     print(f"Computing SHA-256 checksums ({len(files)} files)...", flush=True)
     with open(manifest, 'w') as fout:
@@ -1119,11 +1129,12 @@ def main() -> None:
 
     write_provenance_json(output_dir, jitters, I0, dc_offset_cm, num_real)
 
-    if not args.no_checksums:
-        write_checksums(output_dir)
-
     if not args.no_pdf:
         generate_pdf(output_dir, num_real)
+
+    # Last, so the manifest covers every file including the PDF.
+    if not args.no_checksums:
+        write_checksums(output_dir)
 
     print()
     print(f"Dataset complete → {output_dir}")
