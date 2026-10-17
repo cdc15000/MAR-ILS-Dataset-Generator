@@ -49,7 +49,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 |---|---|---|---|
 | Document 1: Form 01 field content | Online wizard entries | Text to paste into the ASTM portal | N/A |
 | Document 2: Cover memorandum | Executive summary for F04.15 subcommittee chair | PDF/Word attachment | 2–3 pages |
-| Document 3: ILS Protocol | E691 study design | PDF/Word attachment | 8–10 pages |
+| Document 3: ILS Protocol | E691 study design, structured after D7778 Table 4, with the coordinator letter, return form and questionnaire as attachments | PDF/Word attachment | 13 pages |
 | Attachment: Rev 05 draft standard | The standard itself | PDF/Word in ASTM manuscript format | ~60 pages |
 
 ---
@@ -73,12 +73,12 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 
 | Field | Value | Rationale |
 |---|---|---|
-| Target date for Subcommittee ballot | **April 2028** | ILS execution Mar–Jul 2027; Research Report Oct 2027; ballot Jan–Apr 2028; re-baselined 2026-10-04 |
+| Target date for Subcommittee ballot | **June 2028** | Pilot Mar–Apr 2027; full-scale ILS May–Oct 2027; Research Report Jan 2028; ballot Mar–Jun 2028; re-baselined 2026-10-17 after adding the pilot run |
 | Authorized at a Subcommittee meeting? | **No** | Submission itself requests authorization |
 | Authorization date | **10 / 2026** | Month of submission; adjust if submitted later |
 | Emergency / regulatory requirement? | **Yes** | IEC 60601-2-44 Ed. 4 publishes ~Oct 2026 with a 3-year transition window; the ASTM standard must publish within that window for incorporation by normative reference |
 | Patented or pending patent? | **No** | |
-| Expected target date for approval | **12–18 months** | Select the longest available option in the dropdown; if only "3–6 months" is offered, select it and note the actual 12–18 month timeline in the rationale field. The dropdown constrains presentation, not commitment |
+| Expected target date for approval | **18–24 months** | Select the longest available option in the dropdown; if only "3–6 months" is offered, select it and note the actual 18–24 month timeline in the rationale field. The dropdown constrains presentation, not commitment |
 | Technical contact | **I will** | |
 
 ### Page 4: Data
@@ -146,7 +146,7 @@ Notes the approved DICOM CP-2575 MAR metadata, now in DICOM 2026b, as complement
 - Reference dataset generated: 80 realizations, 35 GB, SHA-256 verified
 - Reference CHO implementation: `run_cho_analysis_v7_0.py`, hardcoded normative parameters
 - Reference MAR algorithm: LI-MAR v7, parameter-free linear interpolation
-- 79 metrology guard tests, all passing
+- 106 automated tests across 9 suites, all passing
 - DICOM 2026b compliant output with the CP-2575 Metal Artifact Reduction Macro
 
 **Section 5: Jurisdictional Fit: F04.15**, about 2 paragraphs
@@ -162,7 +162,7 @@ Notes that per Dr. Woods' recommendation, the sponsor joined the CT groups IEC S
 
 **Section 6: Regulatory Context and Timeline**, about 1 paragraph
 
-Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures ΔAUC → FDA guidance establishes acceptance criteria. The IEC 3-year transition window, ending about 2029, establishes the deadline for ASTM publication. Target: ILS execution March–July 2027, Research Report October 2027, ballot January–April 2028, F-designation mid-2028.
+Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures ΔAUC → FDA guidance establishes acceptance criteria. The IEC 3-year transition window, ending about 2029, establishes the deadline for ASTM publication. Target: pilot run March–April 2027, full-scale ILS May–October 2027, Research Report January 2028, ballot March–June 2028, F-designation late 2028.
 
 **Section 7: Requested Actions**, about 3 bullets
 
@@ -176,135 +176,75 @@ Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures
 
 **Title:** Interlaboratory Study Protocol, ASTM WKXXXXX: Evaluation of Metal Artifact Reduction Performance
 
-**Format:** 8–10 page PDF/Word attachment
+**Format:** 13-page PDF/Word attachment. The editable source is `private/d7778/protocol.md`, built with `private/d7778/build_docx.py` using the previous protocol as the style reference.
 
 ### Structure
 
-**Section 1: Objective**
+Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) Table 4. D7778 is a D02 guide (§1.1); the protocol uses its plan structure and example forms, adapted to a computational method, and not its D02-specific procedures: D6300, Cochran and Hawkins tests, D2PP software, the 30 degrees of freedom target, the 75 % manufacturer-laboratory rule and DOT/IATA shipping. E691-23 governs the statistics. D7778 is copyrighted and was obtained under an ASTM license, so the protocol paraphrases it and cites it by section; the PDF stays out of the repository and the package folder.
 
-To determine the within-laboratory repeatability (S_r) and between-laboratory reproducibility (S_R) of the ΔAUC measurand defined in ASTM WKXXXXX, in accordance with ASTM E691-23 and ISO 5725-2.
-
-**Section 2: Measurand**
-
-Single measurand: ΔAUC = AUC_MAR − AUC_noMAR, computed by the reference CHO implementation on slice 128 of 40 LP + 40 LA paired realizations, with internal noise σ = 15. Reported to three decimal places.
-
-**Section 3: Test Materials**
-
-- Reference dataset: 80 realizations, 40 LP and 40 LA; HDF5 fan-beam sinograms and DICOM noMAR reconstructions; ~35 GB, SHA-256 verified
-- Distribution channel: Zenodo, DOI 10.5281/zenodo.23144489, reserved 2026-10-04 and published before distribution to labs
-- Each lab receives an identical, checksummed copy, so dataset variability is zero by design
-
-**Section 4: Laboratory Requirements**
-
-Minimum qualifications for participation:
-- Computational platform capable of running the reference CHO implementation: Python 3.11 or later, 16 GB RAM
-- Access to at least one MAR algorithm: proprietary, published, or one of the reference implementations provided in the WKXXXXX repository
-- Principal investigator with expertise in CT reconstruction, medical image quality, or signal detection theory
-- Commitment to execute the protocol without modification and return results within the execution window
-
-**Section 5: Number of Laboratories**
-
-- **Target:** 8 or more laboratories; E691-23 §9.1.2 recommends starting with 8+ to allow for attrition
-- **Minimum:** 6 laboratories with acceptable results, per E691-23 §9.1.2
-- **Laboratory tiers**, for recruitment purposes only, not for stratified analysis:
-  - Tier A: CT system manufacturers with proprietary MAR; target 2–3
-  - Tier B: Academic / government imaging physics labs; target 5–6, including FDA CDRH
-  - Tier C: Independent testing / CRO labs; target 1–2
-
-**Section 6: Test Conditions**
-
-Each lab executes two conditions, producing two ΔAUC values:
-
-| Condition | MAR Algorithm | Purpose |
+| Section | Content | D7778 source |
 |---|---|---|
-| Condition 1 | Reference LI-MAR v7, provided | Reproducibility baseline. All labs run the identical algorithm; any between-lab variance is attributable to computational environment or CHO implementation differences |
-| Condition 2 | Lab's own MAR algorithm | Performance measurement. The lab's proprietary or selected algorithm; this is the value of interest for the precision statement |
+| Introduction | Subcommittee, ILS title, test method version, coordinator | Table 4 header, §6.8.4 |
+| Protocol Plan Summary | Activity, plan and status for A1–A12 and B1–B9 | Table 4 |
+| A1 Purpose | Measurand, reference baseline with provenance footnote | Table 4 A1 |
+| A2 Funding | Self-funded by participants; sponsor provides materials; ASTM ILS Program support requested | Table 4 A2, §6.2.1 |
+| A3 Staffing | Coordinator, F04.15 task group, statistician to be appointed | Table 4 A3, §6.2.2–6.2.4 |
+| A4 Participants | Tiers A–C; 8 or more, preferably 10; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
+| A5 Equipment | Computational platform; integration paths A–C | Table 4 A5 |
+| A6 Test materials | Dataset table; single-material justification; blinding; familiarization dataset | Table 4 A6, §6.3.1, §6.6.3–6.6.4 |
+| A7 Tests | Rev 05, generator v7.0.0, CHO release; two conditions; replicates; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
+| A8 Special instructions | General instructions; Steps 1–7; output specification | Table 4 A8, Fig. X1.2 |
+| A9 Reporting form | Two-part return form, Attachment 2 | Table 4 A9, Fig. X1.3 |
+| A10 Statistical tools | E691-23 §15–19; digit retention; software verification | Table 4 A10, §10.3 |
+| A11 Data acceptance | Committed runs, baseline check, completeness, cross-check, timeliness, h/k handling, 5 % cap | Table 4 A11, §10.7–10.8 |
+| A12 Questionnaire | Attachment 3 | Table 4 A12, Fig. X1.4 |
+| B1–B9 | Subcommittee notice, solicitation, materials, pilot, full run, review, statistics, presentation, Research Report | Table 4 B1–B9, §8, §10, §11, §12.1 |
+| C1–C3 | Timeline, confidentiality, amendments | |
+| Attachments 1–3 | Coordinator letter, return form, questionnaire | Figs. X1.1, X1.3, X1.4 |
 
-The two-condition design separates method reproducibility from measurand precision. Condition 1 should yield near-zero between-lab variance; Condition 2 captures real-world variance.
+### Design Decisions, 2026-10-17
 
-**Section 6A: First Task Group Meeting, MAR Integration Approach**
+- **Pilot run:** separate, before the full-scale run. The first three signed laboratories run Condition 1 only, three replicates, on the blinded dataset; the coordinator scores centrally with the key and returns results. Rev 05 §17.10 requires pilot data from at least 3 laboratories before first ballot showing (a) a control ΔAUC of consistent sign distinguishable from zero, (b) within-laboratory SD of ΔAUC at most 0.05 and (c) ΔAUC bias, resubstitution minus hold-out, at most 0.02; §17.11 designates LI-MAR as the control. The archived LI-MAR record meets all three: ΔAUC −0.230 with p ≈ 3e−11, SD 0 for deterministic replicates, ΔAUC bias 0.004. Pilot data is not used in the precision estimates. Adds two months to the schedule.
+- **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
+- **Number of materials:** one, the canonical 12 HU configuration. E691-23 §10.2.2 recommends at least three; the protocol justifies one normative test point under Rev 05 A2.3–A2.4 and limits the precision statement to it, per E691-23 §10.2.3 and D7778 §6.6.4.
+- **Funding and staffing:** self-funded by participants; statistician to be appointed by the task group.
+- **Familiarization dataset:** a small labeled dataset with different noise seeds, for trial runs and tuning, so that no laboratory tunes on the ILS dataset, per D7778 Fig. X1.2 item 8 and E691-23 §9.3.
 
-The first task group meeting after work item registration shall include the following agenda item:
+### Blinded Distribution
 
-> **Agenda: Sinogram Ingestion and MAR Integration Path**
->
-> The reference implementation provides lab harness templates in Python, MATLAB and C, in which the lab implements a single function, `apply_mar`, that receives sinogram data and geometry and returns a reconstructed HU volume. The harness handles all HDF5 I/O, DICOM writing, and CP-2575 MAR macro injection.
->
-> However, commercial MAR implementations are typically embedded in C/C++/CUDA scanner reconstruction pipelines and may not be separable as standalone callable functions. Task group members are asked to advise on which integration path is feasible for their organization:
->
-> - **Path A, library extraction:** Isolate the MAR algorithm as a callable function that operates on the provided sinograms. The lab harness templates support this directly.
-> - **Path B, format bridge:** Convert HDF5 sinograms into the lab's proprietary sinogram format, process through the existing reconstruction pipeline with MAR enabled, export DICOM, and reformat output to match the submission spec.
-> - **Path C, offline reconstruction server:** Import sinograms into an offline reconstruction environment, such as vendor workstation software, reconstruct with MAR, export and reformat DICOM output.
->
-> The sinogram ingestion specification, `sinogram_ingestion_spec.md`, and lab harness templates, `templates/`, are provided as starting points. The task group should determine whether these materials are sufficient or whether additional format support or interface modifications are needed.
+The master dataset keeps the labeled layout and stays with the coordinator. The distribution copy for Zenodo is derived from it:
 
-This discussion informs whether the ILS protocol requires revision to accommodate vendor-specific integration constraints before the dataset is distributed.
+- **Layout:** `sinograms/realization_001.h5` to `realization_080.h5` and `noMAR_recon/realization_001/` to `realization_080/`, a random permutation of the 40 LP and 40 LA realizations.
+- **Removed from the files:** HDF5 `noise_params` attributes `place_lesion`, `lesion_z_extent`, `seed` and `jitter_deg`; any attributes on `line_integrals` that carry them; DICOM `SeriesDescription` and `ProtocolName`, which hold the condition label; `ContentDate` and `ContentTime`, set to one value; the per-realization jitters in `generator_provenance.json`. Compressed file sizes and leftover HDF5 bytes are not scrubbed.
+- **Key:** `blinding_key.json`, mapping each code to its condition and original realization index, with a random salt. Its SHA-256 hash is published in the dataset record at distribution; the key is published after the manifest deadline.
+- **Submission sequence:** laboratories submit a SHA-256 manifest of each run directory before key release, then score with the key and submit `cho_results.json` and the 80 scored slices per run. The laboratory's `cho_results.json` is the official result; the coordinator's rescoring is a cross-check.
+- **Honesty about strength:** the generator and `BASE_SEED` are public and LP/LA pairs share a seed, so a laboratory could unblind deliberately. The protocol presents blinding as a safeguard against unconscious bias, and the Participation Agreement adds a commitment not to unblind.
+- **Tooling, not yet built:** a blinding script that writes the distribution copy, its checksums, its lab instructions PDF and the key; `run_cho_analysis_v7_0.py --blinding-key`, which builds the LP and LA folder lists in original realization order so the fixed-seed bootstrap is unchanged, with the no-key path untouched; a manifest utility; and the coded layout in LI-MAR and the Python, MATLAB and C harnesses, which use the labeled layout when `sinograms/LP` exists and the coded layout otherwise. Regression target with a blinded copy and its key: self-test 0.829375, CI [0.761219, 0.902516]; LI-MAR ΔAUC −0.230, CI [−0.2969, −0.1475]. The release containing this tooling is the one the protocol cites.
+- **Zenodo:** only the blinded copy is uploaded, and the record description is updated for the coded layout. Published Zenodo files cannot be changed, so the key is added after the manifest deadline as a new version of the record, with its own DOI; the v1 description carries the key hash. The Drive copy is the coordinator's master archive and is not shared.
 
-**Section 7: Execution Protocol**
-
-Per-lab procedure, step by step:
-1. Download dataset, verify SHA-256 checksums against manifest
-2. Condition 1: Apply reference LI-MAR v7 to sinograms → reconstruct → run `run_cho_analysis_v7_0.py` → record ΔAUC
-3. Condition 2: Apply lab's own MAR to sinograms → reconstruct → run `run_cho_analysis_v7_0.py` → record ΔAUC
-4. Complete all §16 fields of the draft standard in the Results Submission Template
-5. Retain reconstructed DICOM volumes for 18 months as an audit provision
-6. Return results package to ILS Coordinator
-
-**Section 8: Repeatability Design**
-
-To estimate within-laboratory repeatability (S_r), each lab performs 3 independent replicate runs of Condition 1, the reference LI-MAR. Since the dataset and algorithm are deterministic, variance can arise only from any floating-point non-determinism across runs and from computational environment effects. If Condition 1 replicates show zero variance, as expected for deterministic code on a single machine, S_r for Condition 1 is reported as < ε, below measurement resolution, and the repeatability estimate is derived from Condition 2 replicates where the lab runs its own MAR 3 times with any stochastic elements.
-
-**Section 9: Statistical Analysis Plan**
-
-Per E691 §15–17:
-- Compute cell means (x̄) and cell standard deviations (s) for each lab × condition
-- Compute within-laboratory repeatability standard deviation (S_r)
-- Compute between-laboratory reproducibility standard deviation (S_R)
-- Compute repeatability limit r = 2.8 × S_r
-- Compute reproducibility limit R = 2.8 × S_R
-- Compute Mandel's h and k statistics, display graphically per E691-23 §16, and flag values exceeding the 0.5 % critical values per §17; investigate and resolve flagged results per §18–19
-- Report all results in an ASTM Research Report
-
-**Section 10: Timeline**
+### Timeline
 
 | Milestone | Target Date |
 |---|---|
 | Work item registered and WK number assigned | November 2026 |
-| ILS Protocol distributed to potential labs | December 2026 |
-| First task group meeting: MAR integration discussion, virtual | January 2027 |
-| Lab recruitment complete: ≥8 signed agreements | February 2027 |
-| Dataset distributed to participating labs | March 2027 |
-| Execution window opens | March 2027 |
-| 30-day check-in | April 2027 |
-| 60-day check-in | May 2027 |
-| 90-day check-in | June 2027 |
-| Execution window closes; results due | July 2027 |
-| Statistical analysis complete | August 2027 |
-| Draft Research Report circulated to labs | September 2027 |
-| Research Report finalized | October 2027 |
-| Draft standard updated with §17 P&B data | October 2027 |
-| Subcommittee ballot | January–April 2028 |
+| Protocol circulated to candidate laboratories | December 2026 |
+| First task group meeting: integration paths, plan approval | January 2027, virtual |
+| Recruitment complete: at least 8 signed agreements | February 2027 |
+| Pilot run | March–April 2027 |
+| Pilot review and any protocol revisions | April 2027 |
+| Dataset distributed; execution window opens | May 2027 |
+| Check-ins at 30, 60 and 90 days | June–August 2027 |
+| Manifest deadline; execution window closes | September 2027 |
+| Key released; scored results due two weeks later | September–October 2027 |
+| Statistical analysis complete | November 2027 |
+| Draft Research Report circulated to laboratories | December 2027 |
+| Research Report finalized; §17 updated | January 2028 |
+| Subcommittee ballot | March–June 2028 |
 
-_Re-baselined 2026-10-04; the original plan assumed July 2026 registration._
-
-**Section 11: Reporting**
-
-Each lab submits:
-1. `cho_results.json` for each condition × replicate
-2. Completed Results Submission Template, per draft standard §16
-3. Signed ILS Participation Agreement, using the existing template updated to reference the registered WK number
-4. Computational environment disclosure
-
-The ILS Coordinator aggregates results, computes E691 statistics, and prepares the ASTM Research Report. Labs are identified by alphabetical code only in all published materials.
-
-**Section 12: Governance**
-
-- ILS Coordinator: Christopher D. Cocchiaraley, WKXXXXX Sponsor
-- Upon work item registration, coordination transitions to ASTM staff oversight
-- Disputes regarding protocol adherence are resolved by the F04.15 task group chair
-- The Research Report is submitted to ASTM's Research Report Program per E691-23 §21.5
+_Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17 to add the pilot run._
 
 ---
+
 
 ## Attachment: Rev 05 Draft Standard
 
@@ -317,7 +257,9 @@ The existing `private/ASTM_MAR_Standard.md` Rev 05, dated 2026-05-29, exported t
 1. [x] ~~Resolve IP question~~ DONE 2026-07-14: standard text moved to the gitignored `private/` folder and removed from the public repo
 2. [ ] Export Rev 05 draft standard to Word/PDF in ASTM manuscript format
 3. [x] Write Document 2, the Cover Memorandum, as a standalone PDF: drafted 2026-07-27 and re-dated 2026-10-04 in `~/Desktop/ASTM Submission Package/`
-4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27 and re-dated 2026-10-04
+4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27, re-dated 2026-10-04, restructured after D7778 Table 4 on 2026-10-17
 5. [ ] Complete the ASTM online wizard using the Document 1 field content
 6. [ ] Attach Documents 2, 3, and the Rev 05 draft to the work item registration
-7. [ ] Update ILS Participation Agreement template to reference the assigned WK number once received
+7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17 (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WKXXXXX with the assigned WK number once received
+8. [ ] Build the blinding tooling and the familiarization dataset, and verify the regression target, before distribution in March 2027
+9. [ ] Upload the blinded copy to Zenodo, publish the key hash in the record, and update the record description
