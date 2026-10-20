@@ -16,7 +16,7 @@ Prepare a complete submission package for registering a new ASTM work item throu
 
 | Layer | Document | Role | Status |
 |---|---|---|---|
-| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; publication scheduled 2026-10-23 |
+| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; published 2026-10-23 |
 | 2 | ASTM FXXXX, this submission | TYPE TEST measuring ΔAUC | Form 01 not yet submitted |
 | 3 | FDA guidance | Acceptance criteria: non-degradation threshold | Conceptual framework drafted |
 
@@ -76,7 +76,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 | Target date for Subcommittee ballot | **June 2028** | Pilot Mar–Apr 2027; full-scale ILS May–Oct 2027; Research Report Jan 2028; ballot Mar–Jun 2028; re-baselined 2026-10-17 after adding the pilot run |
 | Authorized at a Subcommittee meeting? | **No** | Submission itself requests authorization |
 | Authorization date | **10 / 2026** | Month of submission; adjust if submitted later |
-| Emergency / regulatory requirement? | **Yes** | IEC 60601-2-44 Ed. 4 publishes ~Oct 2026 with a 3-year transition window; the ASTM standard must publish within that window for incorporation by normative reference |
+| Emergency / regulatory requirement? | **Yes** | IEC 60601-2-44 Ed. 4 was published on 23 October 2026 with a 3-year transition window; the ASTM standard must publish within that window for incorporation by normative reference |
 | Patented or pending patent? | **No** | |
 | Expected target date for approval | **18–24 months** | Select the longest available option in the dropdown; if only "3–6 months" is offered, select it and note the actual 18–24 month timeline in the rationale field. The dropdown constrains presentation, not commitment |
 | Technical contact | **I will** | |
@@ -95,7 +95,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 > metal artifact reduction; computed tomography; channelized Hotelling observer; model observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
 
 **Rationale:**
-> Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4, scheduled for publication on 23 October 2026, establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata as specified by DICOM CP-2575 in DICOM 2026b. However, the current compliance statement verifies documentation only, not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions such as 510(k) and CE marking, regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement in §17.
+> Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4, published on 23 October 2026, establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata as specified by DICOM CP-2575 in DICOM 2026b. However, the current compliance statement verifies documentation only, not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions such as 510(k) and CE marking, regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement in §17.
 
 **Existing Standards:**
 > ASTM F2119-24, Standard Test Method for Evaluation of MR Image Artifacts from Passive Implants. F2119 characterizes the physical extent of image artifacts produced by passive implants under standardized MR scanning conditions. The proposed standard is complementary, not duplicative: it quantifies the observer-based task-detectability impact of MAR, an algorithmic countermeasure applied within CT imaging systems. The two methods address non-overlapping axes: modality, MR versus CT, and object of measurement, physical artifact extent versus algorithmic task impact. No existing ASTM, ISO, IEC, or NEMA standard defines a task-based, model-observer test method for MAR performance evaluation. IEC 60601-2-44 Ed. 4 requires MAR availability but does not specify a test method for performance verification.
@@ -189,7 +189,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 | A1 Purpose | Measurand, reference baseline with provenance footnote | Table 4 A1 |
 | A2 Funding | Self-funded by participants; sponsor provides materials; ASTM ILS Program support requested | Table 4 A2, §6.2.1 |
 | A3 Staffing | Coordinator, F04.15 task group, statistician to be appointed | Table 4 A3, §6.2.2–6.2.4 |
-| A4 Participants | Tiers A–C; 8 or more, preferably 10; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
+| A4 Participants | Tiers A–C; 10 to 12; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
 | A5 Equipment | Computational platform; integration paths A–C | Table 4 A5 |
 | A6 Test materials | Dataset table; single-material justification; blinding; familiarization dataset | Table 4 A6, §6.3.1, §6.6.3–6.6.4 |
 | A7 Tests | Rev 05, generator v7.0.0, CHO release; two conditions; replicates; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
@@ -231,7 +231,7 @@ The master dataset keeps the labeled layout and stays with the coordinator. The 
 | Work item registered and WK number assigned | November 2026 |
 | Protocol circulated to candidate laboratories | December 2026 |
 | First task group meeting: integration paths, plan approval | January 2027, virtual |
-| Recruitment complete: at least 8 signed agreements | February 2027 |
+| Recruitment complete: at least 10 signed agreements | February 2027 |
 | Pilot run | March–April 2027 |
 | Pilot review and any protocol revisions | April 2027 |
 | Dataset distributed; execution window opens | May 2027 |
