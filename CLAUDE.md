@@ -191,7 +191,7 @@ python run_cho_analysis_v7_0.py \
 | Layer | Document | Role |
 |---|---|---|
 | 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | MAR method available (.1), user information (.2), DICOM recording (.3) |
-| 2 | ASTM FXXXX (bound to §203.6.7.101.1 via post-publication Corrigendum/Amendment, deferred until ASTM FXXXX publishes) | TYPE TEST — measures ΔAUC |
+| 2 | ASTM FXXXX (bound to §203.6.7.101.1 via post-publication Amendment, deferred until ASTM FXXXX publishes) | TYPE TEST — measures ΔAUC |
 | 3 | FDA guidance | Acceptance criteria (non-degradation threshold, superiority claim) |
 
 See `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` (post-publication Amendment proposal) and `docs_and_references/FDA_guidance_framework.md` for draft regulatory text.
