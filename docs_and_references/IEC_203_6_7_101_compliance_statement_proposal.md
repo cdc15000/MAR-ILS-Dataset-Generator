@@ -69,7 +69,7 @@ The title is the WKXXXXX working title. Replace it with the published title.
 
 The reference is dated. Ed. 4 uses both forms in Clause 2: IEC 62985:2019, the SSDE calculation method, is dated, while IEC 61223-3-5 and ISO 12052 are undated. The compliance statement depends on specific numerical content of the ASTM method: the reference dataset, the observer parameters and the ±0.005 AUC tolerance. A later ASTM revision could change that content without review by WG 30. A dated reference fixes the edition used to show compliance. Adopting a later edition then takes a further amendment, which WG 30 controls.
 
-The undated reference to ISO 12052 suits DICOM, a data dictionary that grows by additions such as the MAR attribute. A test method with numerical criteria is closer to the SSDE calculation method, which Ed. 4 cites dated.
+The undated reference to ISO 12052 suits DICOM. ISO 12052:2026 itself prefers undated references to DICOM and says an edition should generally be cited only to identify a retired feature (Clause 7), because DICOM changes continuously and keeps its features compatible across editions. A test method with numerical criteria is closer to the SSDE calculation method, which Ed. 4 cites dated.
 
 If WG 30 prefers an undated reference, the Directives call for a statement that all future changes to the referenced document are acceptable for the purposes of this standard. That is a weaker position for a TYPE TEST with numerical criteria.
 
@@ -89,7 +89,17 @@ The current compliance statement verifies that the manufacturer has described a 
 
 ### 2. The clause already incorporates an external standard by reference
 
-§203.6.7.101.3 requires that, if MAR is used, it "shall be recorded in the corresponding standard DICOM attribute of the image header." Clause 2 of Ed. 4 lists ISO 12052, the ISO publication of DICOM, as a normative reference. The attribute in question was added to DICOM by CP-2575 in DICOM 2026b. §203.6.7.101 therefore already relies on a standard maintained outside IEC to define what manufacturers must do. The amendment applies the same approach to §203.6.7.101.1, with ASTM FXXXX defining the test. Confirm before submission how ISO 12052 ties to the current DICOM edition, since that link carries the CP-2575 attribute into Ed. 4.
+§203.6.7.101.3 requires that, if MAR is used, it "shall be recorded in the corresponding standard DICOM attribute of the image header." Clause 2 of Ed. 4 lists ISO 12052 as an undated normative reference, so it refers to the current edition, ISO 12052:2026 (third edition, February 2026; adopted unchanged as EN ISO 12052:2026). That edition links to the current DICOM standard in three ways:
+
+- It states that it is equivalent to Part 1 of DICOM, describes the content of the standard and the requirements for a conformance claim, and has no normative references of its own (Clauses 1 and 2).
+- It states that DICOM is officially changed when each change is approved as Final Text, that the dated editions such as 2026b are only consolidations for convenience, and that the current standard is the one published at dicomstandard.org (Clause 7).
+- Its preferred citation form is "NEMA PS3 / ISO 12052", without an edition date (Clause 7).
+
+ISO 12052 is therefore not revised when DICOM changes. A reference to ISO 12052 is a reference to DICOM as currently maintained, which has included the Metal Artifact Reduction attributes since CP-2575 was approved as Final Text; DICOM 2026b is the first edition that consolidates them. ISO 12052 also allows regulations to reference specific DICOM features, such as an attribute, as their own requirements (Clause 7), which is what §203.6.7.101.3 does.
+
+§203.6.7.101 therefore already relies on a standard maintained outside IEC to define what manufacturers must do. The amendment applies the same approach to §203.6.7.101.1, with ASTM FXXXX defining the test.
+
+A strict reader could note one gap: ISO 12052 describes the other DICOM parts but does not cite them as normative references. The link from Ed. 4 to the attribute definition in PS3.3 and PS3.6 rests on ISO 12052's statement that it is Part 1 of the same standard. It is, however, the way Ed. 4 itself cites DICOM throughout.
 
 The DICOM liaison report to SC 62B for the November 2026 plenary (62B/1420/INF) also draws attention to the new MAR attribute and encourages vendors to use it.
 
@@ -183,3 +193,4 @@ This proposal supersedes:
   - IEC 61223-3-5 references corrected to §203.6.7.2.1 and §203.6.7.2.2; §203.7.6 does not cite it.
   - Dated and undated references in Ed. 4 Clause 2 compared.
   - ASTM Category A liaison added as a second submission route.
+- **2026-10-22, later:** The link between ISO 12052 and current DICOM was confirmed from ISO 12052:2026, Clauses 1, 2 and 7, which replaces the earlier note asking for confirmation.
