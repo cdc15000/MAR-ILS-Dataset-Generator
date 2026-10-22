@@ -3,7 +3,7 @@
 ## Amendment to be submitted after ASTM FXXXX publishes
 
 **Status:** Draft Amendment proposal for IEC SC 62B WG 30 and USNC TAG SC 62B
-**Date:** 2026-10-21 (first drafted 2026-04-19)
+**Date:** 2026-10-22 (first drafted 2026-04-19)
 **Author:** Christopher D. Cocchiaraley (Consumer Advocate, IEC USNC TAG SC 62B; Consumer Advocate Member, IEC TC 62 / SC 62B WG 30; Consumer Member, ASTM F04 / F04.15)
 **Target document:** IEC 60601-2-44 Ed. 4. Project leader Andreas Paul Schaller, SC 62B WG 30.
 **Project status, from the IEC SC 62B dashboard on 2026-10-21:**
@@ -11,7 +11,8 @@
 | Stage | Document | Date |
 |---|---|---|
 | CDV approved | 62B/1400/CDV | 2025-11-21 |
-| FDIS approved | 62B/1413/FDIS | 2026-07-17 |
+| FDIS circulated | 62B/1413/FDIS | 2026-07-17 |
+| FDIS vote closed, approved by all voting P-members with no votes against | 62B/1413/FDIS, 62B/1413(F)/FDIS | 2026-08-28 |
 | Approved for publication (BPUB) | 62B/1423/RVD | 2026-10-09 |
 | Publication (PPUB), forecast | | 2026-11; current project plan 2026-11-20 |
 | Stability date | | 2029 |
@@ -66,7 +67,9 @@ The title is the WKXXXXX working title. Replace it with the published title.
 
 ### 3. Dated reference
 
-The reference is dated. The compliance statement depends on specific numerical content of the ASTM method: the reference dataset, the observer parameters and the ±0.005 AUC tolerance. A later ASTM revision could change that content without review by WG 30. A dated reference fixes the edition used to show compliance. Adopting a later edition then takes a further amendment, which WG 30 controls.
+The reference is dated. Ed. 4 uses both forms in Clause 2: IEC 62985:2019, the SSDE calculation method, is dated, while IEC 61223-3-5 and ISO 12052 are undated. The compliance statement depends on specific numerical content of the ASTM method: the reference dataset, the observer parameters and the ±0.005 AUC tolerance. A later ASTM revision could change that content without review by WG 30. A dated reference fixes the edition used to show compliance. Adopting a later edition then takes a further amendment, which WG 30 controls.
+
+The undated reference to ISO 12052 suits DICOM, a data dictionary that grows by additions such as the MAR attribute. A test method with numerical criteria is closer to the SSDE calculation method, which Ed. 4 cites dated.
 
 If WG 30 prefers an undated reference, the Directives call for a statement that all future changes to the referenced document are acceptable for the purposes of this standard. That is a weaker position for a TYPE TEST with numerical criteria.
 
@@ -84,9 +87,13 @@ The reference dataset and the reference CHO implementation are published openly:
 
 The current compliance statement verifies that the manufacturer has described a MAR method. It does not verify that the method has any measurable effect on diagnostic task performance. A MAR method with no effect, or one that degrades lesion detectability, satisfies §203.6.7.101.1 as published.
 
-### 2. The clause already uses a specific compliance check
+### 2. The clause already incorporates an external standard by reference
 
-§203.6.7.101 already departs from document inspection where a more specific check exists:
+§203.6.7.101.3 requires that, if MAR is used, it "shall be recorded in the corresponding standard DICOM attribute of the image header." Clause 2 of Ed. 4 lists ISO 12052, the ISO publication of DICOM, as a normative reference. The attribute in question was added to DICOM by CP-2575 in DICOM 2026b. §203.6.7.101 therefore already relies on a standard maintained outside IEC to define what manufacturers must do. The amendment applies the same approach to §203.6.7.101.1, with ASTM FXXXX defining the test. Confirm before submission how ISO 12052 ties to the current DICOM edition, since that link carries the CP-2575 attribute into Ed. 4.
+
+The DICOM liaison report to SC 62B for the November 2026 plenary (62B/1420/INF) also draws attention to the new MAR attribute and encourages vendors to use it.
+
+The compliance statements show the same pattern of departing from document inspection where a more specific check exists:
 
 | Subclause | Compliance statement in Ed. 4 |
 |---|---|
@@ -96,9 +103,11 @@ The current compliance statement verifies that the manufacturer has described a 
 
 §203.6.7.101.3 names the specific item to be inspected. The amendment applies the same principle to §203.6.7.101.1 by naming the specific test.
 
+The requirement itself has broad support. The FDIS was approved without a vote against, and the abstract of Ed. 4 lists MAR in imaging performance among the new requirements of the edition.
+
 ### 3. References to tests in other standards are usual in IEC 60601
 
-Compliance statements in IEC 60601 particular standards routinely refer to tests defined in other standards instead of reproducing them. Ed. 4 itself refers to IEC 61223-3-5 for quality assurance and for half-value layer measurement at the isocentre (§203.6.7.2.1 and §203.7.6 in the draft text). The amendment follows the same pattern with ASTM FXXXX as the source of the test. Confirm the subclause numbers against the published Ed. 4 before submission.
+Compliance statements in IEC 60601 particular standards routinely refer to tests defined in other standards instead of reproducing them. In the FDIS text of Ed. 4, §203.6.7.2.1 (Quality Assurance) and §203.6.7.2.2 (Performance information) both rely on the constancy and acceptance tests specified in IEC 61223-3-5. The amendment follows the same pattern with ASTM FXXXX as the source of the test. Confirm the subclause numbers against the published Ed. 4 before submission.
 
 ### 4. The scope is that of an amendment, not a new edition
 
@@ -132,7 +141,11 @@ IEC and ASTM do not set acceptance thresholds. The TYPE TEST reports the measure
 
 ## Submission Vehicle
 
-Submit through USNC TAG SC 62B as a national-body proposal for an amendment to IEC 60601-2-44 Ed. 4. Under USNC MOP §9.9.1, a national-body position needs a two-thirds TAG vote per §9.6(d). The proposal then goes to SC 62B for a decision on an amendment project assigned to WG 30, or for consideration at the 2029 stability-date review.
+Two routes are available, and they can be used together.
+
+**National body.** Submit through USNC TAG SC 62B as a national-body proposal for an amendment to IEC 60601-2-44 Ed. 4. Under USNC MOP §9.9.1, a national-body position needs a two-thirds TAG vote per §9.6(d). The proposal then goes to SC 62B for a decision on an amendment project assigned to WG 30, or for consideration at the 2029 stability-date review.
+
+**ASTM liaison.** ASTM is a Category A liaison to IEC SC 62B. Its liaison representatives are listed in the liaison reports to SC 62B (62B/1420/INF). Through this liaison ASTM can present the published standard to SC 62B and support the amendment. Category A liaisons take part in the work of the committee, and may be able to propose work directly. Confirm what the current ISO/IEC Directives Part 1 allow before relying on that. A liaison report from ASTM at an SC 62B plenary is the natural way to announce FXXXX when it publishes.
 
 Attach to the proposal:
 
@@ -164,3 +177,9 @@ This proposal supersedes:
   - Acceptability of an ASTM reference addressed.
   - Vehicle changed from "corrigendum or amendment" to amendment.
   - Timing tied to the ASTM schedule and the 2029 stability date.
+- **2026-10-22:**
+  - FDIS vote result added.
+  - §203.6.7.101.3 and ISO 12052 cited as the existing incorporation by reference of the DICOM MAR attribute.
+  - IEC 61223-3-5 references corrected to §203.6.7.2.1 and §203.6.7.2.2; §203.7.6 does not cite it.
+  - Dated and undated references in Ed. 4 Clause 2 compared.
+  - ASTM Category A liaison added as a second submission route.
