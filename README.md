@@ -35,7 +35,7 @@ For per-version status, performance work, tooling, DICOM 2026b compliance detail
 | 2 | Draft ASTM test method (WKXXXXX Rev 01–05) | Complete |
 | 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7) | Complete |
 | 4 | ILS reference implementation (reference baseline, lab instructions, DICOM 2026b) | Complete |
-| 5 | ASTM interlaboratory study (Form 01 package ready for submission; dataset DOI reserved; lab recruitment pending) | In progress |
+| 5 | ASTM interlaboratory study (Form 01 package ready, awaiting IEC 60601-2-44 Ed. 4 publication, forecast November 2026; dataset DOI reserved; lab recruitment pending) | In progress |
 | 6 | Journal publication (*Medical Physics* or equivalent) | Planned |
 | 7 | IEC incorporation (§203.6.7.101.1 binding amendment, post-ASTM-FXXXX publication) | Planned |
 

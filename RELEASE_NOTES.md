@@ -62,7 +62,7 @@ To ensure inter-laboratory consistency, use the following in-memory physics audi
 | `generator_v7_0_0.py` | **Normative** fan-beam dataset generator (Rev 05). |
 | `run_cho_analysis_v7_0.py` | **Normative** 2D CHO scoring tool (Rev 05). |
 | `private/ASTM_MAR_Standard.md` | Draft standard text (Rev 05) — removed from public repo per ASTM IP policy |
-| `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` | Post-publication Corrigendum/Amendment proposal for §203.6.7.101.1 (deferred until ASTM FXXXX publishes) |
+| `docs_and_references/IEC_203_6_7_101_compliance_statement_proposal.md` | Post-publication Amendment proposal for §203.6.7.101.1 (deferred until ASTM FXXXX publishes) |
 | `docs_and_references/FDA_guidance_framework.md` | Draft FDA guidance for acceptance criteria |
 | `/algorithms` | Reference MAR implementations (iMAR, MBIR, Spectral). |
 | `/legacy` | Archived v6.0.0 parallel-beam research framework. |
@@ -102,5 +102,5 @@ print(f'(0018,9391) Metal Artifact Reduction Applied = {mar_applied}')
 |-------|----------|------|
 | **1 — What to record** | DICOM CP-2575 (2026b) | MAR metadata tags in DICOM |
 | **2 — Must have / describe / record** | IEC 60601-2-44 Ed. 4 §203.6.7.101 (.1 method, .2 user info, .3 DICOM) | Regulatory mandate |
-| **3 — How to measure (post-publication binding to §203.6.7.101.1)** | ASTM FXXXX (formerly WKXXXXX Rev 05) — Corrigendum/Amendment submitted after ASTM FXXXX publishes | Quantitative ΔAUC TYPE TEST |
+| **3 — How to measure (post-publication binding to §203.6.7.101.1)** | ASTM FXXXX (formerly WKXXXXX Rev 05) — Amendment submitted after ASTM FXXXX publishes | Quantitative ΔAUC TYPE TEST |
 | **4 — Acceptance** | FDA guidance (proposed) | Non-degradation / superiority thresholds |
