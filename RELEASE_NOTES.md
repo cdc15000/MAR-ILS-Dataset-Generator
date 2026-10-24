@@ -6,6 +6,10 @@ This file records per-version status, performance work, tooling additions, metad
 
 ## v7.0.0 — April 2026 (current)
 
+### October 2026: Version Labels
+
+v7.0.0 is the only current version label. The tag `v7.1.0-dicom2026b`, created on 2026-04-07 to mark the first CP-2575 implementation, was removed on 2026-10-24. Despite its higher number, it pointed to an April snapshot (commit `97af94e7`) that predates the v7.0.0 release. That commit remains in the history. The suffix `-dicom2026b` is no longer used, because every v7.0.0 dataset carries the CP-2575 macro.
+
 ### July 2026: ASTM Rev 05 Alignment
 
 All code, documentation, and cross-references updated to reflect **ASTM WKXXXXX Revision 05** (2026-05-29). Rev 05 is an editorial-only revision — no numerical parameters changed. Key changes from Rev 04:
