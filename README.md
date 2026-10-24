@@ -50,6 +50,8 @@ This is the **reference evaluation framework** for conducting standardized **Int
 3.  **Objective Statistical Scoring:** Quantifying lesion detectability ($\Delta AUC$) using a **Channelized Hotelling Observer (CHO)** with normative internal noise ($\sigma=15$).
 4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
 
+For why the method uses a task-based ΔAUC rather than HU accuracy, noise or other fundamental image-quality metrics, see [Technical Foundation](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation#why-a-task-based-metric-rather-than-fundamental-image-quality-metrics) in the wiki.
+
 ---
 
 ## Setup
