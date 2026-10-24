@@ -50,7 +50,7 @@ This is the **reference evaluation framework** for conducting standardized **Int
 3.  **Objective Statistical Scoring:** Quantifying lesion detectability ($\Delta AUC$) using a **Channelized Hotelling Observer (CHO)** with normative internal noise ($\sigma=15$).
 4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
 
-For why the method uses a task-based ΔAUC rather than HU accuracy, noise or other fundamental image-quality metrics, see [Technical Foundation](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation#why-a-task-based-metric-rather-than-fundamental-image-quality-metrics) in the wiki.
+The [project wiki](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki) describes the [Technical Foundation](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation) of the CHO and the [Phantom Design](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Phantom-Design). Technical Foundation also explains [why the method uses a task-based ΔAUC](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation#why-a-task-based-metric-rather-than-fundamental-image-quality-metrics) rather than HU accuracy, noise or other fundamental image-quality metrics.
 
 ---
 
@@ -73,7 +73,7 @@ python3.11 -m venv mar-ils
 source mar-ils/bin/activate
 
 pip install -r requirements.txt
-pip install numba    # optional but strongly recommended — ~24x speedup
+pip install numba    # optional but strongly recommended; ~24x speedup
 ```
 
 ### Verify the install
@@ -82,7 +82,7 @@ pip install numba    # optional but strongly recommended — ~24x speedup
 python generator_v7_0_0.py --dry-run
 ```
 
-A clean `--dry-run` prints the locked constants and exits 0 without writing any files.
+A clean `--dry-run` prints the reference constants and exits 0 without writing any files.
 
 Once a dataset is available, the self-test in [Quick Start](#quick-start) should report AUC_noMAR = 0.8294, 95% CI [0.7612, 0.9025]. The archived reference record is in [`docs_and_references/baseline/`](docs_and_references/baseline/).
 
@@ -94,12 +94,12 @@ Once a dataset is available, the self-test in [Quick Start](#quick-start) should
 # Generate the canonical fan-beam dataset
 python generator_v7_0_0.py --output-dir ./astm_reference_dataset
 
-# Self-test (validates CHO pipeline — ΔAUC = 0 by definition)
+# Self-test (validates the CHO pipeline; ΔAUC = 0 by definition)
 python run_cho_analysis_v7_0.py \
     --dataset-dir ./astm_reference_dataset \
     --self-test --internal-noise-sigma 15
 
-# ILS mode (score your MAR algorithm)
+# MAR scoring mode (score a MAR reconstruction set)
 python run_cho_analysis_v7_0.py \
     --dataset-dir ./astm_reference_dataset \
     --mar-output-dir ./mar_recon \
@@ -126,7 +126,7 @@ python generator_v7_0_0.py [options]
 
 ### 2. Run CHO analysis
 
-**Self-test** — pipeline validation (ΔAUC = 0 by construction):
+**Self-test:** pipeline validation (ΔAUC = 0 by construction):
 
 ```bash
 python run_cho_analysis_v7_0.py \
@@ -134,7 +134,7 @@ python run_cho_analysis_v7_0.py \
     --self-test --internal-noise-sigma 15
 ```
 
-**ILS mode** — score a submitted MAR reconstruction set against the noMAR baseline:
+**MAR scoring mode:** score a MAR reconstruction set against the noMAR baseline:
 
 ```bash
 python run_cho_analysis_v7_0.py \
@@ -143,11 +143,11 @@ python run_cho_analysis_v7_0.py \
     --internal-noise-sigma 15
 ```
 
-`--internal-noise-sigma 15` is the locked normative default — do not change it for submissions scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
+`--internal-noise-sigma 15` is the normative default; do not change it for results scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
 
 ### 3. Apply the reference LI-MAR (negative control / ΔAUC anchor)
 
-A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale as the designated control (ΔAUC ≈ −0.23) — every commercial MAR is expected to beat it.
+A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale as the designated control (ΔAUC ≈ −0.23). Every commercial MAR is expected to beat it.
 
 ```bash
 # Produce a CHO-ready LI-MAR reconstruction set (slice_0129.dcm per realization)
@@ -164,7 +164,7 @@ python run_cho_analysis_v7_0.py \
 
 LI-MAR output is tagged Metal Artifact Reduction Applied = `YES`, as the ILS protocol requires for MAR-corrected submissions.
 
-See [`algorithms/v7/README.md`](algorithms/v7/README.md) for the measured ΔAUC anchor on the locked $N=40$ dataset.
+See [`algorithms/v7/README.md`](algorithms/v7/README.md) for the measured ΔAUC anchor on the reference $N=40$ dataset.
 
 ### 4. Visualize sinograms
 
@@ -188,8 +188,8 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 │   ├── LP/  realization_001/ ... realization_040/        # 256 DICOMs each
 │   └── LA/  realization_001/ ... realization_040/
 ├── checksums_sha256.txt           # SHA-256 integrity manifest
-├── generator_provenance.json      # locked constants + git SHA
-└── MAR_ILS_Lab_Instructions.pdf   # one-page operational instructions for labs
+├── generator_provenance.json      # reference constants + git SHA
+└── MAR_ILS_Lab_Instructions.pdf   # one-page instructions for the labeled reference dataset
 ```
 
 Total size: **~35 GB** for $N=40$; **~18 GB** for $N=20$ screening.
@@ -211,11 +211,11 @@ Each `realization_NNN.h5` contains:
 | `@geometry.n_angles` / `@n_det` | scalar | 720 / 512 |
 | `@geometry.angles_deg` / `@det_fan_angles_deg` | 1-D array | Projection + detector geometry samples |
 | `@noise_params.I0` / `sigma_e_counts` / `seed` | scalar | Noise calibration (I₀ = 310,853) |
-| `@lesion_slice_index` | scalar | `128` — the only slice containing the lesion disc |
+| `@lesion_slice_index` | scalar | `128`, the only slice containing the lesion disc |
 
-### Lab submission layout (for CHO scoring)
+### MAR reconstruction layout (for CHO scoring)
 
-Participating labs submit reconstructed DICOMs back in this structure:
+`run_cho_analysis_v7_0.py` reads MAR reconstructions in this structure:
 
 ```
 mar_recon/
@@ -223,7 +223,9 @@ mar_recon/
 └── LA/  realization_001/ ...
 ```
 
-Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py` — the CHO is 2D on slice 128; 3D integration shall not be performed per §A1.5.3 of the draft standard.
+Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py`. The CHO is 2D on slice 128; 3D integration shall not be performed per §A1.5.3 of the draft standard.
+
+ILS laboratories receive a coded dataset and submission instructions from the study coordinator.
 
 ---
 
@@ -257,7 +259,7 @@ The dataset DOI is reserved and resolves once the Zenodo record is published.
 
 ## License
 
-All code and documentation in this repository are released under the **Apache License, Version 2.0** — see [`LICENSE.md`](LICENSE.md) for the full text.
+All code and documentation in this repository are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md) for the full text.
 
 The single third-party figure (axial pelvic CT at the top of this README) is reproduced from Wellenberg et al. 2019 under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache 2.0 license; attribution is given in the figure caption.
 
