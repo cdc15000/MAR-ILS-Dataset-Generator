@@ -246,7 +246,7 @@ ILS laboratories receive a coded dataset and submission instructions from the st
 If you use this framework in your research, please cite:
 
 > Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v7.0.0.
-> ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of CT Metal Artifact Reduction Algorithms Using a Channelized Hotelling Observer.
+> ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer.
 > https://github.com/cdc15000/MAR-ILS-Dataset-Generator
 
 To cite the reference dataset:
