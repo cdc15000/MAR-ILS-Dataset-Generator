@@ -2,7 +2,7 @@
 
 **Template version:** v0.2 (draft 2026-10-17)
 **Governing procedure:** ASTM E691-23, Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
-**Study subject:** ASTM Work Item WKXXXXX Revision 05, Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
+**Study subject:** ASTM Work Item WKXXXXX Revision 05, Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
 **Study protocol:** ASTM WKXXXXX Interlaboratory Study Protocol, October 2026
 **ILS Coordinator:** Christopher D. Cocchiaraley, WKXXXXX Sponsor, ASTM F04 / F04.15 (Consumer Member)
 

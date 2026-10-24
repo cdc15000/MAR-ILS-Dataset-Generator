@@ -86,13 +86,13 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 **Type of Standard:** Test Method
 
 **Title**, after the dropdown prepends "Test Method for":
-> Quantitative Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer
+> Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
 
 **Proposed Scope:**
-> This test method specifies a quantitative procedure for evaluating the performance of Metal Artifact Reduction (MAR) methods implemented in tomographic imaging systems. The measurand is the scalar difference in area under the receiver operating characteristic curve (ΔAUC) derived from a signal-known-exactly, background-known-statistically (SKE/BKS) detection task using a fixed channelized Hotelling observer (CHO) implementation, predefined regions of interest, and specified statistical estimation procedures. The method uses a standardized synthetic digital dataset distributed as fan-beam line-integral sinograms and reference reconstructions, verified by SHA-256 checksums. The method applies to systems producing HU-calibrated reconstructed image data and is structured to support precision and bias evaluation in accordance with ASTM E691 and ISO 5725. It is intended for type testing and conformity assessment and does not establish performance acceptance criteria.
+> This test method specifies a quantitative procedure for evaluating the performance of Metal Artifact Reduction (MAR) methods implemented in tomographic imaging systems. The measurand is the scalar difference in area under the receiver operating characteristic curve (ΔAUC) derived from a signal-known-exactly, background-known-statistically (SKE/BKS) detection task using a fixed model observer, specified as a channelized Hotelling observer (CHO), predefined regions of interest, and specified statistical estimation procedures. The method uses a standardized synthetic digital dataset distributed as fan-beam line-integral sinograms and reference reconstructions, verified by SHA-256 checksums. The method applies to systems producing HU-calibrated reconstructed image data and is structured to support precision and bias evaluation in accordance with ASTM E691 and ISO 5725. It is intended for type testing and conformity assessment and does not establish performance acceptance criteria.
 
 **Keywords:**
-> metal artifact reduction; computed tomography; channelized Hotelling observer; model observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
+> metal artifact reduction; tomographic imaging; computed tomography; model observer; channelized Hotelling observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
 
 **Rationale:**
 > Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4, approved for publication in October 2026 with publication forecast for November 2026, establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata as specified by DICOM CP-2575 in DICOM 2026b. However, the current compliance statement verifies documentation only, not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions such as 510(k) and CE marking, regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement in §17.
@@ -115,7 +115,7 @@ Submit.
 
 ## Document 2: Cover Memorandum
 
-**Title:** Cover Memorandum: New Work Item Proposal: Standard Test Method for Quantitative Evaluation of Metal Artifact Reduction Performance
+**Title:** Cover Memorandum: New Work Item Proposal: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
 
 **Addressee:** F04.15 Subcommittee Chair
 

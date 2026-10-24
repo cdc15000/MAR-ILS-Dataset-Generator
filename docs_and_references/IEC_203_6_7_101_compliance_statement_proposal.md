@@ -61,7 +61,7 @@ Clause 2 of IEC 60601-1 applies, with the additions listed in Clause 2 of Ed. 4.
 
 > *Addition:*
 >
-> ASTM FXXXX-YY, *Standard Test Method for Evaluation of Metal Artifact Reduction Performance in Tomographic Imaging Systems Using a Channelized Hotelling Observer*
+> ASTM FXXXX-YY, *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*
 
 The title is the WKXXXXX working title. Replace it with the published title.
 
