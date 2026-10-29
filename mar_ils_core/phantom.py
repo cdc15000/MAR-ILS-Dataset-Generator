@@ -54,8 +54,15 @@ def build_lesion_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
 def build_attenuation_map(
     place_lesion: bool,
     jitter_deg: float = 0.0,
+    *,
+    lesion_after_rotation: bool = False,
 ) -> np.ndarray:
-    """Construct 2D attenuation map (cm⁻¹) for one axial slice."""
+    """Construct 2D attenuation map (cm⁻¹) for one axial slice.
+
+    By default (v7.0.0) the lesion is placed before the jitter rotation and
+    moves with the body. With ``lesion_after_rotation`` (v8.0.0) the lesion is
+    written after the rotation, so it stays at (281, 256) for every jitter.
+    """
     yy, xx = np.mgrid[0:Y_DIM, 0:X_DIM]
     body_mask = build_body_mask(yy, xx)
     metal_mask = build_metal_mask(yy, xx)
@@ -64,7 +71,7 @@ def build_attenuation_map(
     mu = np.full((Y_DIM, X_DIM), MU_AIR_CM, dtype=np.float64)
     mu[body_mask] = MU_TISSUE_CM
     mu[metal_mask] = MU_IRON_CM
-    if place_lesion:
+    if place_lesion and not lesion_after_rotation:
         mu[lesion_mask] = MU_LESION_CM
 
     if abs(jitter_deg) > 1e-6:
@@ -77,5 +84,8 @@ def build_attenuation_map(
             reshape=False, order=1, mode='constant', cval=0.0,
         ) > 0.5
         mu[~body_rot] = MU_AIR_CM
+
+    if place_lesion and lesion_after_rotation:
+        mu[lesion_mask] = MU_LESION_CM
 
     return mu.astype(np.float32)

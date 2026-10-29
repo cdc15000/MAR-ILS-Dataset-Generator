@@ -1,0 +1,1236 @@
+#!/usr/bin/env python3
+"""
+generator_v8_0_0.py
+====================
+MAR ILS Dataset Generator v8.0.0 — ASTM WKXXXXX Rev 06 (Fan-Beam)
+
+Changes from v7.0.0
+-------------------
+[IN]  Independent noise: every slice of every realization has its own seed,
+      default_rng([BASE_SEED, replicate, condition, realization, slice]).
+      v7.0.0 seeded LP_i and LA_i with the same BASE_SEED + i, so their noise
+      was shared. The jitter set is unchanged and is still shared by LP_i and
+      LA_i (background variability is paired; noise is not).
+[LF]  Lesion fixed at (281, 256): written after the jitter rotation. In v7.0.0
+      it rotated with the body (up to 6.3 voxels off the ROI centre).
+[SC2] Scatter subtracted before the log: p = -ln(max(I - S, 1) / I0). v7.0.0
+      added S but never removed it, which shaded the background and cut the
+      reconstructed lesion contrast from about 11 HU to about 5 HU.
+[CAL] Noise calibrated by the difference of paired draws, sigma =
+      SD(A - B)/sqrt(2), so deterministic shading cannot count as noise.
+[OP]  Operating point: noise target 10 HU in the metal-free body (I₀ ≈ 1.15e6),
+      chosen by the pilot dose sweep so that AUC_noMAR is about 0.88 and the
+      replicate SD of ΔAUC is below 0.05 (review item 14). Rev 05 used 30 HU.
+[RND] DICOM HU values are rounded to the nearest integer (v7.0.0 truncated).
+[REP] --replicate R selects an independent noise draw (0 = reference dataset;
+      1..5 = operating-point selection; 6..15 = confirmatory pilot gate,
+      see pilot_gate_v8_0.py).
+
+Changes in v7.0.0 from v6.0.0 / v5.3.0
+--------------------------------------
+[FB1] Fan-beam acquisition geometry: SID=570 mm, SDD=1040 mm, equi-angular
+      curved detector, 720 projection angles over full 360° rotation.
+[FB2] Fan-beam forward projection via ray-driven integration (replaces
+      parallel-beam rotation-sum).
+[FB3] Fan-beam FBP: cosine pre-weighting, ramp filter, distance-weighted
+      backprojection with (SID/L)² weighting (replaces parallel-beam FBP).
+[SC]  Single canonical configuration — v5.3.0 parameters (iron rod r=5 mm,
+      circular lesion r=2.5 mm at (281,256), ROI 121×121, channel width
+      a=7.5 vox). No tier framework. §1.7: "No additional configurations
+      are permitted under this standard."
+[RR]  --realizations flag: 40 (normative default) or 20 (screening mode).
+[AC]  Acceptance criteria cross-reference to IEC 60601-2-44 §203.6.7.101.1
+      (via post-publication Corrigendum/Amendment, submitted after ASTM FXXXX
+      publishes) and FDA guidance (layered approach per §5.5).
+
+Canonical Parameters (ASTM WKXXXXX Rev 06)
+-------------------------------------------
+  Body        : ellipse 85×60 mm (170×120 vox)
+  Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centred at (256,256)
+  Lesion      : circular disc r=2.5 mm (5 vox) at (281,256), slice 128 only
+  Contrast    : 12 HU in mu (about 11 HU reconstructed; no post-FBP hard-set)
+  Metal HU    : 3000 (restored last)
+  Background  : 40 HU
+  Noise σ     : 10 HU in soft tissue (metal-free body)
+  Acquisition : fan-beam, SID=570 mm, SDD=1040 mm, 720 angles × 512 dets
+  ROI         : 121×121 at (281,256), 2D slice 128 only
+  Channel a   : 7.5 voxels
+
+Usage
+-----
+    python generator_v8_0_0.py --output-dir ./astm_reference_dataset_v8
+    python generator_v8_0_0.py --workers 2                # 8 GB RAM
+    python generator_v8_0_0.py --realizations 20         # screening mode
+    python generator_v8_0_0.py --dry-run                  # validate only
+
+Author  : ASTM F04 Subcommittee Working Draft
+Standard: ASTM WKXXXXX Rev 06
+Date    : 2026-10-25
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import os
+import warnings
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import date, datetime, timezone
+from pathlib import Path
+
+import h5py
+import numpy as np
+import scipy.ndimage
+from pydicom.uid import generate_uid
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (
+    HRFlowable,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Table,
+    TableStyle,
+)
+from tqdm import tqdm
+
+from mar_ils_core.constants import (
+    _N_RAY_SAMPLES,
+    _RAY_STEP,
+    _RAY_T_VALS,
+    ANGLES_DEG,
+    ANGLES_RAD,
+    BACKGROUND_HU,
+    BASE_SEED,
+    BODY_SEMI_X_VOX,
+    BODY_SEMI_Y_VOX,
+    COS_DET_FAN,
+    DELTA_GAMMA_RAD,
+    DET_FAN_ANGLES_RAD,
+    GAMMA_MAX_RAD,
+    JITTER_MAX_DEG,
+    LESION_CENTER_X,
+    LESION_DELTA_HU,
+    LESION_SLICE_INDEX,
+    MU_AIR_CM,
+    MU_IRON_CM,
+    MU_LESION_CM,
+    MU_TISSUE_CM,
+    N_ANGLES,
+    N_DET,
+    NUM_REALIZATIONS_DEFAULT,
+    PHANTOM_CENTER_X,
+    PHANTOM_CENTER_Y,
+    SCATTER_FRAC,
+    SDD_MM,
+    SID_CM,
+    SID_MM,
+    SID_VOX,
+    SIGMA_E_COUNTS,
+    VOXEL_CM,
+    VOXEL_MM,
+    X_DIM,
+    Y_DIM,
+    Z_DIM,
+)
+from mar_ils_core.dicom_utils import write_dicom_slice as _write_dicom_slice
+from mar_ils_core.noise import (
+    SCATTER_CORRECTED_FLOOR_COUNTS,
+    apply_noise_scatter_corrected,
+)
+from mar_ils_core.phantom import (
+    build_attenuation_map,
+)
+from mar_ils_core.phantom import (
+    build_body_mask as _build_body_mask,
+)
+from mar_ils_core.phantom import (
+    build_metal_mask as _build_metal_mask,
+)
+
+try:
+    import numba
+    _HAS_NUMBA = True
+except ImportError:
+    _HAS_NUMBA = False
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Generator-specific constants
+# ═══════════════════════════════════════════════════════════════════════════════
+
+DATASET_VERSION: str = "v8.0.0"
+STANDARD_REF: str = "ASTM-WKXXXXX-Rev06"
+
+# Operating point (review item 14). The shared constant NOISE_SIGMA_TARGET_HU
+# (30 HU) stays the v7.0.0 value.
+NOISE_SIGMA_TARGET_HU_V8: float = 10.0
+
+# Seed key for the condition axis of default_rng([BASE_SEED, replicate,
+# condition, realization, slice]).
+SERIES_CODE: dict[str, int] = {"LP": 0, "LA": 1}
+
+# PDF fonts
+def _find_font(name: str) -> str:
+    candidates = [
+        f"/usr/share/fonts/truetype/dejavu/{name}",
+        os.path.expanduser(f"~/Library/Fonts/{name}"),
+        f"/Library/Fonts/{name}",
+        f"/System/Library/Fonts/{name}",
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return ""
+
+_DEJAVU_REGULAR = _find_font("DejaVuSans.ttf")
+_DEJAVU_BOLD = _find_font("DejaVuSans-Bold.ttf")
+_DEJAVU_MONO = _find_font("DejaVuSansMono.ttf")
+PDF_FONT = "DejaVuSans"
+PDF_FONT_BOLD = "DejaVuSans-Bold"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Numba-accelerated kernels (optional — falls back to NumPy if unavailable)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+if _HAS_NUMBA:
+
+    @numba.njit(parallel=True, cache=True)
+    def _forward_project_jit(mu, angles_rad, det_fan_angles, ray_t_vals,
+                             sid_vox, cx, cy, mu_air, ray_step_cm):
+        """Fan-beam forward projection with hand-rolled bilinear interpolation."""
+        n_angles = angles_rad.shape[0]
+        n_det = det_fan_angles.shape[0]
+        n_samples = ray_t_vals.shape[0]
+        ny, nx = mu.shape
+        sino = np.zeros((n_angles, n_det), dtype=np.float64)
+        nx_lim = float(nx - 1)
+        ny_lim = float(ny - 1)
+
+        for i in numba.prange(n_angles):
+            beta = angles_rad[i]
+            sx = cx + sid_vox * math.cos(beta)
+            sy = cy + sid_vox * math.sin(beta)
+
+            for j in range(n_det):
+                ray_angle = beta + math.pi + det_fan_angles[j]
+                dx = math.cos(ray_angle)
+                dy = math.sin(ray_angle)
+
+                line_sum = 0.0
+                for k in range(n_samples):
+                    x = sx + dx * ray_t_vals[k]
+                    y = sy + dy * ray_t_vals[k]
+
+                    if x < 0.0 or x >= nx_lim or y < 0.0 or y >= ny_lim:
+                        line_sum += mu_air
+                    else:
+                        ix = int(x)
+                        iy = int(y)
+                        fx = x - float(ix)
+                        fy = y - float(iy)
+                        line_sum += (mu[iy, ix] * (1.0 - fx) * (1.0 - fy)
+                                     + mu[iy, ix + 1] * fx * (1.0 - fy)
+                                     + mu[iy + 1, ix] * (1.0 - fx) * fy
+                                     + mu[iy + 1, ix + 1] * fx * fy)
+
+                sino[i, j] = line_sum * ray_step_cm
+
+        return sino
+
+    @numba.njit(parallel=True, cache=True)
+    def _backproject_jit(filtered, angles_rad, sid_vox, delta_gamma,
+                         gamma_min, cx, cy, nx, ny):
+        """Single-slice fan-beam backprojection (pixel-driven)."""
+        n_proj = filtered.shape[0]
+        n_det = filtered.shape[1]
+        sid_vox_sq = sid_vox * sid_vox
+
+        # Precompute source positions and central-ray angles
+        sx_arr = np.empty(n_proj)
+        sy_arr = np.empty(n_proj)
+        cr_arr = np.empty(n_proj)
+        for i in range(n_proj):
+            sx_arr[i] = cx + sid_vox * math.cos(angles_rad[i])
+            sy_arr[i] = cy + sid_vox * math.sin(angles_rad[i])
+            cr_arr[i] = math.atan2(cy - sy_arr[i], cx - sx_arr[i])
+
+        recon = np.zeros((ny, nx), dtype=np.float64)
+        det_max = float(n_det - 1)
+
+        for row in numba.prange(ny):
+            yf = float(row)
+            for col in range(nx):
+                xf = float(col)
+                val = 0.0
+                for i in range(n_proj):
+                    px = xf - sx_arr[i]
+                    py = yf - sy_arr[i]
+                    L_sq = px * px + py * py
+                    pa = math.atan2(py, px)
+                    g = pa - cr_arr[i]
+                    g = math.atan2(math.sin(g), math.cos(g))
+                    di = (g - gamma_min) / delta_gamma
+                    if di >= 0.0 and di <= det_max:
+                        lo = int(di)
+                        if lo >= n_det - 1:
+                            lo = n_det - 2
+                        f = di - float(lo)
+                        v = (1.0 - f) * filtered[i, lo] + f * filtered[i, lo + 1]
+                        val += v * sid_vox_sq / L_sq
+                recon[row, col] = val
+
+        return recon
+
+    @numba.njit(parallel=True, cache=True)
+    def _backproject_batch_jit(filtered_t, angles_rad, sid_vox, delta_gamma,
+                               gamma_min, cx, cy, nx, ny, n_slices):
+        """
+        Batch backprojection: geometry computed once per (pixel, angle),
+        applied to all n_slices. ~4x fewer arctan2 calls vs per-slice.
+
+        filtered_t : (n_proj, n_det, n_slices) float64 — transposed for
+                     cache-friendly z-sequential access
+        Returns    : (ny, nx, n_slices) float64 — transposed output for
+                     cache-friendly z-sequential writes
+        """
+        n_proj = filtered_t.shape[0]
+        n_det = filtered_t.shape[1]
+        sid_vox_sq = sid_vox * sid_vox
+
+        sx_arr = np.empty(n_proj)
+        sy_arr = np.empty(n_proj)
+        cr_arr = np.empty(n_proj)
+        for i in range(n_proj):
+            sx_arr[i] = cx + sid_vox * math.cos(angles_rad[i])
+            sy_arr[i] = cy + sid_vox * math.sin(angles_rad[i])
+            cr_arr[i] = math.atan2(cy - sy_arr[i], cx - sx_arr[i])
+
+        recon = np.zeros((ny, nx, n_slices), dtype=np.float64)
+        det_max = float(n_det - 1)
+
+        for row in numba.prange(ny):
+            yf = float(row)
+            for col in range(nx):
+                xf = float(col)
+                for i in range(n_proj):
+                    px = xf - sx_arr[i]
+                    py = yf - sy_arr[i]
+                    L_sq = px * px + py * py
+                    w = sid_vox_sq / L_sq
+                    pa = math.atan2(py, px)
+                    g = pa - cr_arr[i]
+                    g = math.atan2(math.sin(g), math.cos(g))
+                    di = (g - gamma_min) / delta_gamma
+                    if di >= 0.0 and di <= det_max:
+                        lo = int(di)
+                        if lo >= n_det - 1:
+                            lo = n_det - 2
+                        f = di - float(lo)
+                        omf = 1.0 - f
+                        for z in range(n_slices):
+                            v = omf * filtered_t[i, lo, z] + f * filtered_t[i, lo + 1, z]
+                            recon[row, col, z] += v * w
+
+        return recon
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fan-beam forward projection [Rev 05]
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def forward_project_slice(mu: np.ndarray) -> np.ndarray:
+    """
+    Fan-beam forward projection via ray-driven integration.
+
+    For each source angle β and detector element γ_j, traces a ray from the
+    source through the volume, sampling μ at sub-voxel intervals and
+    integrating to compute the line integral in nepers.
+
+    mu  : (Y_DIM, X_DIM) attenuation map in cm⁻¹
+    Returns: (N_ANGLES, N_DET) sinogram in nepers
+    """
+    if _HAS_NUMBA:
+        return _forward_project_jit(
+            mu.astype(np.float64), ANGLES_RAD, DET_FAN_ANGLES_RAD,
+            _RAY_T_VALS, SID_VOX, X_DIM / 2.0, Y_DIM / 2.0,
+            MU_AIR_CM, _RAY_STEP * VOXEL_CM,
+        ).astype(np.float32)
+
+    # NumPy fallback (no Numba)
+    sino = np.zeros((N_ANGLES, N_DET), dtype=np.float64)
+    mu64 = mu.astype(np.float64)
+    cx, cy = X_DIM / 2.0, Y_DIM / 2.0
+
+    for i, beta in enumerate(ANGLES_RAD):
+        sx = cx + SID_VOX * np.cos(beta)
+        sy = cy + SID_VOX * np.sin(beta)
+        ray_angles = beta + np.pi + DET_FAN_ANGLES_RAD
+        dx = np.cos(ray_angles)
+        dy = np.sin(ray_angles)
+        x_pts = sx + np.outer(dx, _RAY_T_VALS)
+        y_pts = sy + np.outer(dy, _RAY_T_VALS)
+        coords = np.array([y_pts.ravel(), x_pts.ravel()])
+        vals = scipy.ndimage.map_coordinates(
+            mu64, coords, order=1, mode='constant', cval=float(MU_AIR_CM),
+        ).reshape(N_DET, _N_RAY_SAMPLES)
+        sino[i] = vals.sum(axis=1) * (_RAY_STEP * VOXEL_CM)
+
+    return sino.astype(np.float32)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Fan-beam FBP reconstruction [Rev 05]
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _fbp_fanbeam_core(sino: np.ndarray) -> np.ndarray:
+    """
+    Fan-beam filtered backprojection → raw μ map (cm⁻¹).
+
+    Algorithm (Kak & Slaney §3.4, equi-angular detector, full 360° scan):
+      1. Pre-weight projections by cos(γ)
+      2. Apply ramp (Ram-Lak) filter along detector dimension
+      3. Distance-weighted backprojection: Σ (SID/L)² × Q(β, γ(x,y))
+      4. Scale by π / N_angles / (SID_cm × Δγ)
+    """
+    n_proj, n_det = sino.shape
+
+    # Steps 1-2: cosine pre-weighting + ramp filter (NumPy — already fast)
+    weighted = sino.astype(np.float64) * COS_DET_FAN[np.newaxis, :]
+    freq = np.fft.rfftfreq(n_det)
+    ramp = np.abs(freq)
+    filtered = np.fft.irfft(
+        np.fft.rfft(weighted, axis=1) * ramp, n=n_det, axis=1,
+    )
+
+    if _HAS_NUMBA:
+        # Numba-accelerated backprojection
+        recon = _backproject_jit(
+            filtered, ANGLES_RAD, SID_VOX, DELTA_GAMMA_RAD,
+            float(DET_FAN_ANGLES_RAD[0]), X_DIM / 2.0, Y_DIM / 2.0,
+            X_DIM, Y_DIM,
+        )
+        mu_recon = recon * np.pi / n_proj / (SID_CM * DELTA_GAMMA_RAD)
+        return mu_recon.astype(np.float32)
+
+    # Step 3: distance-weighted backprojection (NumPy fallback)
+    recon = np.zeros((Y_DIM, X_DIM), dtype=np.float64)
+    cx, cy = X_DIM / 2.0, Y_DIM / 2.0
+    yy, xx = np.mgrid[0:Y_DIM, 0:X_DIM]
+    xx_f = xx.astype(np.float64)
+    yy_f = yy.astype(np.float64)
+    gamma_min = DET_FAN_ANGLES_RAD[0]
+
+    for i, beta in enumerate(ANGLES_RAD):
+        sx = cx + SID_VOX * np.cos(beta)
+        sy = cy + SID_VOX * np.sin(beta)
+        px = xx_f - sx
+        py = yy_f - sy
+        L_sq = px * px + py * py
+        cr_angle = np.arctan2(cy - sy, cx - sx)
+        pixel_angle = np.arctan2(py, px)
+        gamma = pixel_angle - cr_angle
+        gamma = np.arctan2(np.sin(gamma), np.cos(gamma))
+        det_idx = (gamma - gamma_min) / DELTA_GAMMA_RAD
+        valid = (det_idx >= 0) & (det_idx <= n_det - 1)
+        idx_lo = np.clip(np.floor(det_idx).astype(np.intp), 0, n_det - 2)
+        frac = det_idx - idx_lo
+        proj = np.zeros((Y_DIM, X_DIM), dtype=np.float64)
+        proj[valid] = (
+            (1.0 - frac[valid]) * filtered[i, idx_lo[valid]]
+            + frac[valid] * filtered[i, np.minimum(idx_lo[valid] + 1, n_det - 1)]
+        )
+        recon += proj * (SID_VOX * SID_VOX) / L_sq
+
+    mu_recon = recon * np.pi / n_proj / (SID_CM * DELTA_GAMMA_RAD)
+    return mu_recon.astype(np.float32)
+
+
+def fbp_reconstruct_slice(sino: np.ndarray, dc_offset_cm: float = 0.0) -> np.ndarray:
+    """Fan-beam FBP → HU image with DC calibration and background offset."""
+    mu_recon = _fbp_fanbeam_core(sino)
+    hu = (
+        (mu_recon - MU_TISSUE_CM - dc_offset_cm) / MU_TISSUE_CM * 1000.0
+        + BACKGROUND_HU
+    )
+    return hu.astype(np.float32)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Calibration
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _cal_roi_bounds() -> tuple[int, int, int, int]:
+    """Calibration ROI in the upper portion of the body ellipse."""
+    y0 = PHANTOM_CENTER_Y - round(0.90 * BODY_SEMI_Y_VOX)
+    y1 = PHANTOM_CENTER_Y - round(0.40 * BODY_SEMI_Y_VOX)
+    x0 = PHANTOM_CENTER_X - round(0.20 * BODY_SEMI_X_VOX)
+    x1 = PHANTOM_CENTER_X + round(0.20 * BODY_SEMI_X_VOX)
+    return max(0, y0), min(Y_DIM, y1), max(0, x0), min(X_DIM, x1)
+
+
+def calibrate(
+    target_sigma_hu: float = NOISE_SIGMA_TARGET_HU_V8,
+) -> tuple[float, float, float]:
+    """
+    3-FBP analytic calibration for fan-beam geometry.
+
+      FBP-1: Noise-free full phantom → DC offset
+      FBP-2: Noise-free body-only → clean tissue ROI for noise scaling
+      FBP-3: N_MC pairs of noisy FBPs at I₀_ref → σ_ref = mean SD(A − B)/√2
+             → I₀ = I₀_ref×(σ_ref/σ_target)²
+
+    Returns (I0_calibrated, dc_offset_cm, sigma_ref_hu).
+    """
+    print("Calibrating fan-beam forward model...", flush=True)
+    y0, y1, x0, x1 = _cal_roi_bounds()
+    print(f"  Calibration ROI: y=[{y0}:{y1}] x=[{x0}:{x1}] "
+          f"({(y1 - y0) * (x1 - x0)} pixels)", flush=True)
+
+    # FBP-1: DC offset from noise-free full phantom
+    print("  [1/3] Noise-free FBP (full phantom, DC offset)...",
+          end=" ", flush=True)
+    mu_full = build_attenuation_map(False, jitter_deg=0.0)
+    sino_full = forward_project_slice(mu_full)
+    mu_full_recon = _fbp_fanbeam_core(sino_full)
+    dc_offset_cm = float(mu_full_recon[y0:y1, x0:x1].mean()) - MU_TISSUE_CM
+    print(f"DC offset = {dc_offset_cm / MU_TISSUE_CM * 1000:+.1f} HU", flush=True)
+
+    # FBP-2: Body-only phantom for noise calibration
+    print("  [2/3] Noise-free FBP (body-only)...", end=" ", flush=True)
+    yy_c, xx_c = np.mgrid[0:Y_DIM, 0:X_DIM]
+    mu_cal = np.full((Y_DIM, X_DIM), MU_AIR_CM, dtype=np.float32)
+    mu_cal[_build_body_mask(yy_c, xx_c)] = MU_TISSUE_CM
+    sino_cal = forward_project_slice(mu_cal)
+    mu_cal_recon = _fbp_fanbeam_core(sino_cal)
+    dc_cal = float(mu_cal_recon[y0:y1, x0:x1].mean()) - MU_TISSUE_CM
+    hu_cal_nf = (mu_cal_recon - MU_TISSUE_CM - dc_cal) / MU_TISSUE_CM * 1000
+    nf_std = float(hu_cal_nf[y0:y1, x0:x1].std())
+    print(f"done  (noise-free ROI std = {nf_std:.2f} HU)", flush=True)
+
+    # FBP-3: Monte Carlo noise calibration
+    I0_ref = 1e5
+    N_MC_CAL = 5
+    print(f"  [3/3] {N_MC_CAL} pairs of noisy FBPs at I₀_ref={I0_ref:.0f}...",
+          flush=True)
+    sigmas_ref: list[float] = []
+    for mc_seed in tqdm(range(N_MC_CAL), desc="    MC pairs", leave=False):
+        hu_pair = []
+        for k in (0, 1):
+            rng_mc = np.random.default_rng([900_000, mc_seed, k])
+            mu_mc = _fbp_fanbeam_core(
+                apply_noise_scatter_corrected(sino_cal, I0_ref, rng_mc))
+            hu_pair.append((mu_mc - MU_TISSUE_CM - dc_cal) / MU_TISSUE_CM * 1000)
+        diff = hu_pair[0] - hu_pair[1]
+        s = float(diff[y0:y1, x0:x1].std() / math.sqrt(2.0))
+        sigmas_ref.append(s)
+        print(f"    pair {mc_seed + 1}/{N_MC_CAL}: σ = {s:.1f} HU", flush=True)
+
+    sigma_ref = float(np.mean(sigmas_ref))
+    print(f"  Mean σ_ref = {sigma_ref:.1f} HU  "
+          f"(std = {float(np.std(sigmas_ref)):.1f} HU)", flush=True)
+
+    I0_cal = I0_ref * (sigma_ref / target_sigma_hu) ** 2
+    print(f"  Calibrated I₀ = {I0_cal:.0f}  "
+          f"(target σ = {target_sigma_hu} HU)", flush=True)
+    return float(I0_cal), float(dc_offset_cm), sigma_ref
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Sinogram generation (HDF5)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def slice_rng(replicate: int, series: str, realization_idx: int,
+              z: int) -> np.random.Generator:
+    """Independent noise stream for one slice of one realization."""
+    return np.random.default_rng(
+        [BASE_SEED, replicate, SERIES_CODE[series], realization_idx, z])
+
+
+def clean_sinogram(place_lesion: bool, jitter_deg: float) -> np.ndarray:
+    """Noise-free fan-beam sinogram of one slice (lesion fixed at (281, 256))."""
+    return forward_project_slice(
+        build_attenuation_map(place_lesion, jitter_deg, lesion_after_rotation=True))
+
+
+def generate_sinogram_realization(
+    output_path: Path,
+    *,
+    series: str,
+    place_lesion: bool,
+    replicate: int,
+    jitter_deg: float,
+    I0: float,
+    realization_idx: int,
+) -> None:
+    """Generate one 3D sinogram realization and write to HDF5."""
+    sino_no = clean_sinogram(False, jitter_deg)
+    if place_lesion:
+        sino_with = clean_sinogram(True, jitter_deg)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with h5py.File(str(output_path), 'w') as f:
+        sino_vol = f.create_dataset(
+            'line_integrals',
+            shape=(Z_DIM, N_ANGLES, N_DET),
+            dtype=np.float32,
+            compression='gzip', compression_opts=4,
+            chunks=(1, N_ANGLES, N_DET),
+        )
+        for z in range(Z_DIM):
+            clean = sino_with if place_lesion and z == LESION_SLICE_INDEX else sino_no
+            sino_vol[z] = apply_noise_scatter_corrected(
+                clean, I0, slice_rng(replicate, series, realization_idx, z))
+
+        geo = f.create_group('geometry')
+        geo.attrs['type'] = 'fan-beam'
+        geo.attrs['n_slices'] = Z_DIM
+        geo.attrs['n_angles'] = N_ANGLES
+        geo.attrs['n_det'] = N_DET
+        geo.attrs['voxel_mm'] = VOXEL_MM
+        geo.attrs['SID_mm'] = SID_MM
+        geo.attrs['SDD_mm'] = SDD_MM
+        geo.attrs['gamma_max_deg'] = float(np.degrees(GAMMA_MAX_RAD))
+        geo.attrs['delta_gamma_deg'] = float(np.degrees(DELTA_GAMMA_RAD))
+        geo.attrs['angles_deg'] = ANGLES_DEG.tolist()
+        geo.attrs['det_fan_angles_deg'] = np.degrees(DET_FAN_ANGLES_RAD).tolist()
+
+        np_grp = f.create_group('noise_params')
+        np_grp.attrs['I0'] = I0
+        np_grp.attrs['scatter_frac'] = SCATTER_FRAC
+        np_grp.attrs['sigma_e_counts'] = SIGMA_E_COUNTS
+        np_grp.attrs['scatter_corrected'] = 1
+        np_grp.attrs['floor_counts'] = SCATTER_CORRECTED_FLOOR_COUNTS
+        np_grp.attrs['seed_scheme'] = (
+            'default_rng([base_seed, replicate, condition, realization, slice]), '
+            'condition LP=0 LA=1, realization and slice 0-indexed')
+        np_grp.attrs['base_seed'] = BASE_SEED
+        np_grp.attrs['replicate'] = replicate
+        np_grp.attrs['jitter_deg'] = jitter_deg
+        np_grp.attrs['place_lesion'] = int(place_lesion)
+        np_grp.attrs['lesion_slice_index'] = LESION_SLICE_INDEX
+        np_grp.attrs['lesion_z_extent'] = 1 if place_lesion else 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Reconstruction (noMAR FBP)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def reconstruct_realization(
+    sino_path: Path,
+    output_dir: Path,
+    *,
+    dc_offset_cm: float,
+    realization_idx: int,
+    condition_label: str,
+    place_lesion: bool,
+    study_uid: str,
+    series_uid: str,
+    metal_mask: np.ndarray,
+) -> None:
+    """FBP-reconstruct sinogram HDF5 → DICOM slices."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    with h5py.File(str(sino_path), 'r') as f:
+        line_integrals = f['line_integrals'][:]  # (Z_DIM, N_ANGLES, N_DET)
+
+    for z in range(Z_DIM):
+        hu = fbp_reconstruct_slice(
+            line_integrals[z].astype(np.float64), dc_offset_cm=dc_offset_cm,
+        )
+        _write_dicom_slice(
+            hu, z,
+            output_dir=output_dir,
+            realization_idx=realization_idx,
+            condition_label=condition_label,
+            study_uid=study_uid,
+            series_uid=series_uid,
+            metal_mask=metal_mask,
+            dataset_version=DATASET_VERSION,
+            standard_ref=STANDARD_REF,
+            round_hu=True,
+        )
+
+
+def reconstruct_realization_batch(
+    sino_path: Path,
+    output_dir: Path,
+    *,
+    dc_offset_cm: float,
+    realization_idx: int,
+    condition_label: str,
+    place_lesion: bool,
+    study_uid: str,
+    series_uid: str,
+    metal_mask: np.ndarray,
+) -> None:
+    """
+    Batch FBP-reconstruct all slices with shared geometry (Numba-accelerated).
+
+    Geometry (source positions, fan angles, distance weights) is computed once
+    per (pixel, angle) pair and applied to all 256 slices. This reduces arctan2
+    calls by ~256x compared to per-slice reconstruction.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    with h5py.File(str(sino_path), 'r') as f:
+        sinograms = f['line_integrals'][:]  # (Z_DIM, N_ANGLES, N_DET) float32
+
+    n_slices, n_proj, n_det = sinograms.shape
+
+    # Steps 1-2: cosine pre-weight + ramp filter all slices (vectorized NumPy)
+    weighted = sinograms.astype(np.float64) * COS_DET_FAN[np.newaxis, np.newaxis, :]
+    del sinograms
+    freq = np.fft.rfftfreq(n_det)
+    ramp = np.abs(freq)
+    filtered = np.fft.irfft(
+        np.fft.rfft(weighted, axis=2) * ramp[np.newaxis, np.newaxis, :],
+        n=n_det, axis=2,
+    )
+    del weighted
+
+    # Transpose for cache-friendly z-sequential access in batch kernel
+    filtered_t = np.ascontiguousarray(filtered.transpose(1, 2, 0))
+    del filtered
+
+    # Step 3: batch backprojection (geometry computed once, applied to all slices)
+    scale = np.pi / n_proj / (SID_CM * DELTA_GAMMA_RAD)
+    recon_yxz = _backproject_batch_jit(
+        filtered_t, ANGLES_RAD, SID_VOX, DELTA_GAMMA_RAD,
+        float(DET_FAN_ANGLES_RAD[0]), X_DIM / 2.0, Y_DIM / 2.0,
+        X_DIM, Y_DIM, n_slices,
+    )
+    del filtered_t
+
+    # Step 4: scale → HU → DICOM for each slice
+    for z in range(n_slices):
+        mu_recon = recon_yxz[:, :, z] * scale
+        hu = (
+            (mu_recon - MU_TISSUE_CM - dc_offset_cm) / MU_TISSUE_CM * 1000.0
+            + BACKGROUND_HU
+        ).astype(np.float32)
+        _write_dicom_slice(
+            hu, z,
+            output_dir=output_dir,
+            realization_idx=realization_idx,
+            condition_label=condition_label,
+            study_uid=study_uid,
+            series_uid=series_uid,
+            metal_mask=metal_mask,
+            dataset_version=DATASET_VERSION,
+            standard_ref=STANDARD_REF,
+            round_hu=True,
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Parallel worker
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _realization_worker(
+    series: str,
+    place_lesion: bool,
+    realization_idx: int,
+    output_dir_str: str,
+    I0: float,
+    jitter_deg: float,
+    dc_offset_cm: float,
+    replicate: int = 0,
+) -> str:
+    """ProcessPoolExecutor worker: sinogram + FBP for one realization."""
+    # Limit Numba threads per worker — parallelism is across workers
+    if _HAS_NUMBA:
+        numba.set_num_threads(1)
+
+    output_dir = Path(output_dir_str)
+    tag = f"realization_{realization_idx + 1:03d}"
+
+    h5_path = output_dir / 'sinograms' / series / f'{tag}.h5'
+    recon_dir = output_dir / 'noMAR_recon' / series / tag
+    recon_dir.mkdir(parents=True, exist_ok=True)
+
+    yy, xx = np.mgrid[0:Y_DIM, 0:X_DIM]
+    metal_mask = _build_metal_mask(yy, xx)
+
+    sentinel = recon_dir / f'slice_{LESION_SLICE_INDEX + 1:04d}.dcm'
+    if sentinel.exists():
+        return f'{series}/{tag} (skipped)'
+
+    study_uid = generate_uid()
+    series_uid = generate_uid()
+
+    generate_sinogram_realization(
+        h5_path,
+        series=series,
+        place_lesion=place_lesion,
+        replicate=replicate,
+        jitter_deg=jitter_deg,
+        I0=I0,
+        realization_idx=realization_idx,
+    )
+
+    _reconstruct = reconstruct_realization_batch if _HAS_NUMBA else reconstruct_realization
+    _reconstruct(
+        h5_path, recon_dir,
+        dc_offset_cm=dc_offset_cm,
+        realization_idx=realization_idx,
+        condition_label=f'noMAR_{series}',
+        place_lesion=place_lesion,
+        study_uid=study_uid,
+        series_uid=series_uid,
+        metal_mask=metal_mask,
+    )
+    return f'{series}/{tag}'
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Metadata, checksums, provenance
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(1 << 20), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+# Desktop metadata files that Finder or Explorer can drop into the folder.
+OS_METADATA_FILES = {'.DS_Store', 'Thumbs.db', 'desktop.ini'}
+
+
+def _is_dataset_file(p: Path) -> bool:
+    return (
+        p.is_file()
+        and p.name != 'checksums_sha256.txt'
+        and p.name not in OS_METADATA_FILES
+        and not p.name.startswith('._')
+    )
+
+
+def write_checksums(output_dir: Path) -> None:
+    files = [p for p in sorted(output_dir.rglob('*')) if _is_dataset_file(p)]
+    manifest = output_dir / 'checksums_sha256.txt'
+    print(f"Computing SHA-256 checksums ({len(files)} files)...", flush=True)
+    with open(manifest, 'w') as fout:
+        fout.write(f'# ASTM WKXXXXX {DATASET_VERSION} — SHA-256 manifest\n')
+        fout.writelines(
+            f'{_sha256_file(p)}  {p.relative_to(output_dir)}\n'
+            for p in tqdm(files, desc='  SHA-256', unit='file')
+        )
+
+
+def write_provenance_json(
+    output_dir: Path,
+    jitters: dict[int, float],
+    I0: float,
+    dc_offset_cm: float,
+    num_realizations: int,
+    replicate: int = 0,
+    sigma_ref_hu: float | None = None,
+) -> None:
+    prov = {
+        'generator_version': DATASET_VERSION,
+        'standard_reference': STANDARD_REF,
+        'generation_timestamp': datetime.now(timezone.utc).isoformat(),
+        'geometry': {
+            'type': 'fan-beam',
+            'x_dim': X_DIM, 'y_dim': Y_DIM, 'z_dim': Z_DIM,
+            'voxel_mm': VOXEL_MM,
+            'SID_mm': SID_MM, 'SDD_mm': SDD_MM,
+            'n_angles': N_ANGLES, 'n_det': N_DET,
+            'angle_range_deg': [0.0, 360.0],
+            'gamma_max_deg': float(np.degrees(GAMMA_MAX_RAD)),
+            'delta_gamma_deg': float(np.degrees(DELTA_GAMMA_RAD)),
+        },
+        'phantom': {
+            'body_semi_x_mm': 85.0, 'body_semi_y_mm': 60.0,
+            'metal_material': 'iron',
+            'metal_radius_mm': 5.0, 'metal_mu_cm': MU_IRON_CM,
+            'lesion_radius_mm': 2.5, 'lesion_center_x': LESION_CENTER_X,
+            'lesion_slice_index': LESION_SLICE_INDEX,
+            'lesion_placement': 'after jitter rotation (fixed at ROI centre)',
+        },
+        'physics': {
+            'energy_keV': 60, 'spectrum': 'monochromatic',
+            'mu_air_cm': MU_AIR_CM,
+            'mu_tissue_cm': MU_TISSUE_CM,
+            'mu_metal_cm': MU_IRON_CM,
+            'mu_lesion_cm': float(MU_LESION_CM),
+            'lesion_delta_hu': LESION_DELTA_HU,
+        },
+        'noise_model': {
+            'type': 'Poisson+Gaussian (Vaishnav 2020), scatter subtracted',
+            'measurement': 'p = -ln(max(I - S, floor) / I0), '
+                           'I = Poisson(I0 exp(-p) + S) + N(0, sigma_e^2)',
+            'I0_calibrated': round(I0, 2),
+            'sigma_calibration_method': 'SD(A - B)/sqrt(2) of paired draws, '
+                                        'metal-free body, calibration ROI',
+            'sigma_ref_at_I0_1e5_hu': (None if sigma_ref_hu is None
+                                       else round(sigma_ref_hu, 3)),
+            'scatter_frac': SCATTER_FRAC,
+            'scatter_corrected': True,
+            'floor_counts': SCATTER_CORRECTED_FLOOR_COUNTS,
+            'sigma_e_counts': SIGMA_E_COUNTS,
+            'target_sigma_hu': NOISE_SIGMA_TARGET_HU_V8,
+            'dc_offset_cm': round(dc_offset_cm, 8),
+        },
+        'realizations': {
+            'count': num_realizations,
+            'base_seed': BASE_SEED,
+            'replicate': replicate,
+            'seed_scheme': 'default_rng([base_seed, replicate, condition, '
+                           'realization, slice]), condition LP=0 LA=1, '
+                           '0-indexed',
+            'jitter_seed': BASE_SEED - 1,
+            'jitter_shared_by_LP_i_and_LA_i': True,
+            'jitters': {
+                str(i + 1): round(jitters[i], 4)
+                for i in range(num_realizations)
+            },
+        },
+        'cho_reference': {
+            'roi_size': 121, 'roi_center': [LESION_CENTER_X, PHANTOM_CENTER_Y],
+            'channel_width_a': 7.5,
+            'internal_noise_sigma': 15,
+            'auc_tolerance': 0.005,
+        },
+    }
+    with open(output_dir / 'generator_provenance.json', 'w') as f:
+        json.dump(prov, f, indent=2)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PDF lab instructions
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def generate_pdf(output_dir: Path, num_realizations: int) -> None:
+    """Generate MAR_ILS_Lab_Instructions.pdf."""
+    _font_ok = False
+    if os.path.exists(_DEJAVU_REGULAR) and os.path.exists(_DEJAVU_BOLD):
+        try:
+            pdfmetrics.registerFont(TTFont(PDF_FONT, _DEJAVU_REGULAR))
+            pdfmetrics.registerFont(TTFont(PDF_FONT_BOLD, _DEJAVU_BOLD))
+            if _DEJAVU_MONO:
+                pdfmetrics.registerFont(TTFont("DejaVuMono", _DEJAVU_MONO))
+            _font_ok = True
+        except Exception:  # noqa: BLE001, S110 — any font failure falls back to Helvetica below
+            pass
+    if not _font_ok:
+        globals()['PDF_FONT'] = "Helvetica"
+        globals()['PDF_FONT_BOLD'] = "Helvetica-Bold"
+        warnings.warn("DejaVu fonts not found — falling back to Helvetica.",
+                      RuntimeWarning, stacklevel=2)
+
+    pdf_path = output_dir / "MAR_ILS_Lab_Instructions.pdf"
+    doc = SimpleDocTemplate(
+        str(pdf_path), pagesize=letter,
+        topMargin=0.75 * inch, bottomMargin=0.75 * inch,
+        leftMargin=inch, rightMargin=inch,
+    )
+    styles = getSampleStyleSheet()
+    T = ParagraphStyle("T", parent=styles["Title"],
+                       fontName=PDF_FONT_BOLD, fontSize=16, spaceAfter=6)
+    H1 = ParagraphStyle("H1", parent=styles["Heading1"],
+                        fontName=PDF_FONT_BOLD, fontSize=13,
+                        spaceBefore=14, spaceAfter=4)
+    B = ParagraphStyle("B", parent=styles["Normal"],
+                       fontName=PDF_FONT, fontSize=10, leading=14, spaceAfter=6)
+    TC = ParagraphStyle("TC", parent=styles["Normal"],
+                        fontName=PDF_FONT, fontSize=9, leading=11)
+    TC_HDR = ParagraphStyle("TCH", parent=styles["Normal"],
+                            fontName=PDF_FONT_BOLD, fontSize=9, leading=11,
+                            textColor=colors.white)
+
+    def _cell(v, h=False):
+        return Paragraph(str(v), TC_HDR if h else TC)
+
+    def _tbl(data, widths):
+        wrapped = [[_cell(c, r == 0) for c in row] for r, row in enumerate(data)]
+        t = Table(wrapped, colWidths=widths)
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#003366")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("GRID", (0, 0), (-1, -1), 0.4, colors.grey),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1),
+             [colors.white, colors.HexColor("#EEF2F7")]),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("LEFTPADDING", (0, 0), (-1, -1), 5),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ]))
+        return t
+
+    story = [
+        Paragraph("MAR ILS Lab Instructions", T),
+        Paragraph(
+            f"Metal Artifact Reduction ILS — {DATASET_VERSION} ({STANDARD_REF})",
+            styles["Heading2"],
+        ),
+        Paragraph(f"Generated {date.today().isoformat()}", styles["Italic"]),  # noqa: DTZ011 — local date intended
+        HRFlowable(width="100%", thickness=1, color=colors.grey, spaceAfter=12),
+        Paragraph("1. Canonical Test Configuration", H1),
+        _tbl([
+            ["Parameter", "Value", "Reference"],
+            ["Acquisition", "Fan-beam, SID=570 mm, SDD=1040 mm", "§A1.1(f)"],
+            ["Projections", "720 angles × 512 detectors, equi-angular", "§A1.1(f)"],
+            ["Body", "Ellipse 85×60 mm (170×120 vox)", "§A1.2(a,b)"],
+            ["Metal", f"Iron rod, r=5 mm (10 vox), μ={MU_IRON_CM} cm⁻¹", "§A1.3"],
+            ["Lesion", "Circular disc r=2.5 mm at (281,256), slice 128",
+             "§A1.4"],
+            ["Contrast", "12 HU in μ, about 11 HU reconstructed (no post-FBP hard-set)",
+             "§A1.4(e)"],
+            ["Noise", "10 HU σ in soft tissue (metal-free calibration)", "§A1.7.3"],
+            ["Realizations", f"{num_realizations} LP + {num_realizations} LA",
+             "§10.2"],
+        ], [1.78 * inch, 2.9 * inch, 1.67 * inch]),
+        Paragraph("2. Dataset Directory Structure", H1),
+        Paragraph(
+            "The distributed dataset has the following layout:", B,
+        ),
+        Paragraph(
+            f"&lt;dataset_dir&gt;/<br/>"
+            f"&#x251C;&#x2500;&#x2500; sinograms/<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x251C;&#x2500;&#x2500; LP/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x2514;&#x2500;&#x2500; LA/&nbsp;&nbsp;realization_001.h5 ... realization_{num_realizations:03d}.h5<br/>"
+            f"&#x251C;&#x2500;&#x2500; noMAR_recon/<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x251C;&#x2500;&#x2500; LP/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&#x2502;&nbsp;&nbsp; &#x2514;&#x2500;&#x2500; LA/&nbsp;&nbsp;realization_001/ ... realization_{num_realizations:03d}/&nbsp;&nbsp;(256 DICOMs each)<br/>"
+            f"&#x251C;&#x2500;&#x2500; checksums_sha256.txt<br/>"
+            f"&#x251C;&#x2500;&#x2500; generator_provenance.json<br/>"
+            f"&#x2514;&#x2500;&#x2500; MAR_ILS_Lab_Instructions.pdf",
+            ParagraphStyle("tree", parent=styles["Normal"],
+                           fontName="DejaVuMono" if _font_ok else "Courier",
+                           fontSize=8, leading=11,
+                           backColor=colors.HexColor("#F5F5F5"), spaceAfter=4),
+        ),
+        _tbl([
+            ["Directory", "Contents", "Format"],
+            ["sinograms/LP/, sinograms/LA/",
+             "Line-integral sinograms (§3.1.12) — MAR-ready input",
+             "HDF5, float32 (256×720×512)"],
+            ["noMAR_recon/LP/, noMAR_recon/LA/",
+             "Reference reconstructions with MAR disabled",
+             "DICOM CT (512×512×0.5 mm)"],
+            ["checksums_sha256.txt",
+             "SHA-256 manifest for dataset integrity verification (§11.1)",
+             "Text"],
+            ["generator_provenance.json",
+             "Generation parameters and software version",
+             "JSON"],
+        ], [1.78 * inch, 2.9 * inch, 1.67 * inch]),
+        PageBreak(),
+        Paragraph("3. Submission Instructions", H1),
+        Paragraph(
+            "Apply your MAR algorithm to the sinograms in sinograms/LP/ and "
+            "sinograms/LA/ and submit reconstructed DICOMs:", B,
+        ),
+        _tbl([
+            ["Folder", "Contents"],
+            [f"mar_recon/LP/realization_001/ ... /{num_realizations:03d}/",
+             (f"MAR-corrected DICOMs (slice_NNNN.dcm, 1-indexed). "
+              f"Only slice_{LESION_SLICE_INDEX + 1:04d}.dcm is scored.")],
+            [f"mar_recon/LA/realization_001/ ... /{num_realizations:03d}/",
+             "MAR-corrected DICOMs for LA realizations."],
+        ], [2.75 * inch, 3.6 * inch]),
+        Paragraph("4. CHO Analysis", H1),
+        Paragraph(
+            "Run the following command (--internal-noise-sigma 15 is normative):", B,
+        ),
+        Paragraph(
+            "python run_cho_analysis_v8_0.py "
+            "--dataset-dir &lt;output_dir&gt; "
+            "--mar-output-dir ./mar_recon "
+            "--internal-noise-sigma 15",
+            ParagraphStyle("code", parent=styles["Normal"], fontName="Courier",
+                           fontSize=9, leading=12,
+                           backColor=colors.HexColor("#F5F5F5"), spaceAfter=8),
+        ),
+    ]
+    doc.build(story)
+    print(f"  PDF written → {pdf_path}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Main
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Peak memory per worker: several (256, 720, 512) float64 arrays plus the
+# sinogram and DICOM buffers. Beyond RAM, workers thrash swap and N=40 takes
+# hours instead of ~20 minutes (observed on an 8 GB Mac with 8 workers).
+WORKER_PEAK_GB = 2.5
+SYSTEM_RESERVE_GB = 2.0
+
+
+def total_ram_gb() -> float | None:
+    """Physical RAM in GB, or None where the platform does not report it."""
+    try:
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024**3
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
+def recommended_workers(ram_gb: float) -> int:
+    """Largest worker count whose peak memory fits in RAM (8 GB -> 2)."""
+    return max(1, int((ram_gb - SYSTEM_RESERVE_GB) // WORKER_PEAK_GB))
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(
+        description=(
+            "MAR ILS Dataset Generator v8.0.0 — "
+            "ASTM WKXXXXX Rev 06 (Fan-Beam, Single Canonical Configuration)"
+        ),
+    )
+    ap.add_argument(
+        "--output-dir", default="./astm_reference_dataset_v8",
+        help="Root output directory (default: ./astm_reference_dataset_v8)",
+    )
+    ap.add_argument(
+        "--realizations", type=int, default=NUM_REALIZATIONS_DEFAULT,
+        help=(
+            f"Realizations per condition "
+            f"(default: {NUM_REALIZATIONS_DEFAULT}; "
+            f"screening: 20; formal reporting requires ≥40)"
+        ),
+    )
+    ap.add_argument(
+        "--workers", type=int, default=0,
+        help="Parallel workers (0 = os.cpu_count())",
+    )
+    ap.add_argument(
+        "--replicate", type=int, default=0,
+        help=("Independent noise draw (default 0 = reference dataset; "
+              "1-5 operating-point selection, 6-15 confirmatory pilot gate)"),
+    )
+    ap.add_argument("--no-pdf", action="store_true",
+                    help="Skip PDF lab instructions")
+    ap.add_argument("--no-checksums", action="store_true",
+                    help="Skip SHA-256 checksum computation")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Validate configuration without writing files")
+    args = ap.parse_args()
+
+    num_real = args.realizations
+    output_dir = Path(args.output_dir).resolve()
+    n_workers = args.workers if args.workers > 0 else (os.cpu_count() or 1)
+
+    print(f"Generator version : {DATASET_VERSION} ({STANDARD_REF})")
+    print(f"Geometry          : fan-beam  SID={SID_MM} mm  SDD={SDD_MM} mm")
+    print(f"Projections       : {N_ANGLES} angles × {N_DET} detectors (equi-angular)")
+    print(f"Fan angle range   : ±{np.degrees(GAMMA_MAX_RAD):.2f}° "
+          f"(Δγ = {np.degrees(DELTA_GAMMA_RAD):.4f}°)")
+    print(f"Phantom           : ellipse 85×60 mm, iron rod r=5 mm "
+          f"(μ={MU_IRON_CM} cm⁻¹)")
+    print(f"Lesion            : circular disc r=2.5 mm at x={LESION_CENTER_X}, "
+          f"slice {LESION_SLICE_INDEX}")
+    print(f"Contrast          : ~{LESION_DELTA_HU:.0f} HU sinogram-domain")
+    print(f"Realizations      : {num_real} LP + {num_real} LA "
+          f"({'SCREENING' if num_real < 40 else 'FORMAL'})")
+    print(f"Replicate         : {args.replicate}"
+          f"{' (reference dataset)' if args.replicate == 0 else ' (pilot replicate)'}")
+    print(f"Output directory  : {output_dir}")
+    print(f"Workers           : {n_workers}")
+    ram_gb = total_ram_gb()
+    if ram_gb is not None:
+        print(f"Memory            : {ram_gb:.0f} GB RAM "
+              f"(~{WORKER_PEAK_GB:g} GB peak per worker)")
+    if _HAS_NUMBA:
+        print(f"Acceleration      : Numba {numba.__version__} "
+              f"(JIT + batch geometry sharing)")
+    else:
+        print("Acceleration      : none (install numba for ~4-8x speedup)")
+    print()
+
+    if num_real < 40:
+        print("WARNING: Screening mode (< 40 realizations). Results are not "
+              "reportable under ASTM WKXXXXX §10.2.", flush=True)
+        print()
+
+    if ram_gb is not None and n_workers > recommended_workers(ram_gb):
+        rec = recommended_workers(ram_gb)
+        print(f"WARNING: {n_workers} workers need about "
+              f"{n_workers * WORKER_PEAK_GB:.0f} GB but this machine has "
+              f"{ram_gb:.0f} GB RAM. Workers will thrash swap and run far "
+              f"slower. Use --workers {rec}.", flush=True)
+        print()
+
+    if args.dry_run:
+        print("DRY RUN — configuration validated, no files written.")
+        return
+
+    I0, dc_offset_cm, sigma_ref = calibrate()
+
+    # Warm up batch backprojector JIT (forward + single-slice already compiled
+    # during calibration; batch kernel is only used in workers)
+    if _HAS_NUMBA:
+        print("  Compiling batch backprojector...", end=" ", flush=True)
+        _dummy = _backproject_batch_jit(
+            np.zeros((2, 4, 2), dtype=np.float64),
+            np.array([0.0, 1.0]),
+            SID_VOX, DELTA_GAMMA_RAD, float(DET_FAN_ANGLES_RAD[0]),
+            4.0, 4.0, 4, 4, 2,
+        )
+        del _dummy
+        print("done", flush=True)
+    print()
+
+    rng_jitter = np.random.default_rng(BASE_SEED - 1)
+    jitters: dict[int, float] = {
+        i: float(rng_jitter.uniform(-JITTER_MAX_DEG, JITTER_MAX_DEG))
+        for i in range(num_real)
+    }
+
+    tasks = [
+        (cond, place, i, str(output_dir), I0, jitters[i], dc_offset_cm,
+         args.replicate)
+        for cond, place in (("LP", True), ("LA", False))
+        for i in range(num_real)
+    ]
+
+    done = 0
+    n_tasks = len(tasks)
+    print(f"Generating {n_tasks} realizations "
+          f"({num_real} LP + {num_real} LA)...")
+    with ProcessPoolExecutor(max_workers=n_workers) as pool:
+        futs = {pool.submit(_realization_worker, *t): t for t in tasks}
+        for fut in as_completed(futs):
+            try:
+                label = fut.result()
+                done += 1
+                print(f"  [{done:3d}/{n_tasks}] {label}", flush=True)
+            except Exception as exc:  # noqa: BLE001 — report failed realization, keep the rest
+                t = futs[fut]
+                print(f"  ERROR {t[0]}/realization_{t[2] + 1:03d}: {exc}")
+
+    print()
+
+    write_provenance_json(output_dir, jitters, I0, dc_offset_cm, num_real,
+                          replicate=args.replicate, sigma_ref_hu=sigma_ref)
+
+    if not args.no_pdf:
+        generate_pdf(output_dir, num_real)
+
+    # Last, so the manifest covers every file including the PDF.
+    if not args.no_checksums:
+        write_checksums(output_dir)
+
+    print()
+    print(f"Dataset complete → {output_dir}")
+    print("Next step:")
+    print("  python run_cho_analysis_v8_0.py \\")
+    print(f"      --dataset-dir {output_dir} \\")
+    print("      --mar-output-dir ./mar_recon \\")
+    print("      --internal-noise-sigma 15")
+
+
+if __name__ == "__main__":
+    warnings.filterwarnings("ignore", category=UserWarning)
+    main()

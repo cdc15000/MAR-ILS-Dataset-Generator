@@ -136,3 +136,24 @@ class TestAttenuationMap:
         mu = build_attenuation_map(place_lesion=False, jitter_deg=5.0)
         assert mu.shape == (Y_DIM, X_DIM)
         assert mu.dtype == np.float32
+
+
+class TestLesionPlacement:
+    def test_default_lesion_moves_with_jitter(self, coordinate_grids):
+        """v7.0.0 behaviour: the lesion rotates with the body."""
+        yy, xx = coordinate_grids
+        mu = build_attenuation_map(True, 14.0)
+        assert not np.allclose(mu[build_lesion_mask(yy, xx)], MU_LESION_CM)
+
+    def test_lesion_after_rotation_is_fixed(self, coordinate_grids):
+        yy, xx = coordinate_grids
+        lesion = build_lesion_mask(yy, xx)
+        for jitter in (-14.0, 0.0, 9.5):
+            mu = build_attenuation_map(True, jitter, lesion_after_rotation=True)
+            np.testing.assert_allclose(mu[lesion], MU_LESION_CM, rtol=1e-6)
+
+    def test_lesion_after_rotation_same_without_jitter(self):
+        np.testing.assert_array_equal(
+            build_attenuation_map(True, 0.0),
+            build_attenuation_map(True, 0.0, lesion_after_rotation=True),
+        )

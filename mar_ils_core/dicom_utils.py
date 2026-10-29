@@ -44,17 +44,22 @@ def write_dicom_slice(
     dataset_version: str = "v7.0.0",
     standard_ref: str = "ASTM-WKXXXXX-Rev05",
     mar_applied: str = "NO",
+    round_hu: bool = False,
 ) -> None:
     """Write one 2D HU array as DICOM. Metal hard-set to 3000 HU (§A1.3(d,f)).
 
     ``mar_applied`` sets CP-2575 Metal Artifact Reduction Applied (0018,9391):
     "NO" for noMAR reconstructions, "YES" for MAR-corrected output.
+    ``round_hu`` rounds to the nearest HU (v8.0.0); the default truncates
+    toward zero, as v7.0.0 did.
     """
     if mar_applied not in ("YES", "NO"):
         raise ValueError(f"mar_applied must be 'YES' or 'NO', got {mar_applied!r}")
     output_dir.mkdir(parents=True, exist_ok=True)
     hu = hu.copy()
     hu[metal_mask] = METAL_HU
+    if round_hu:
+        hu = np.rint(hu)
     hu_clipped = np.clip(hu, -1024, 32767).astype(np.int16)
 
     file_meta = FileMetaDataset()
