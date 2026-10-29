@@ -5,7 +5,7 @@ Tests for the physics-based noise model.
 import numpy as np
 import pytest
 
-from mar_ils_core.noise import apply_noise
+from mar_ils_core.noise import apply_noise, apply_noise_scatter_corrected
 
 
 class TestNoiseModel:
@@ -51,3 +51,27 @@ class TestNoiseModel:
         rng = np.random.default_rng(42)
         out = apply_noise(sino, I0=1e4, rng=rng)
         assert np.all(np.isfinite(out))
+
+
+class TestScatterCorrectedNoise:
+    def test_unbiased_at_high_I0(self):
+        """Subtracting the known scatter removes the v7 downward bias."""
+        sino = np.full((100, 100), 0.5, dtype=np.float32)
+        out = apply_noise_scatter_corrected(sino, I0=1e7, rng=np.random.default_rng(42))
+        assert np.mean(out) == pytest.approx(0.5, abs=1e-3)
+
+    def test_v7_model_is_biased(self):
+        sino = np.full((100, 100), 0.5, dtype=np.float32)
+        out = apply_noise(sino, I0=1e7, rng=np.random.default_rng(42))
+        assert np.mean(out) < 0.45
+
+    def test_finite_under_photon_starvation(self):
+        sino = np.full((50, 50), 12.0, dtype=np.float32)  # through-metal path
+        out = apply_noise_scatter_corrected(sino, I0=1e5, rng=np.random.default_rng(1))
+        assert np.all(np.isfinite(out))
+
+    def test_deterministic_with_seed(self):
+        sino = np.ones((10, 20), dtype=np.float32) * 0.5
+        out1 = apply_noise_scatter_corrected(sino, I0=1e5, rng=np.random.default_rng(7))
+        out2 = apply_noise_scatter_corrected(sino, I0=1e5, rng=np.random.default_rng(7))
+        np.testing.assert_array_equal(out1, out2)

@@ -71,3 +71,41 @@ class TestCHOPerformance:
             internal_noise_sigma=15.0,
         )
         assert result["AUC"] == pytest.approx(0.5, abs=0.15)
+
+
+class TestRefitBootstrapV8:
+    """run_cho_analysis_v8_0: LOO point estimate equals v7; refit bootstrap."""
+
+    @pytest.fixture(scope="class")
+    def feats(self):
+        rng = np.random.default_rng(0)
+        la = rng.normal(0.0, 30.0, size=(40, NUM_CHANNELS))
+        lp = rng.normal(0.0, 30.0, size=(40, NUM_CHANNELS))
+        lp[:, 0] += 15.0
+        return lp, la
+
+    def test_loo_matches_v7(self, feats):
+        from run_cho_analysis_v7_0 import compute_cho_performance
+        from run_cho_analysis_v8_0 import loo_auc
+        lp, la = feats
+        v7 = compute_cho_performance(lp, la, 40, n_boot=10, internal_noise_sigma=15)
+        assert loo_auc(lp, la, 225.0) == v7["AUC"]
+
+    def test_heldout_copies_excluded(self, feats):
+        """A resample made of one index repeated has no training data left."""
+        from run_cho_analysis_v8_0 import loo_auc
+        lp, la = feats
+        idx = np.array([3, 3, 7, 7, 7, 9])
+        auc = loo_auc(lp, la, 225.0, idx)
+        assert 0.0 <= auc <= 1.0
+
+    def test_self_test_delta_zero_every_draw(self, feats):
+        from run_cho_analysis_v8_0 import refit_bootstrap
+        lp, la = feats
+        b = refit_bootstrap({"noMAR": (lp, la), "MAR": (lp, la)}, 225.0, n_boot=20)
+        np.testing.assert_array_equal(b["MAR"] - b["noMAR"], 0.0)
+
+    def test_normal_interval_contains_estimate(self):
+        from run_cho_analysis_v8_0 import _ci
+        lo, hi = _ci(0.8, np.array([0.6, 0.7, 0.65, 0.72]))
+        assert lo < 0.8 < hi

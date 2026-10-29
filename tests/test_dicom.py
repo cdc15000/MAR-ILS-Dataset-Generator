@@ -122,3 +122,24 @@ class TestCP2575:
             metal_mask=metal_mask,
         )
         return tmp_path / "slice_0001.dcm"
+
+
+class TestRoundHU:
+    def _write(self, tmp_path, round_hu):
+        import pydicom
+
+        from mar_ils_core.dicom_utils import write_dicom_slice
+        hu = np.full((512, 512), 0.7, dtype=np.float32)
+        hu[0, 0] = -0.7
+        write_dicom_slice(hu, 0, output_dir=tmp_path, realization_idx=0,
+                          condition_label="t", study_uid="1.2", series_uid="1.3",
+                          metal_mask=np.zeros((512, 512), bool), round_hu=round_hu)
+        return pydicom.dcmread(str(tmp_path / "slice_0001.dcm")).pixel_array
+
+    def test_default_truncates(self, tmp_path):
+        px = self._write(tmp_path, False)
+        assert px[1, 1] == 0 and px[0, 0] == 0
+
+    def test_round_hu_rounds(self, tmp_path):
+        px = self._write(tmp_path, True)
+        assert px[1, 1] == 1 and px[0, 0] == -1

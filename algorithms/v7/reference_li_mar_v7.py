@@ -1,10 +1,14 @@
 """
 LI-MAR v7 reference — parameter-free linear-interpolation Metal Artifact
-Reduction on the v7.0.0 fan-beam dataset.
+Reduction on the v7.0.0 or v8.0.0 fan-beam dataset (same geometry).
 
-Non-normative. Serves as (a) a negative control (designated control) for the
-CHO pipeline and (b) a reproducible delta-AUC anchor. The ASTM type test measures the *lab's*
-algorithm; this reference is for validation and calibration only.
+Non-normative. Serves as the reference MAR condition: (a) the designated
+control for the CHO pipeline, gated on the mean ΔAUC over the pilot replicates
+(pilot_gate_v8_0.py), and (b) a reproducible delta-AUC anchor. Its sign
+depends on the physics: about −0.23 on the v7.0.0 dataset (scatter never
+subtracted), about +0.10 with the v8.0.0 corrections. The ASTM type test
+measures the *lab's* algorithm; this reference is for validation and
+calibration only.
 
 Pipeline (per realization, slice 128 / slice_0129.dcm only):
   1. metal_mask  = noMAR_HU > METAL_HU_THRESH       (textbook detection)
@@ -114,6 +118,21 @@ def load_dc_offset(dataset_dir) -> float:
     return float(noise_model["dc_offset_cm"])
 
 
+def dicom_write_kwargs(dataset_dir) -> dict:
+    """DICOM labels and HU rounding matching the dataset's generator version.
+
+    v8.0.0 datasets are labelled v8.0.0 / Rev06 and rounded to the nearest HU;
+    v7.0.0 datasets (or no provenance) keep the v7 defaults.
+    """
+    prov = Path(dataset_dir) / "generator_provenance.json"
+    version = (json.loads(prov.read_text()).get("generator_version", "v7.0.0")
+               if prov.exists() else "v7.0.0")
+    if version.startswith("v8"):
+        return {"dataset_version": version,
+                "standard_ref": "ASTM-WKXXXXX-Rev06", "round_hu": True}
+    return {}
+
+
 def discover_realizations(dataset_dir, cond: str = "LP") -> int:
     """Count realization_*.h5 files under <dataset_dir>/sinograms/<cond>/."""
     d = Path(dataset_dir) / "sinograms" / cond
@@ -166,13 +185,14 @@ def process_realization(
         series_uid=generate_uid(),
         metal_mask=metal_mask,
         mar_applied="YES",
+        **dicom_write_kwargs(dataset_dir),
     )
 
 
 def main(argv=None, *, slice_index: int = LESION_SLICE_INDEX) -> None:
     ap = argparse.ArgumentParser(
         description="LI-MAR v7 reference (non-normative): linear-interpolation "
-                    "MAR on the v7.0.0 fan-beam dataset; writes slice_0129.dcm."
+                    "MAR on the v7.0.0 or v8.0.0 fan-beam dataset; writes slice_0129.dcm."
     )
     ap.add_argument("--dataset-dir", required=True,
                     help="generator_v7_0_0.py output directory")
