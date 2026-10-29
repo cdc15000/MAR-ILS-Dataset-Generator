@@ -6,3 +6,4 @@ tqdm==4.67.3
 reportlab==4.4.10
 matplotlib==3.10.8
 # numba is optional (~24x speedup). Install separately: pip install numba
+spekpy==2.0.13

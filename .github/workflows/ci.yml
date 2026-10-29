@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.16.10
-      - run: ruff check mar_ils_core/ tests/ algorithms/v7/ generator_v7_0_0.py run_cho_analysis_v7_0.py
+      - run: ruff check mar_ils_core/ tests/ algorithms/v7/ generator_v7_0_0.py run_cho_analysis_v7_0.py generator_v8_0_0.py run_cho_analysis_v8_0.py pilot_gate_v8_0.py generator_v9_0_0.py run_cho_analysis_v9_0.py
 
   test:
     runs-on: ubuntu-latest

@@ -4,13 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with **ASTM WKXXXXX Revision 05** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
+This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), following **ASTM WKXXXXX Revision 06 (draft, October 2026)** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
 
 ## Project Root
 
 The persistent working directory is `~/projects/claude/mar-ils/`.
 
-## Commands
+## Current Design: v9 (October 2026)
+
+v9 replaces v7 as the design of record (Rev 06 draft in `private/rev06/`; decisions, pre-registrations and results in the gitignored review notes `docs_and_references/ASTM_MAR_Standard_Rev05_Review.md`, items 20 to 33; spec of the phantom in `private/vaishnav_phantom_spec.md`). Everything below this section describes the superseded v7 design and is kept for reference.
+
+- **Modules:** `mar_ils_core/vaishnav_phantom.py` (Table II phantom, lumps, signal baseline), `vaishnav_sim.py` (geometry, analytic projector, SpekPy spectrum, noise, FBP, HU), `ddog.py`, `cho_v9.py` (pooled CHO, Φ(SNR/√2), antler AUC∞), `mar_v9.py` (MAR 1, MAR 2); `generator_v9_0_0.py` (ROI mode, methods fbp/mar1/mar2/oracle/mar1xK); `run_cho_analysis_v9_0.py`; tests in `tests/test_v9.py`.
+- **Fixed parameters:** SID 541 mm, SDD 949 mm, 888 ch at 1 mm, 984 views; 120 kV W 10° 2.5 mm Al; scatter 1e-4·I₀; σ_e² = 160; 512² over 30 cm, centre pixel (256, 256); ROI 121²; D-DOG σ₀ 0.005, α 1.4, Q 1.67, j = 1…10; lump scale s = 0.0588; I₀ = 1e6; levels 1.020/1.025/1.030; τ_counts = 1124, τ_mu = 1.953 cm⁻¹; μ_w = 0.2124 cm⁻¹; estimator null AUC∞ = 0.533.
+- **Discipline:** design and validation changes are pre-registered in the review notes and approved by the user before runs; failures are recorded, not re-tuned.
+- **Pending:** v9 dataset writer (sinograms + DICOM), blinding tooling, master dataset; wiki update.
+
+## Commands (v7, superseded)
 
 ### Environment Setup
 ```bash
