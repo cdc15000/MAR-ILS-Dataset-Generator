@@ -1,5 +1,7 @@
 # Copilot Instructions for MAR ILS Dataset Generator
 
+> **Note:** the current design is v9.0.0 (see README and `CLAUDE.md`, section Current Design). Sections below that describe v7.0.0, the 0.8294 baseline, internal noise 15 or the LI-MAR control are superseded.
+
 ## Quick Setup
 
 ```bash

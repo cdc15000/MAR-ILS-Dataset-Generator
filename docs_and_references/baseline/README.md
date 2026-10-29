@@ -1,5 +1,7 @@
 # Reference CHO results
 
+> **Superseded.** This is the archived v7.0.0 record. The LI-MAR result below came from defects in the v7.0.0 generator and is withdrawn; see the v9.0.0 release.
+
 `cho_results_li_mar_v7_n40.json` is the archived output of `run_cho_analysis_v7_0.py` in ILS mode, scoring the reference LI-MAR v7 reconstructions against the noMAR baseline on the N=40 fan-beam dataset with internal noise σ = 15.
 
 | Quantity | Value |

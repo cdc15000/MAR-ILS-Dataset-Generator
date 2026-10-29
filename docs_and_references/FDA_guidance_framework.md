@@ -5,7 +5,7 @@
 **Status:** Conceptual framework for future FDA guidance document
 **Date:** 2026-04-05
 **Author:** Christopher D. Cocchiaraley (Consumer Member, ASTM F04)
-**References:** ASTM WKXXXXX Rev 05, IEC 60601-2-44 Ed. 4
+**References:** ASTM WKXXXXX Rev 06 (draft), IEC 60601-2-44 Ed. 4
 
 ---
 
@@ -15,7 +15,7 @@ This document outlines a proposed framework for FDA acceptance criteria when
 evaluating Metal Artifact Reduction (MAR) performance in 510(k) submissions.
 The framework builds on:
 
-- **ASTM FXXXX (formerly WKXXXXX Rev 05)** — standardized TYPE TEST that measures ΔAUC
+- **ASTM FXXXX (currently WKXXXXX Rev 06 draft)** — standardized TYPE TEST that measures ΔAUC
 - **IEC 60601-2-44 Ed. 4 §203.6.7.101.1** — post-publication Amendment binding the compliance statement to the ASTM TYPE TEST, to be submitted after ASTM FXXXX publishes
 
 FDA's role in the layered approach is to establish the acceptance threshold:
@@ -136,7 +136,7 @@ other. The same principle applies here: ASTM WKXXXXX defines how to measure
 
 | Prerequisite | Status | Impact |
 |-------------|--------|--------|
-| ASTM WKXXXXX Rev 05 ballot | Pending | Must be balloted before FDA can reference |
+| ASTM WKXXXXX ballot | Pending | Must be balloted before FDA can reference |
 | ASTM ILS precision study (≥3 labs) | Not started | Required to establish S_r, S_R, T_r |
 | IEC 60601-2-44 Ed. 4 publication | ~Q1 2027 | FDA recognition of IEC standard |
 | §203.6.7.101.1 binding Amendment (post-ASTM-FXXXX-publication) | Pending ASTM publication | Optional — FDA can act independently |
