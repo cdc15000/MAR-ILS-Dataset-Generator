@@ -8,7 +8,7 @@
 
 ## Objective
 
-Prepare a complete submission package for registering a new ASTM work item through Form 01 under F04.15, Material Test Methods, for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the maturity of the Rev 05 draft standard, established reference baseline, and existing reference implementation to present a near-complete standard with a concrete plan to populate §17, Precision and Bias.
+Prepare a complete submission package for registering a new ASTM work item through Form 01 under F04.15, Material Test Methods, for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the Rev 06 draft standard, its pre-registered validation and the existing reference implementation to present a near-complete standard with a concrete plan to populate §17, Precision and Bias.
 
 ## Strategic Context
 
@@ -50,7 +50,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 | Document 1: Form 01 field content | Online wizard entries | Text to paste into the ASTM portal | N/A |
 | Document 2: Cover memorandum | Executive summary for F04.15 subcommittee chair | PDF/Word attachment | 2–3 pages |
 | Document 3: ILS Protocol | E691 study design, structured after D7778 Table 4, with the coordinator letter, return form and questionnaire as attachments | PDF/Word attachment | 13 pages |
-| Attachment: Rev 05 draft standard | The standard itself | PDF/Word in ASTM manuscript format | ~60 pages |
+| Attachment: Rev 06 draft standard | The standard itself | PDF/Word in ASTM manuscript format | ~60 pages |
 
 ---
 
@@ -89,7 +89,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 > Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
 
 **Proposed Scope:**
-> This test method specifies a quantitative procedure for evaluating the performance of Metal Artifact Reduction (MAR) methods implemented in tomographic imaging systems. The measurand is the scalar difference in area under the receiver operating characteristic curve (ΔAUC) derived from a signal-known-exactly, background-known-statistically (SKE/BKS) detection task using a fixed model observer, specified as a channelized Hotelling observer (CHO), predefined regions of interest, and specified statistical estimation procedures. The method uses a standardized synthetic digital dataset distributed as fan-beam line-integral sinograms and reference reconstructions, verified by SHA-256 checksums. The method applies to systems producing HU-calibrated reconstructed image data and is structured to support precision and bias evaluation in accordance with ASTM E691 and ISO 5725. It is intended for type testing and conformity assessment and does not establish performance acceptance criteria.
+> This test method specifies a quantitative procedure for evaluating the performance of Metal Artifact Reduction (MAR) methods implemented in tomographic imaging systems. The measurand is the change in the area under the receiver operating characteristic curve, extrapolated to unlimited training data (ΔAUC∞), for a signal-known-exactly, background-known-statistically detection task performed by a channelized Hotelling observer, following the framework of Vaishnav et al. (2020). The method uses a standardized digital dataset of simulated two-dimensional CT scans of a numerical head phantom with iron implants, distributed as fan-beam sinograms and reference reconstructions verified by SHA-256 checksums, and reports the result at three signal levels. It is structured to support precision and bias evaluation in accordance with ASTM E691 and ISO 5725. It is intended for type testing and conformity assessment and does not establish performance acceptance criteria.
 
 **Keywords:**
 > metal artifact reduction; tomographic imaging; computed tomography; model observer; channelized Hotelling observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
@@ -135,17 +135,17 @@ The consequence: patients scanned on systems without effective MAR, or with MAR 
 
 **Section 3: Technical Approach**, about 2 paragraphs
 
-Summarizes the method without requiring the reader to open Rev 05: standardized digital dataset of SHA-256-verified fan-beam sinograms and reconstructions, channelized Hotelling observer scoring a binary lesion detection task, ΔAUC as the scalar measurand. Emphasizes that the test is entirely computational; no CT scanner hardware is required. References the framework of Vaishnav et al. (Medical Physics, 2020) as the scientific basis.
+Summarizes the method without requiring the reader to open Rev 06: standardized digital dataset of SHA-256-verified fan-beam sinograms and reconstructions, channelized Hotelling observer scoring a binary lesion detection task, ΔAUC as the scalar measurand. Emphasizes that the test is entirely computational; no CT scanner hardware is required. References the framework of Vaishnav et al. (Medical Physics, 2020) as the scientific basis.
 
 Notes the approved DICOM CP-2575 MAR metadata, now in DICOM 2026b, as complementary infrastructure. The recording mechanism for MAR status already exists; this test method provides the performance measurement.
 
 **Section 4: Maturity of the Draft Standard**, about 1 bulleted paragraph
 
-- Rev 05 draft standard attached, with 18 normative sections and 2 annexes
-- Reference baseline established: AUC_noMAR = 0.8294, N=40, fan-beam geometry
-- Reference dataset generated: 80 realizations, 35 GB, SHA-256 verified
-- Reference CHO implementation: `run_cho_analysis_v7_0.py`, hardcoded normative parameters
-- Reference MAR algorithm: LI-MAR v7, parameter-free linear interpolation
+- Rev 06 draft standard attached, with 18 normative sections, two annexes and two appendices
+- Pre-registered known-answer validation passed on five replicate datasets (review notes items 28 to 32); improving-control ΔAUC∞ +0.215, +0.238, +0.254 at levels 1.020, 1.025, 1.030; degrading control −0.061
+- Reference dataset: about 12,000 2D realizations (three levels plus a control set), about 48 GB, to be generated with generator v9.0.0
+- Reference CHO implementation: `run_cho_analysis_v9_0.py` (D-DOG channels, antler-plot AUC∞)
+- Control methods: image-segmentation inpainting (improving) and sinogram-threshold inpainting at dose 4e6 (degrading), after Vaishnav et al.
 - 106 automated tests across 9 suites, all passing
 - DICOM 2026b compliant output with the CP-2575 Metal Artifact Reduction Macro
 
@@ -192,7 +192,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 | A4 Participants | Tiers A–C; 10 to 12; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
 | A5 Equipment | Computational platform; integration paths A–C | Table 4 A5 |
 | A6 Test materials | Dataset table; single-material justification; blinding; familiarization dataset | Table 4 A6, §6.3.1, §6.6.3–6.6.4 |
-| A7 Tests | Rev 05, generator v7.0.0, CHO release; two conditions; replicates; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
+| A7 Tests | Rev 06, generator v9.0.0, CHO release; two conditions; replicates; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
 | A8 Special instructions | General instructions; Steps 1–7; output specification | Table 4 A8, Fig. X1.2 |
 | A9 Reporting form | Two-part return form, Attachment 2 | Table 4 A9, Fig. X1.3 |
 | A10 Statistical tools | E691-23 §15–19; digit retention; software verification | Table 4 A10, §10.3 |
@@ -204,11 +204,11 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 
 ### Design Decisions, 2026-10-17
 
-- **Pilot run:** separate, before the full-scale run. The first three signed laboratories run Condition 1 only, three replicates, on the blinded dataset; the coordinator scores centrally with the key and returns results. Rev 05 §17.10 requires pilot data from at least 3 laboratories before first ballot showing (a) a control ΔAUC of consistent sign distinguishable from zero, (b) within-laboratory SD of ΔAUC at most 0.05 and (c) ΔAUC bias, resubstitution minus hold-out, at most 0.02; §17.11 designates LI-MAR as the control. The archived LI-MAR record meets all three: ΔAUC −0.230 with p ≈ 3e−11, SD 0 for deterministic replicates, ΔAUC bias 0.004. Pilot data is not used in the precision estimates. Adds two months to the schedule.
+- **Pilot run:** separate, before the full-scale run. The first three signed laboratories run Condition 1 only, three replicates, on the blinded dataset; the coordinator scores centrally with the key and returns results. Rev 06 §17.6 requires pilot data from at least 3 laboratories before first ballot showing, at each level, (a) the improving and degrading controls give ΔAUC∞ of the expected sign with 95 % intervals excluding zero, (b) within-laboratory SD of ΔAUC∞ at most 0.05 and (c) the null-signal check within 0.02 of the estimator's null value (0.533). The developer's validation meets all three. Pilot data is not used in the precision estimates. Adds two months to the schedule.
 - **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
-- **Number of materials:** one, the canonical 12 HU configuration. E691-23 §10.2.2 recommends at least three; the protocol justifies one normative test point under Rev 05 A2.3–A2.4 and limits the precision statement to it, per E691-23 §10.2.3 and D7778 §6.6.4.
+- **Number of materials:** three, the signal levels 1.020, 1.025 and 1.030 at dose 1e6, as E691-23 §10.2.2 recommends. The range is narrow by design (estimator accuracy below, control ceiling above); the precision statement says so.
 - **Funding and staffing:** self-funded by participants; statistician to be appointed by the task group.
-- **Precision basis:** Condition 1 only. Every laboratory runs the same LI-MAR control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
+- **Precision basis:** Condition 1 only. Every laboratory runs the same improving control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
 - **Laboratory identification:** the Research Report names participating laboratories with contacts and addresses and codes every result, following RR:F04-2001, the F2052 study. Decided 2026-10-17.
 - **Familiarization dataset:** a small labeled dataset with different noise seeds, for trial runs and tuning, so that no laboratory tunes on the ILS dataset, per D7778 Fig. X1.2 item 8 and E691-23 §9.3.
 
@@ -221,7 +221,7 @@ The master dataset keeps the labeled layout and stays with the coordinator. The 
 - **Key:** `blinding_key.json`, mapping each code to its condition and original realization index, with a random salt. Its SHA-256 hash is published in the dataset record at distribution; the key is published after the manifest deadline.
 - **Submission sequence:** laboratories submit a SHA-256 manifest of each run directory before key release, then score with the key and submit `cho_results.json` and the 80 scored slices per run. The laboratory's `cho_results.json` is the official result; the coordinator's rescoring is a cross-check.
 - **Honesty about strength:** the generator and `BASE_SEED` are public and LP/LA pairs share a seed, so a laboratory could unblind deliberately. The protocol presents blinding as a safeguard against unconscious bias, and the Participation Agreement adds a commitment not to unblind.
-- **Tooling, not yet built:** a blinding script that writes the distribution copy, its checksums, its lab instructions PDF and the key; `run_cho_analysis_v7_0.py --blinding-key`, which builds the LP and LA folder lists in original realization order so the fixed-seed bootstrap is unchanged, with the no-key path untouched; a manifest utility; and the coded layout in LI-MAR and the Python, MATLAB and C harnesses, which use the labeled layout when `sinograms/LP` exists and the coded layout otherwise. Regression target with a blinded copy and its key: self-test 0.829375, CI [0.761219, 0.902516]; LI-MAR ΔAUC −0.230, CI [−0.2969, −0.1475]. The release containing this tooling is the one the protocol cites.
+- **Tooling, not yet built:** the v9 dataset writer (sinograms and DICOM), a blinding script that writes the distribution copy, its checksums, its lab instructions PDF and the key; `run_cho_analysis_v9_0.py --blinding-key`, which rebuilds the class, level and pool lists from the key; a manifest utility; and the coded layout in the control methods and the Python, MATLAB and C harnesses. Regression targets are the reference AUC∞ values recorded when the master dataset is generated. The release containing this tooling is the one the protocol cites.
 - **Zenodo:** only the blinded copy is uploaded, and the record description is updated for the coded layout. Published Zenodo files cannot be changed, so the key is added after the manifest deadline as a new version of the record, with its own DOI; the v1 description carries the key hash. The Drive copy is the coordinator's master archive and is not shared.
 
 ### Timeline
@@ -248,20 +248,20 @@ _Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17
 ---
 
 
-## Attachment: Rev 05 Draft Standard
+## Attachment: Rev 06 Draft Standard
 
-The existing `private/ASTM_MAR_Standard.md` Rev 05, dated 2026-05-29, exported to Word or PDF in ASTM manuscript format. No content changes are needed; the document is attached as-is.
+`private/rev06/ASTM_MAR_Standard_Rev06.md`, dated 2026-10-29, exported to Word beside Rev 05 in the package folder. Rev 05 is superseded.
 
 ---
 
 ## Pre-Submission Checklist
 
 1. [x] ~~Resolve IP question~~ DONE 2026-07-14: standard text moved to the gitignored `private/` folder and removed from the public repo
-2. [ ] Export Rev 05 draft standard to Word/PDF in ASTM manuscript format
+2. [x] Export Rev 06 draft standard to Word (PDF pending) in ASTM manuscript format
 3. [x] Write Document 2, the Cover Memorandum, as a standalone PDF: drafted 2026-07-27 and re-dated 2026-10-04 in `~/Desktop/ASTM Submission Package/`
 4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27, re-dated 2026-10-04, restructured after D7778 Table 4 on 2026-10-17
 5. [ ] Complete the ASTM online wizard using the Document 1 field content
-6. [ ] Attach Documents 2, 3, and the Rev 05 draft to the work item registration
+6. [ ] Attach Documents 2, 3, and the Rev 06 draft to the work item registration
 7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17 (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WKXXXXX with the assigned WK number once received
 8. [ ] Build the blinding tooling and the familiarization dataset, and verify the regression target, before distribution in March 2027
 9. [ ] Upload the blinded copy to Zenodo, publish the key hash in the record, and update the record description

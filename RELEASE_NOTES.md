@@ -4,7 +4,21 @@ This file records per-version status, performance work, tooling additions, metad
 
 ---
 
-## v7.0.0 — April 2026 (current)
+## v9.0.0: October 2026 (in development)
+
+### Redesign to the framework of Vaishnav et al. (2020)
+
+- **Why:** an October 2026 audit of v7.0.0 found that lesion-present and lesion-absent realization *i* shared their noise, the lesion rotated with the artifact jitter, and scatter was added but not corrected. v8 (`generator_v8_0_0.py`, `run_cho_analysis_v8_0.py`, `pilot_gate_v8_0.py`) fixed these in the v7 design; under the fixes the v7 LI-MAR result (ΔAUC ≈ −0.23) does not hold and is withdrawn. Pre-registered pilot gates on the v7/v8 design then failed, and the method was rebuilt around the paper it cites.
+- **Phantom and physics:** Vaishnav's head phantom with rotatable lumpy inset, 2D; 120 kV polychromatic fan beam (Mehranian 2013 geometry), SpekPy spectrum, NIST attenuation, Poisson noise, constant scatter (De Man 1999) and electronic noise (La Rivière 2005); analytic projections; FBP with the Ram-Lak kernel.
+- **Observer:** dense difference-of-Gaussians CHO (Abbey and Barrett 2001), pooled covariance, no internal noise; antler-plot AUC∞ with separate 1000-image training and test pools.
+- **Calibration:** lump scale and dose mapping fitted to the paper's published FBP curves (s = 0.0588, dose in counts per bin).
+- **Controls:** the paper's two sinogram-inpainting methods, an improving control and a degrading control at dose 4 × 10⁶.
+- **Validation:** pre-registered known-answer checks on five independent replicate datasets all pass (ΔAUC∞ of the improving control +0.215, +0.238, +0.254 at amplitudes 1.020, 1.025, 1.030; degrading control −0.061; replicate SD 0.004 to 0.008). The observer's AUC∞ reads 0.533 at chance; the null check is judged against that value.
+- **Pending:** the v9 dataset writer (sinograms and DICOM), blinding tooling and the master dataset; the wiki update.
+
+---
+
+## v7.0.0 — April 2026 (superseded by v9.0.0)
 
 ### October 2026: Version Labels
 

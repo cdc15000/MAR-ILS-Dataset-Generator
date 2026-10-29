@@ -5,7 +5,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
-![Standard: ASTM WKXXXXX Rev 05](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2005-orange)
+![Standard: ASTM WKXXXXX Rev 06 draft](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2006%20draft-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
@@ -13,8 +13,9 @@
 
 [**Project Status**](#project-status) |
 [**Overview**](#overview) |
+[**v9 Redesign**](#october-2026-v9-redesign) |
 [**Setup**](#setup) |
-[**Quick Start**](#quick-start) |
+[**Quick Start (v7)**](#quick-start-v700-superseded) |
 [**Usage**](#usage) |
 [**Dataset**](#dataset) |
 [**References**](#references) |
@@ -32,9 +33,9 @@ For per-version status, performance work, tooling, DICOM 2026b compliance detail
 | Phase | Description | Status |
 | :--- | :--- | :--- |
 | 1 | Concept development (Vaishnav framework adaptation) | Complete |
-| 2 | Draft ASTM test method (WKXXXXX Rev 01–05) | Complete |
-| 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7) | Complete |
-| 4 | ILS reference implementation (reference baseline, lab instructions, DICOM 2026b) | Complete |
+| 2 | Draft ASTM test method (WKXXXXX Rev 01–06) | Rev 06 drafted October 2026 |
+| 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7; v9 redesign after Vaishnav et al. 2020) | v9 built and validated October 2026 |
+| 4 | ILS reference implementation (v9 dataset writer, blinding tooling, lab instructions, DICOM 2026b) | v9 dataset writer pending |
 | 5 | ASTM interlaboratory study (Form 01 package ready, awaiting IEC 60601-2-44 Ed. 4 publication, forecast November 2026; dataset DOI reserved; lab recruitment pending) | In progress |
 | 6 | Journal publication (*Medical Physics* or equivalent) | Planned |
 | 7 | IEC incorporation (§203.6.7.101.1 binding amendment, post-ASTM-FXXXX publication) | Planned |
@@ -45,12 +46,38 @@ For per-version status, performance work, tooling, DICOM 2026b compliance detail
 
 This is the **reference evaluation framework** for conducting standardized **Interlaboratory Studies (ILS)** on CT **Metal Artifact Reduction (MAR)** algorithms. Following the task-based signal detection framework of **Vaishnav et al. (Medical Physics, 2020)**, this toolset provides:
 
-1.  **Standardized Dataset Generation:** Physics-based fan-beam sinogram synthesis (v7.0.0).
-2.  **Reference MAR Algorithms:** A parameter-free linear-interpolation reference (**LI-MAR**) for the v7.0.0 fan-beam geometry ([`algorithms/v7/`](algorithms/v7/)), plus legacy parallel-beam implementations (iMAR, MBIR, Dual-Energy Spectral MAR) retained for the v6 research framework ([`algorithms/`](algorithms/)).
-3.  **Objective Statistical Scoring:** Quantifying lesion detectability ($\Delta AUC$) using a **Channelized Hotelling Observer (CHO)** with normative internal noise ($\sigma=15$).
+1.  **Standardized Dataset Generation:** v9.0.0 simulates Vaishnav's numerical head phantom (2D, polychromatic 120 kV fan beam, analytic projections). v7.0.0 (simplified torso phantom) is superseded.
+2.  **Reference MAR Algorithms:** the two sinogram-inpainting methods of Vaishnav et al. as known-answer controls (`mar_ils_core/mar_v9.py`); the v7 LI-MAR reference ([`algorithms/v7/`](algorithms/v7/)) and legacy parallel-beam implementations are retained for the record.
+3.  **Objective Statistical Scoring:** lesion detectability change ($\Delta AUC_\infty$) from a **Channelized Hotelling Observer (CHO)** with dense difference-of-Gaussians channels and antler-plot extrapolation, as in Vaishnav et al.
 4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
 
 The [project wiki](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki) describes the [Technical Foundation](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation) of the CHO and the [Phantom Design](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Phantom-Design). Technical Foundation also explains [why the method uses a task-based ΔAUC](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation#why-a-task-based-metric-rather-than-fundamental-image-quality-metrics) rather than HU accuracy, noise or other fundamental image-quality metrics.
+
+---
+
+## October 2026: v9 Redesign
+
+An audit in October 2026 found defects in the v7.0.0 generator (shared noise between paired realizations, a lesion that rotated with the artifact jitter, and uncorrected scatter). With those fixed, the v7 LI-MAR result of ΔAUC ≈ −0.23 does not hold, and it is withdrawn. The method was then rebuilt to follow Vaishnav et al. (Med Phys 2020) closely:
+
+- **Phantom:** the paper's head phantom (bone skull, iron fillings, cochlear and deep-brain implants, rotatable lumpy inset), 2D, 512 × 512 over 30 cm.
+- **Acquisition:** fan beam (SID 541 mm, SDD 949 mm, 888 channels, 984 views), 120 kV spectrum (SpekPy), Poisson noise, constant scatter and electronic noise, from the references the paper cites.
+- **Observer:** CHO with ten dense difference-of-Gaussians channels, pooled covariance, no internal noise; AUC∞ by antler-plot extrapolation; 1000 training and 1000 test images per class.
+- **Test levels:** signal amplitudes 1.020, 1.025 and 1.030 at dose 1 × 10⁶ (the E691 materials).
+- **Validation (pre-registered, five independent replicate datasets):** pipeline identity, null-signal, graded-harm and control-sign checks all pass. The improving control gives ΔAUC∞ = +0.215, +0.238 and +0.254 at the three levels; the degrading control gives −0.061; replicate SD 0.004 to 0.008. An attempt to reproduce the paper's published curves numerically matched the qualitative behaviour but not the size of the MAR benefit.
+
+v9 code: [`mar_ils_core/vaishnav_phantom.py`](mar_ils_core/vaishnav_phantom.py), [`vaishnav_sim.py`](mar_ils_core/vaishnav_sim.py), [`ddog.py`](mar_ils_core/ddog.py), [`cho_v9.py`](mar_ils_core/cho_v9.py), [`mar_v9.py`](mar_ils_core/mar_v9.py), [`generator_v9_0_0.py`](generator_v9_0_0.py) (ROI mode; the dataset writer for sinograms and DICOM is next), [`run_cho_analysis_v9_0.py`](run_cho_analysis_v9_0.py), [`tests/test_v9.py`](tests/test_v9.py).
+
+```bash
+# Simulate centre ROIs for FBP, MAR 1 and MAR 2 at one level (small N shown)
+python generator_v9_0_0.py --out roi.npz --dose 1e6 --amplitude 1.025 \
+    --lump-scale 0.0588 --n-train 100 --n-test 100 \
+    --methods fbp mar1 mar2 --tau-counts 1124 --tau-mu 1.953
+
+# AUC∞ per method and ΔAUC∞ against FBP
+python run_cho_analysis_v9_0.py roi.npz --out cho.json
+```
+
+The v8 files (`generator_v8_0_0.py`, `run_cho_analysis_v8_0.py`, `pilot_gate_v8_0.py`) are the intermediate fix of the v7 design and are kept for the record. The v7 sections below describe the superseded design.
 
 ---
 
@@ -84,11 +111,11 @@ python generator_v7_0_0.py --dry-run
 
 A clean `--dry-run` prints the reference constants and exits 0 without writing any files.
 
-Once a dataset is available, the self-test in [Quick Start](#quick-start) should report AUC_noMAR = 0.8294, 95% CI [0.7612, 0.9025]. The archived reference record is in [`docs_and_references/baseline/`](docs_and_references/baseline/).
+For the superseded v7.0.0 dataset, the self-test in [Quick Start](#quick-start-v700-superseded) reports AUC_noMAR = 0.8294, 95% CI [0.7612, 0.9025]. The archived reference record is in [`docs_and_references/baseline/`](docs_and_references/baseline/).
 
 ---
 
-## Quick Start
+## Quick Start (v7.0.0, superseded)
 
 ```bash
 # Generate the canonical fan-beam dataset
@@ -145,9 +172,9 @@ python run_cho_analysis_v7_0.py \
 
 `--internal-noise-sigma 15` is the normative default; do not change it for results scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
 
-### 3. Apply the reference LI-MAR (negative control / ΔAUC anchor)
+### 3. Apply the reference LI-MAR (v7, superseded)
 
-A parameter-free linear-interpolation MAR for the fan-beam dataset. It is **non-normative** (the type test scores the *lab's* algorithm), but it validates the full MAR→CHO loop and anchors the ΔAUC scale as the designated control (ΔAUC ≈ −0.23). Every commercial MAR is expected to beat it.
+A parameter-free linear-interpolation MAR for the v7 fan-beam dataset, retained for the record. Its earlier ΔAUC ≈ −0.23 came from defects in the v7 generator and is withdrawn; see [October 2026: v9 Redesign](#october-2026-v9-redesign).
 
 ```bash
 # Produce a CHO-ready LI-MAR reconstruction set (slice_0129.dcm per realization)
