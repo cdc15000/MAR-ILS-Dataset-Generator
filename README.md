@@ -11,9 +11,7 @@
 
 ## Contents
 
-[**What This Is**](#what-this-is) |
-[**What the Test Measures**](#what-the-test-measures) |
-[**What a Laboratory Does**](#what-a-laboratory-does) |
+[**Overview**](#overview) |
 [**Setup**](#setup) |
 [**Try It**](#try-it) |
 [**Key Parameters**](#key-parameters) |
@@ -27,7 +25,9 @@ Version history and release details are on the [Releases page](https://github.co
 
 ---
 
-## What This Is
+## Overview
+
+### What This Is
 
 This repository is the reference software for a proposed ASTM test method, **ASTM WKXXXXX**: *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*. It also supports the interlaboratory study (ILS) that will measure the method's precision under ASTM E691.
 
@@ -38,9 +38,7 @@ The method follows the framework published by FDA researchers in Vaishnav et al.
 3. a model observer that scores how well a faint lesion can be detected;
 4. two reference MAR methods with known effects, used as controls.
 
----
-
-## What the Test Measures
+### What the Test Measures
 
 The test asks one question: **does the MAR method make a faint lesion near metal easier or harder to detect?**
 
@@ -53,9 +51,7 @@ A channelized Hotelling observer, a mathematical model of a reader, scores lesio
 
 The ∞ means the AUC is extrapolated to an unlimited number of training images, so the result does not depend on how many images were used. The result is reported at three lesion contrasts.
 
----
-
-## What a Laboratory Does
+### What a Laboratory Does
 
 1. **Download the dataset** from Zenodo and verify the SHA-256 checksums.
 2. **Apply your MAR method** to every sinogram in the dataset. If your method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
