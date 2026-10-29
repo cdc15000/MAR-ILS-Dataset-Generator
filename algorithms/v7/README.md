@@ -1,5 +1,7 @@
 # algorithms/v7/ — fan-beam reference MAR
 
+> **Superseded.** These references belong to the v7.0.0 design. The LI-MAR ΔAUC of about −0.23 reported below came from defects in the v7.0.0 generator and is withdrawn. The current controls are in `mar_ils_core/mar_v9.py`; see the v9.0.0 release.
+
 Reference MAR implementations compatible with the **v7.0.0 fan-beam** dataset
 (ASTM Rev 05). Unlike the parallel-beam references in `algorithms/`, these
 operate on the (256, 720, 512) fan-beam sinograms and reuse the validated

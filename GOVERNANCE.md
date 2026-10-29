@@ -30,14 +30,17 @@ Non-breaking changes (documentation, tooling, diagnostics, additional output for
 
 ## Current baseline
 
-The metrology baseline was locked on 2026-04-07 and is documented in the **ASTM Metrology Baseline** section of [`CLAUDE.md`](CLAUDE.md). Key values:
+The current design is v9.0.0, following Vaishnav et al. (2020). Its fixed parameters are listed in the [v9.0.0 release notes](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/releases/tag/v9.0.0) and in the README. Key values:
 
-| Parameter | Locked value |
+| Parameter | Value |
 | :--- | :--- |
-| AUC_noMAR | 0.8294, CI [0.7612, 0.9025] |
-| Realizations | 40 LP + 40 LA |
-| Internal noise sigma | 15 |
-| Calibrated I_0 | 310,853 |
+| Lump amplitude scale | 0.0588 |
+| Dose | 1 × 10⁶ counts per detector bin per view |
+| Contrast levels | 1.020, 1.025, 1.030 |
+| Images | 1000 training + 1000 test per class and level |
+| MAR 1 / MAR 2 thresholds | 1124 counts / 1.953 cm⁻¹ |
+
+The v7.0.0 baseline (AUC_noMAR = 0.8294, N = 40, internal noise 15) is superseded.
 
 ## Contribution process
 
@@ -47,4 +50,4 @@ The metrology baseline was locked on 2026-04-07 and is documented in the **ASTM 
 
 ## Standard alignment
 
-This repository tracks **ASTM WKXXXXX Rev 05** (2026-05-29). When the standard is published as ASTM FXXXX, this governance document and all references will be updated to reflect the published designation.
+This repository tracks **ASTM WKXXXXX Rev 06** (draft, October 2026). When the standard is published as ASTM FXXXX, this governance document and all references will be updated to reflect the published designation.
