@@ -11,73 +11,60 @@
 
 ## Contents
 
-[**Project Status**](#project-status) |
-[**Overview**](#overview) |
-[**v9 Redesign**](#october-2026-v9-redesign) |
+[**What This Is**](#what-this-is) |
+[**What the Test Measures**](#what-the-test-measures) |
+[**What a Laboratory Does**](#what-a-laboratory-does) |
 [**Setup**](#setup) |
-[**Quick Start (v7)**](#quick-start-v700-superseded) |
-[**Usage**](#usage) |
-[**Dataset**](#dataset) |
+[**Try It**](#try-it) |
+[**Key Parameters**](#key-parameters) |
+[**Repository Layout**](#repository-layout) |
 [**References**](#references) |
 [**Citation**](#citation) |
 [**License**](#license) |
-[**Governance**](#governance) |
-[**Technical Contact**](#technical-contact)
+[**Contact**](#contact)
 
-For per-version status, performance work, tooling, DICOM 2026b compliance details, repository map, and regulatory positioning, see [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
-
----
-
-## Project Status
-
-| Phase | Description | Status |
-| :--- | :--- | :--- |
-| 1 | Concept development (Vaishnav framework adaptation) | Complete |
-| 2 | Draft ASTM test method (WKXXXXX Rev 01–06) | Rev 06 drafted October 2026 |
-| 3 | Reference methodology (parallel-beam v5/v6, fan-beam v7; v9 redesign after Vaishnav et al. 2020) | v9 built and validated October 2026 |
-| 4 | ILS reference implementation (v9 dataset writer, blinding tooling, lab instructions, DICOM 2026b) | v9 dataset writer pending |
-| 5 | ASTM interlaboratory study (Form 01 package ready, awaiting IEC 60601-2-44 Ed. 4 publication, forecast November 2026; dataset DOI reserved; lab recruitment pending) | In progress |
-| 6 | Journal publication (*Medical Physics* or equivalent) | Planned |
-| 7 | IEC incorporation (§203.6.7.101.1 binding amendment, post-ASTM-FXXXX publication) | Planned |
+Version history and release details are on the [Releases page](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/releases). The [wiki](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki) explains the method in more depth.
 
 ---
 
-## Overview
+## What This Is
 
-This is the **reference evaluation framework** for conducting standardized **Interlaboratory Studies (ILS)** on CT **Metal Artifact Reduction (MAR)** algorithms. Following the task-based signal detection framework of **Vaishnav et al. (Medical Physics, 2020)**, this toolset provides:
+This repository is the reference software for a proposed ASTM test method, **ASTM WKXXXXX**: *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*. It also supports the interlaboratory study (ILS) that will measure the method's precision under ASTM E691.
 
-1.  **Standardized Dataset Generation:** v9.0.0 simulates Vaishnav's numerical head phantom (2D, polychromatic 120 kV fan beam, analytic projections). v7.0.0 (simplified torso phantom) is superseded.
-2.  **Reference MAR Algorithms:** the two sinogram-inpainting methods of Vaishnav et al. as known-answer controls (`mar_ils_core/mar_v9.py`); the v7 LI-MAR reference ([`algorithms/v7/`](algorithms/v7/)) and legacy parallel-beam implementations are retained for the record.
-3.  **Objective Statistical Scoring:** lesion detectability change ($\Delta AUC_\infty$) from a **Channelized Hotelling Observer (CHO)** with dense difference-of-Gaussians channels and antler-plot extrapolation, as in Vaishnav et al.
-4.  **AI-Native Diagnostics:** Integrated **Model Context Protocol (MCP)** servers for automated data auditing and visualization.
+The method follows the framework published by FDA researchers in Vaishnav et al., *Medical Physics* 47(8), 2020. It provides:
 
-The [project wiki](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki) describes the [Technical Foundation](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation) of the CHO and the [Phantom Design](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Phantom-Design). Technical Foundation also explains [why the method uses a task-based ΔAUC](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki/Technical-Foundation#why-a-task-based-metric-rather-than-fundamental-image-quality-metrics) rather than HU accuracy, noise or other fundamental image-quality metrics.
+1. a simulated CT dataset of a head phantom with metal implants;
+2. a reference reconstruction;
+3. a model observer that scores how well a faint lesion can be detected;
+4. two reference MAR methods with known effects, used as controls.
 
 ---
 
-## October 2026: v9 Redesign
+## What the Test Measures
 
-An audit in October 2026 found defects in the v7.0.0 generator (shared noise between paired realizations, a lesion that rotated with the artifact jitter, and uncorrected scatter). With those fixed, the v7 LI-MAR result of ΔAUC ≈ −0.23 does not hold, and it is withdrawn. The method was then rebuilt to follow Vaishnav et al. (Med Phys 2020) closely:
+The test asks one question: **does the MAR method make a faint lesion near metal easier or harder to detect?**
 
-- **Phantom:** the paper's head phantom (bone skull, iron fillings, cochlear and deep-brain implants, rotatable lumpy inset), 2D, 512 × 512 over 30 cm.
-- **Acquisition:** fan beam (SID 541 mm, SDD 949 mm, 888 channels, 984 views), 120 kV spectrum (SpekPy), Poisson noise, constant scatter and electronic noise, from the references the paper cites.
-- **Observer:** CHO with ten dense difference-of-Gaussians channels, pooled covariance, no internal noise; AUC∞ by antler-plot extrapolation; 1000 training and 1000 test images per class.
-- **Test levels:** signal amplitudes 1.020, 1.025 and 1.030 at dose 1 × 10⁶ (the E691 materials).
-- **Validation (pre-registered, five independent replicate datasets):** pipeline identity, null-signal, graded-harm and control-sign checks all pass. The improving control gives ΔAUC∞ = +0.215, +0.238 and +0.254 at the three levels; the degrading control gives −0.061; replicate SD 0.004 to 0.008. An attempt to reproduce the paper's published curves numerically matched the qualitative behaviour but not the size of the MAR benefit.
+A channelized Hotelling observer, a mathematical model of a reader, scores lesion detectability as an area under the ROC curve (AUC). It does so on images without MAR and on images with the laboratory's MAR. The result is
 
-v9 code: [`mar_ils_core/vaishnav_phantom.py`](mar_ils_core/vaishnav_phantom.py), [`vaishnav_sim.py`](mar_ils_core/vaishnav_sim.py), [`ddog.py`](mar_ils_core/ddog.py), [`cho_v9.py`](mar_ils_core/cho_v9.py), [`mar_v9.py`](mar_ils_core/mar_v9.py), [`generator_v9_0_0.py`](generator_v9_0_0.py) (ROI mode; the dataset writer for sinograms and DICOM is next), [`run_cho_analysis_v9_0.py`](run_cho_analysis_v9_0.py), [`tests/test_v9.py`](tests/test_v9.py).
+**ΔAUC∞ = AUC∞ with MAR − AUC∞ without MAR**
 
-```bash
-# Simulate centre ROIs for FBP, MAR 1 and MAR 2 at one level (small N shown)
-python generator_v9_0_0.py --out roi.npz --dose 1e6 --amplitude 1.025 \
-    --lump-scale 0.0588 --n-train 100 --n-test 100 \
-    --methods fbp mar1 mar2 --tau-counts 1124 --tau-mu 1.953
+* **ΔAUC∞ > 0:** the MAR method made the lesion easier to detect.
+* **ΔAUC∞ < 0:** it made the lesion harder to detect.
 
-# AUC∞ per method and ΔAUC∞ against FBP
-python run_cho_analysis_v9_0.py roi.npz --out cho.json
-```
+The ∞ means the AUC is extrapolated to an unlimited number of training images, so the result does not depend on how many images were used. The result is reported at three lesion contrasts.
 
-The v8 files (`generator_v8_0_0.py`, `run_cho_analysis_v8_0.py`, `pilot_gate_v8_0.py`) are the intermediate fix of the v7 design and are kept for the record. The v7 sections below describe the superseded design.
+---
+
+## What a Laboratory Does
+
+1. **Download the dataset** from Zenodo and verify the SHA-256 checksums.
+2. **Apply your MAR method** to every sinogram in the dataset. If your method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
+3. **Reconstruct** the corrected sinograms with the supplied reference reconstruction.
+4. **Write each image as DICOM**, 512 × 512 pixels, with Metal Artifact Reduction Applied (0018,9391) set to YES.
+5. **Score** your images with the reference observer software.
+6. **Report** ΔAUC∞ at each contrast level on the ILS return form.
+
+No CT scanner is needed; the test is entirely computational. The ILS protocol, the return form and the dataset will be sent to participating laboratories by the ILS coordinator. The dataset will be published under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
 
 ---
 
@@ -85,10 +72,11 @@ The v8 files (`generator_v8_0_0.py`, `run_cho_analysis_v8_0.py`, `pilot_gate_v8_
 
 ### Requirements
 
-* **Python** 3.11 or newer
-* **~40 GB free disk** for a full $N=40$ dataset (~35 GB of HDF5 sinograms + DICOM reconstructions)
-* **16+ GB RAM** recommended; 8 CPU cores gets full-$N$ generation under 30 minutes. On an 8 GB machine, use `--workers 2`: more workers exhaust RAM and run slower.
-* macOS, Linux, or Windows (paths below use POSIX)
+* Python 3.11 or newer
+* Numba, which the reconstruction requires
+* About 50 GB of free disk for the full ILS dataset
+* 16 GB of RAM recommended
+* macOS, Linux or Windows
 
 ### Installation
 
@@ -100,206 +88,104 @@ python3.11 -m venv mar-ils
 source mar-ils/bin/activate
 
 pip install -r requirements.txt
-pip install numba    # optional but strongly recommended; ~24x speedup
+pip install numba
 ```
 
-### Verify the install
+### Check the installation
 
 ```bash
-python generator_v7_0_0.py --dry-run
+python -m pytest tests/test_v9.py -q
 ```
 
-A clean `--dry-run` prints the reference constants and exits 0 without writing any files.
-
-For the superseded v7.0.0 dataset, the self-test in [Quick Start](#quick-start-v700-superseded) reports AUC_noMAR = 0.8294, 95% CI [0.7612, 0.9025]. The archived reference record is in [`docs_and_references/baseline/`](docs_and_references/baseline/).
+All tests should pass.
 
 ---
 
-## Quick Start (v7.0.0, superseded)
+## Try It
+
+The two commands below simulate a small set of images, apply the two reference MAR methods, and score them. They take a few minutes on a laptop. The full test uses 1000 training and 1000 test images per class.
 
 ```bash
-# Generate the canonical fan-beam dataset
-python generator_v7_0_0.py --output-dir ./astm_reference_dataset
+# Simulate the scored region for no MAR (fbp), MAR 1 and MAR 2
+python generator_v9_0_0.py --out roi.npz --dose 1e6 --amplitude 1.025 \
+    --lump-scale 0.0588 --n-train 100 --n-test 100 \
+    --methods fbp mar1 mar2 --tau-counts 1124 --tau-mu 1.953
 
-# Self-test (validates the CHO pipeline; ΔAUC = 0 by definition)
-python run_cho_analysis_v7_0.py \
-    --dataset-dir ./astm_reference_dataset \
-    --self-test --internal-noise-sigma 15
-
-# MAR scoring mode (score a MAR reconstruction set)
-python run_cho_analysis_v7_0.py \
-    --dataset-dir ./astm_reference_dataset \
-    --mar-output-dir ./mar_recon \
-    --internal-noise-sigma 15
+# Compute AUC∞ for each method and ΔAUC∞ against no MAR
+python run_cho_analysis_v9_0.py roi.npz --out cho.json
 ```
+
+With only 100 images per class the numbers are rough. MAR 2 should still give a clearly positive ΔAUC∞.
 
 ---
 
-## Usage
+## Key Parameters
 
-### 1. Generate the reference dataset
+| Item | Value |
+|---|---|
+| Phantom | Head phantom of Vaishnav et al.: skull, iron dental fillings, cochlear and deep-brain implants, and a rotating textured inset |
+| Lesion | 10 mm disk at the phantom centre |
+| Contrast levels | 1.020, 1.025 and 1.030 times the background |
+| Scan | Fan beam, 120 kV, 984 views, 888 detector channels |
+| Dose | 1 × 10⁶ photons per detector channel per view |
+| Image | 512 × 512 pixels over a 30 cm field of view |
+| Scored region | 121 × 121 pixels at the image centre |
+| Observer | Channelized Hotelling observer, 10 dense difference-of-Gaussians channels |
+| Images | 1000 training and 1000 test images per class and level |
+| Improving control | MAR 2: metal found in the image, then the affected sinogram data interpolated |
+| Degrading control | MAR 1: metal found by a fixed sinogram threshold, run at a dose where it fails |
 
-```bash
-python generator_v7_0_0.py [options]
-```
-
-| Flag | Default | Purpose |
-| :--- | :--- | :--- |
-| `--output-dir PATH` | `./astm_reference_dataset` | Target directory for the dataset |
-| `--workers N` | all cores | Process-pool size (use `1` for debugging) |
-| `--realizations N` | `40` | Normative $N=40$; `20` for screening pilot |
-| `--dry-run` | off | Print config and exit without writing any files |
-| `--no-pdf` | off | Skip the lab instructions PDF |
-
-### 2. Run CHO analysis
-
-**Self-test:** pipeline validation (ΔAUC = 0 by construction):
-
-```bash
-python run_cho_analysis_v7_0.py \
-    --dataset-dir ./astm_reference_dataset \
-    --self-test --internal-noise-sigma 15
-```
-
-**MAR scoring mode:** score a MAR reconstruction set against the noMAR baseline:
-
-```bash
-python run_cho_analysis_v7_0.py \
-    --dataset-dir ./astm_reference_dataset \
-    --mar-output-dir ./mar_recon \
-    --internal-noise-sigma 15
-```
-
-`--internal-noise-sigma 15` is the normative default; do not change it for results scored against the $N=40$ baseline (AUC_noMAR = 0.8294).
-
-### 3. Apply the reference LI-MAR (v7, superseded)
-
-A parameter-free linear-interpolation MAR for the v7 fan-beam dataset, retained for the record. Its earlier ΔAUC ≈ −0.23 came from defects in the v7 generator and is withdrawn; see [October 2026: v9 Redesign](#october-2026-v9-redesign).
-
-```bash
-# Produce a CHO-ready LI-MAR reconstruction set (slice_0129.dcm per realization)
-python algorithms/v7/reference_li_mar_v7.py \
-    --dataset-dir ./astm_reference_dataset \
-    --output-dir  ./li_mar_recon
-
-# Score it against the noMAR baseline
-python run_cho_analysis_v7_0.py \
-    --dataset-dir ./astm_reference_dataset \
-    --mar-output-dir ./li_mar_recon \
-    --internal-noise-sigma 15
-```
-
-LI-MAR output is tagged Metal Artifact Reduction Applied = `YES`, as the ILS protocol requires for MAR-corrected submissions.
-
-See [`algorithms/v7/README.md`](algorithms/v7/README.md) for the measured ΔAUC anchor on the reference $N=40$ dataset.
-
-### 4. Visualize sinograms
-
-```bash
-python view_sinograms.py sinograms/LP/realization_001.h5
-python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
-```
+In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ of +0.215, +0.238 and +0.254 at the three levels, and MAR 1 at its failing dose gave −0.061. ΔAUC∞ varied by 0.004 to 0.008 (standard deviation) from dataset to dataset.
 
 ---
 
-## Dataset
+## Repository Layout
 
-### Produced by the generator
-
-```
-<output_dir>/
-├── sinograms/
-│   ├── LP/  realization_001.h5 ... realization_040.h5   # lesion-present
-│   └── LA/  realization_001.h5 ... realization_040.h5   # lesion-absent
-├── noMAR_recon/
-│   ├── LP/  realization_001/ ... realization_040/        # 256 DICOMs each
-│   └── LA/  realization_001/ ... realization_040/
-├── checksums_sha256.txt           # SHA-256 integrity manifest
-├── generator_provenance.json      # reference constants + git SHA
-└── MAR_ILS_Lab_Instructions.pdf   # one-page instructions for the labeled reference dataset
-```
-
-Total size: **~35 GB** for $N=40$; **~18 GB** for $N=20$ screening.
-
-Every DICOM file the generator writes includes the DICOM 2026b CP-2575 Metal Artifact Reduction Macro with Metal Artifact Reduction Applied `(0018,9391)` = `NO`. The generator has written the macro natively since April 7, 2026, so no separate patch step is needed. `patch_2026b_metadata.py` is kept only to retrofit datasets generated before that date.
-
-### Distribution
-
-The canonical $N=40$ dataset will be distributed to ILS laboratories through Zenodo under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489), licensed CC BY 4.0. The DOI is reserved; the record will be published, and the link will resolve, before the dataset is distributed to laboratories. Until then, generate the dataset locally with the command above.
-
-### HDF5 sinogram format
-
-Each `realization_NNN.h5` contains:
-
-| Dataset / attr | Shape / type | Content |
-| :--- | :--- | :--- |
-| `line_integrals` | `(256, 720, 512)` float32 | Fan-beam line integrals, neper |
-| `@geometry.SID_mm` / `@SDD_mm` | scalar | 570 / 1040 |
-| `@geometry.n_angles` / `@n_det` | scalar | 720 / 512 |
-| `@geometry.angles_deg` / `@det_fan_angles_deg` | 1-D array | Projection + detector geometry samples |
-| `@noise_params.I0` / `sigma_e_counts` / `seed` | scalar | Noise calibration (I₀ = 310,853) |
-| `@lesion_slice_index` | scalar | `128`, the only slice containing the lesion disc |
-
-### MAR reconstruction layout (for CHO scoring)
-
-`run_cho_analysis_v7_0.py` reads MAR reconstructions in this structure:
-
-```
-mar_recon/
-├── LP/  realization_001/ ... (slice_NNNN.dcm, 1-indexed)
-└── LA/  realization_001/ ...
-```
-
-Only `slice_0129.dcm` is read by `run_cho_analysis_v7_0.py`. The CHO is 2D on slice 128; 3D integration shall not be performed per §A1.5.3 of the draft standard.
-
-ILS laboratories receive a coded dataset and submission instructions from the study coordinator.
+| Path | Contents |
+|---|---|
+| `generator_v9_0_0.py` | Dataset simulation |
+| `run_cho_analysis_v9_0.py` | Observer scoring |
+| `mar_ils_core/vaishnav_phantom.py` | Phantom definition |
+| `mar_ils_core/vaishnav_sim.py` | Scan simulation and reference reconstruction |
+| `mar_ils_core/ddog.py`, `cho_v9.py` | Observer channels and AUC∞ |
+| `mar_ils_core/mar_v9.py` | Reference MAR methods |
+| `tests/` | Automated tests |
+| `legacy/`, `*_v7_*`, `*_v8_*` | Earlier, superseded versions, kept for the record |
 
 ---
 
 ## References
 
-1. **Vaishnav, J.Y., Ghammraoui, B., Leifer, M., Zeng, R., Jiang, L., and Myers, K.J.** "CT metal artifact reduction algorithms: Toward a framework for objective performance assessment." *Medical Physics*, August 2020, Vol. 47, No. 8, pp. 3344–3355. [[DOI](https://doi.org/10.1002/mp.14231)]
+1. **Vaishnav, J.Y., Ghammraoui, B., Leifer, M., Zeng, R., Jiang, L., and Myers, K.J.** "CT metal artifact reduction algorithms: Toward a framework for objective performance assessment." *Medical Physics* 47(8):3344–3355, 2020. [[DOI](https://doi.org/10.1002/mp.14231)]
 
-2. **Gjesteby, L., De Man, B., Jin, Y., Paganetti, H., Verburg, J., Giantsoudi, D., and Wang, G.** "Metal Artifact Reduction in CT: Where Are We After Four Decades?" *IEEE Access*, 2016, Vol. 4, pp. 5826–5849. [[DOI](https://doi.org/10.1109/ACCESS.2016.2608621)]
+2. **Abbey, C.K., and Barrett, H.H.** "Human- and model-observer performance in ramp-spectrum noise: effects of regularization and object variability." *Journal of the Optical Society of America A* 18(3):473–488, 2001. [[PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC2943344/)]
 
-3. **Barrett, H.H., and Myers, K.J.** *Foundations of Image Science*, Chapter 14 — Image Quality, pp. 913–1000. Wiley-Interscience, Hoboken (NJ), 2004. [[Publisher](https://www.wiley.com/en-us/Foundations+of+Image+Science-p-9780471153009)]
+3. **Gjesteby, L., De Man, B., Jin, Y., Paganetti, H., Verburg, J., Giantsoudi, D., and Wang, G.** "Metal Artifact Reduction in CT: Where Are We After Four Decades?" *IEEE Access* 4:5826–5849, 2016. [[DOI](https://doi.org/10.1109/ACCESS.2016.2608621)]
 
-4. **American Association of Physicists in Medicine.** *AAPM Report No. 233 — Performance Evaluation of CT Systems*, 2019. [[AAPM / issuu](https://issuu.com/aapmdocs/docs/tg-233_final_8ec461f2715a5e?mode=embed&viewMode=singlePage&backgroundColor=eeeeee)]
+4. **Barrett, H.H., and Myers, K.J.** *Foundations of Image Science*, Chapter 14, Image Quality. Wiley-Interscience, 2004.
 
 ---
 
 ## Citation
 
-If you use this framework in your research, please cite:
+> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-Dataset-Generator
 
-> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v7.0.0.
-> ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer.
-> https://github.com/cdc15000/MAR-ILS-Dataset-Generator
-
-To cite the reference dataset:
-
-> Cocchiaraley, C. *MAR ILS Reference Dataset v7.0.0: Synthetic Fan-Beam CT Sinograms and Reference Reconstructions for a Metal Artifact Reduction Interlaboratory Study*. Zenodo, 2026. https://doi.org/10.5281/zenodo.23144489
-
-The dataset DOI is reserved and resolves once the Zenodo record is published.
+The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489 once the Zenodo record is published.
 
 ---
 
 ## License
 
-All code and documentation in this repository are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md) for the full text.
+The code and documentation are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md).
 
-The single third-party figure (axial pelvic CT at the top of this README) is reproduced from Wellenberg et al. 2019 under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache 2.0 license; attribution is given in the figure caption.
+The figure at the top of this page is reproduced from Wellenberg et al. 2019 under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache license.
 
----
-
-## Governance
-
-Change control, version freezing, and the approval process for normative parameters are documented in [`GOVERNANCE.md`](GOVERNANCE.md).
+Change control for normative parameters is described in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ---
 
-## Technical Contact
+## Contact
 
-**Christopher D. Cocchiaraley** Consumer Member, ASTM International Committee F04  
+**Christopher D. Cocchiaraley**, Consumer Member, ASTM International Committee F04  
 Executor of the Estate of Veronica M. Cocchiaraley  
 ORCID: [0009-0006-4995-566X](https://orcid.org/0009-0006-4995-566X)
