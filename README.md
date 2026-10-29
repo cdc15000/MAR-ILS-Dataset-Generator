@@ -127,7 +127,7 @@ mar2  AUC_inf 0.8724 ± 0.0154  (resub 0.8571, holdout 0.8877)
 
 | Item | Value |
 |---|---|
-| Phantom | Head phantom of Vaishnav et al.: skull, iron dental fillings, cochlear and deep-brain implants, and a rotating textured inset |
+| Phantom | Head phantom from Vaishnav et al.: skull, iron dental fillings, cochlear and deep-brain implants, and a rotating textured inset |
 | Lesion | 10 mm disk at the phantom centre |
 | Contrast levels | 1.020, 1.025 and 1.030 times the background |
 | Scan | Fan beam, 120 kV, 984 views, 888 detector channels |
