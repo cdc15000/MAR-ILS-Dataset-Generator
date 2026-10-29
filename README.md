@@ -97,7 +97,7 @@ All tests should pass.
 
 ## Try It
 
-The two commands below simulate a small set of images, apply the two reference MAR methods, and score them. They take a few minutes on a laptop. The full test uses 1000 training and 1000 test images per class.
+The two commands below simulate a small set of images, apply the two reference MAR methods, and score them. They take about 4 to 5 minutes on a laptop. The full test uses 1000 training and 1000 test images per class.
 
 ```bash
 # Simulate the scored region for no MAR (fbp), MAR 1 and MAR 2
@@ -109,7 +109,17 @@ python generator_v9_0_0.py --out roi.npz --dose 1e6 --amplitude 1.025 \
 python run_cho_analysis_v9_0.py roi.npz --out cho.json
 ```
 
-With only 100 images per class the numbers are rough. MAR 2 should still give a clearly positive ΔAUC∞.
+You should see output like this:
+
+```
+fbp   AUC_inf 0.6476 ± 0.0190  (resub 0.6288, holdout 0.6664)
+mar1  AUC_inf 0.8646 ± 0.0049  (resub 0.8603, holdout 0.8690)
+mar2  AUC_inf 0.8724 ± 0.0154  (resub 0.8571, holdout 0.8877)
+ΔAUC_inf mar1: +0.2171
+ΔAUC_inf mar2: +0.2248
+```
+
+ΔAUC∞ for MAR 2 should be roughly +0.2. The full test gives +0.238 at this level. With only 100 images per class the results are rough, and the resubstitution and hold-out values can come out in either order; at the full 1000 images per class, resubstitution is the higher of the two.
 
 ---
 
