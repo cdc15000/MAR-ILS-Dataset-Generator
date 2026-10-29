@@ -97,7 +97,7 @@ All tests should pass.
 
 ## Try It
 
-The two commands below simulate a small set of images, apply the two reference MAR methods, and score them. They take about 4 to 5 minutes on a recent 8-core computer and about twice as long on 4 cores. They need about 2 GB of memory. The full test uses 1000 training and 1000 test images per class.
+The two commands below simulate a small set of images, apply the two reference MAR methods, and score them. They take about 4 to 5 minutes on a recent 8-core computer (about twice as long on 4 cores) and need about 2 GB of memory. The full test uses 1000 training and 1000 test images per class.
 
 ```bash
 # Simulate the scored region for no MAR (fbp), MAR 1 and MAR 2
