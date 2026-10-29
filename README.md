@@ -27,8 +27,6 @@ Version history and release details are on the [Releases page](https://github.co
 
 ## Overview
 
-### What This Is
-
 This repository is the reference software for a proposed ASTM test method, **ASTM WKXXXXX**: *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*. It also supports the interlaboratory study (ILS) that will measure the method's precision under ASTM E691.
 
 The method follows the framework published by FDA researchers in Vaishnav et al., *Medical Physics* 47(8), 2020. It provides:
