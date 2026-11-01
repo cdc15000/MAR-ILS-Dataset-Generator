@@ -12,7 +12,7 @@ the LOO mean it produces (~0.76 at N=40) is lower than the reference LOO baselin
 should not be quoted as the §10.2 basis. The §10.2 statistical basis is taken
 from the reference characterization (cho_results.json) cross-checked with the
 analytic Hanley–McNeil standard error; the pilot precision study (§17.1.6) is
-definitive. This script is retained to show the scaling behaviour only.
+definitive. This script is retained to show the scaling behavior only.
 
 Method
 ------

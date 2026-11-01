@@ -36,7 +36,7 @@ original measurements — which carry the full 12 HU lesion signal in LP
 realizations.  The metal-trace rays (~26 % of angles) are filled from the
 current image estimate, which after iMAR warm-start contains no metal
 artifacts.  Each iteration tightens the data-consistency constraint while the
-TV step lightly regularises streak-prone regions without attenuating the
+TV step lightly regularizes streak-prone regions without attenuating the
 slowly-varying 12 HU lesion.  Unlike NMAR or LI-MAR, no interpolation is
 applied to the measured projections themselves; all lesion signal in clean
 rays is preserved exactly.
@@ -208,7 +208,7 @@ def pocs_tv_slice(sino_meas: np.ndarray, ref_hu: np.ndarray,
         body_mean = float(np.mean(x_hu[body_mask]))
         x_hu     += (BACKGROUND_HU - body_mean)
 
-        # ── c. TV denoising (light regularisation, preserves 12 HU signal)─
+        # ── c. TV denoising (light regularization, preserves 12 HU signal)─
         x_k = denoise_tv_chambolle(x_hu, weight=TV_LAMBDA)
 
         # ── d. Non-negativity constraint (physical: μ ≥ 0 ↔ HU ≥ −1000) ──

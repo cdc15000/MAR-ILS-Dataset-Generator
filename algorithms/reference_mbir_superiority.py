@@ -160,7 +160,7 @@ def mbir_superiority_slice(
     ref_hu    : (512, 512) float64  noMAR FBP image (DICOM HU)
     tier      : TierConfig          tier geometry
     n_iter    : int                  PWLS-TV iterations
-    lam_tv    : float                TV regularisation weight
+    lam_tv    : float                TV regularization weight
 
     Returns
     -------
@@ -339,7 +339,7 @@ def _process_one(args_tuple):
 
 
 # ---------------------------------------------------------------------------
-# Visualisation
+# Visualization
 # ---------------------------------------------------------------------------
 
 def generate_comparison_plot(dataset_dir: Path, output_dir: Path,

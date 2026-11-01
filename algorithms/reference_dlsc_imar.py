@@ -14,8 +14,8 @@ blockage tiers (T2_SB: 40%, 1.5 mm gap) the lesion signal is lost because
 neither the smooth prior nor local PDE propagation can reconstruct the
 missing Radon-space projections.
 
-Deep Image Prior (DIP) uses a *randomly initialised* convolutional network
-as an implicit structural prior.  The network is optimised per-realization
+Deep Image Prior (DIP) uses a *randomly initialized* convolutional network
+as an implicit structural prior.  The network is optimized per-realization
 to reproduce the clean rays of the measured sinogram.  Its multi-scale
 convolutional architecture (U-Net with skip connections) forces globally
 coherent interpolation into the metal trace — a fundamentally stronger
@@ -25,8 +25,8 @@ Algorithm (per realization)
 ---------------------------
   1. Metal mask + weight matrix       : Same as iMAR.
   2. Fixed random input z             : z ~ N(0, 0.1²), shape (1, 8, 384, 512).
-  3. DIP optimisation loop (N iter)   :
-       a. z_noisy = z + (1/30)·ε, ε ~ N(0,1)  (input noise regularisation)
+  3. DIP optimization loop (N iter)   :
+       a. z_noisy = z + (1/30)·ε, ε ~ N(0,1)  (input noise regularization)
        b. sino_pred = f_θ(z_noisy)
        c. L = MSE(sino_pred[clean], sino_meas[clean])
             + λ_c · Consistency(sino_pred[metal])
@@ -40,7 +40,7 @@ Sinogram Consistency Loss
 -------------------------
   L_consistency = mean(ReLU(-pred[metal])²)        — non-negativity
                 + mean(ReLU(pred[metal] - ub)²)    — upper bound
-  where ub = 1.5 × max(sino_meas[clean]) (normalised), preventing
+  where ub = 1.5 × max(sino_meas[clean]) (normalized), preventing
   the network from generating physically impossible attenuation values.
 
 Device: torch.device("mps") (Apple Silicon).
@@ -106,10 +106,10 @@ SG_ORDER  = 3
 PAD_H              = 384       # pad 360 → 384 (divisible by 8 for 3 pool layers)
 DIP_IN_CHANNELS    = 8         # random noise input channels
 DIP_BASE_CHANNELS  = 32        # U-Net base width (→ 32, 64, 128)
-DEFAULT_N_ITER     = 500       # DIP optimisation iterations per realization
+DEFAULT_N_ITER     = 500       # DIP optimization iterations per realization
 DEFAULT_LR         = 0.01      # Adam learning rate
 DEFAULT_LAM_C      = 0.1       # consistency loss weight
-INPUT_NOISE_STD    = 1.0/30.0  # input noise regularisation σ
+INPUT_NOISE_STD    = 1.0/30.0  # input noise regularization σ
 BEST_AFTER         = 100       # only track best output after this iteration
 
 DEVICE = torch.device("mps")
@@ -141,7 +141,7 @@ class SinoUNet(nn.Module):
     Lightweight 3-level U-Net for sinogram inpainting.
 
     Input : (B, 8,   384, 512) — fixed random noise
-    Output: (B, 1,   384, 512) — predicted sinogram (normalised)
+    Output: (B, 1,   384, 512) — predicted sinogram (normalized)
 
     Encoder: 32 → 64 → 128;  Bottleneck: 128;  Decoder: 128 → 64 → 32 → 1
     ~900 K parameters.
@@ -195,7 +195,7 @@ def dip_inpaint(
     """
     metal_mask = ~clean_mask
 
-    # ── Normalise to [0, ~1] ────────────────────────────────────────────
+    # ── Normalize to [0, ~1] ────────────────────────────────────────────
     sino_max = float(np.max(np.abs(sino_meas[clean_mask]))) + 1e-8
     sino_norm = sino_meas / sino_max
 
@@ -216,7 +216,7 @@ def dip_inpaint(
     # ── Fixed noise input ───────────────────────────────────────────────
     z = torch.randn(1, DIP_IN_CHANNELS, PAD_H, N_DETECTORS, device=DEVICE) * 0.1
 
-    # ── Network + optimiser ─────────────────────────────────────────────
+    # ── Network + optimizer ─────────────────────────────────────────────
     net = SinoUNet().to(DEVICE)
     opt = torch.optim.Adam(net.parameters(), lr=lr)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=n_iter)
@@ -225,7 +225,7 @@ def dip_inpaint(
     best_out  = None
 
     for it in range(n_iter):
-        # Input noise regularisation (prevents overfitting)
+        # Input noise regularization (prevents overfitting)
         z_in = z + INPUT_NOISE_STD * torch.randn_like(z)
 
         pred = net(z_in)
@@ -262,7 +262,7 @@ def dip_inpaint(
             best_out = net(z)
         result_pad = best_out.squeeze().cpu().numpy()
 
-    # Unpad + denormalise
+    # Unpad + denormalize
     result = result_pad[pad_top:pad_top + N_ANGLES, :] * sino_max
 
     # Hard-pin clean rays to measured values (Dirichlet)

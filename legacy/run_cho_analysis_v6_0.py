@@ -6,7 +6,7 @@ ASTM WKXXXXX v1.0.0 — Enhanced 2D CHO with Tiered Framework
 
 Changes from run_cho_analysis_v5_3.py
 --------------------------------------
-[T1]  Tier-aware ROI, CHO channels, and ROI centre via TierConfig.
+[T1]  Tier-aware ROI, CHO channels, and ROI center via TierConfig.
       ROI size and channel width a are read from TIER_REGISTRY[args.tier].
 
 [T2]  50/50 estimation bias (compute_50_50_auc): 2-fold CV provides an
@@ -53,10 +53,10 @@ Usage
 Normative Parameters (§A1.5, v1.0.0)
 --------------------------------------
   Observer      : 2D CHO — slice LESION_SLICE_INDEX = 128 ONLY
-  ROI           : tier.roi_size × tier.roi_size centred at lesion_center_x
+  ROI           : tier.roi_size × tier.roi_size centered at lesion_center_x
   Channels      : 10 Laguerre-Gauss, a = tier.channel_width_a voxels
   Covariance    : Estimated from LA slice 128 only (§A1.5.2(a))
-  Regularisation: Tikhonov λ = 0.01 × trace(K) / 10
+  Regularization: Tikhonov λ = 0.01 × trace(K) / 10
   Metric        : Mann-Whitney AUC (LOO hold-out)
   Internal noise: σ = 15 (normative default, §A1.5.2, Vaishnav 2020)
 """
@@ -96,7 +96,7 @@ def calculate_lg_channels(tier: TierConfig) -> np.ndarray:
     """
     Generate 10 2D Laguerre-Gauss channel templates for the given tier.
 
-    u_n(x,y) = L_n(2π r²/a²) · exp(−π r²/a²), L2-normalised over the ROI.
+    u_n(x,y) = L_n(2π r²/a²) · exp(−π r²/a²), L2-normalized over the ROI.
 
     Parameters
     ----------
@@ -481,7 +481,7 @@ def main() -> None:
     tier = TIER_REGISTRY[args.tier]
     print()
     print(f"Tier: {tier.tier_id}  —  {tier.description}")
-    print(f"ROI: {tier.roi_size}×{tier.roi_size}  centre=({tier.roi_x_center},{tier.roi_y_center})")
+    print(f"ROI: {tier.roi_size}×{tier.roi_size}  center=({tier.roi_x_center},{tier.roi_y_center})")
     print(f"LG channel width a = {tier.channel_width_a:.1f} vox")
     print(f"Internal noise σ = {args.internal_noise_sigma}")
     print()

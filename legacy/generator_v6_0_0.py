@@ -146,7 +146,7 @@ def _cal_roi_bounds(tier: TierConfig) -> tuple[int, int, int, int]:
     """
     Calibration ROI: upper portion of body, well clear of metal and lesion.
 
-    Position: 40–90% of body_semi_y above centre, ±20% of body_semi_x.
+    Position: 40–90% of body_semi_y above center, ±20% of body_semi_x.
     Verified to lie inside the body ellipse for T1_AB, T2_SB, and T3_HEAD.
     """
     by = tier.body_semi_y_vox
@@ -757,11 +757,11 @@ def generate_pdf_v6(output_dir: Path, tier: TierConfig, contrast_factor: float) 
         ["Body geometry",      body_desc,                      "Outer phantom boundary"],
         ["Metal material",     tier.metal_material,            f"μ = {tier.metal_mu_cm:.3f} cm⁻¹ at 60 keV"],
         ["Metal radius",       f"{tier.metal_radius_mm:.1f} mm ({tier.metal_radius_vox} vox)",
-                               f"Co-axial with phantom centre"],
+                               f"Co-axial with phantom center"],
         ["Lesion geometry",    f"{tier.lesion_semi_major_mm:.1f}×{tier.lesion_semi_minor_mm:.1f} mm ellipse",
                                f"Semi-major/minor axes; x={tier.lesion_center_x}"],
         ["L_nominal",          f"{tier.l_nominal_mm:.1f} mm ({tier.l_nominal_vox} vox)",
-                               "Metal centre → lesion centre"],
+                               "Metal center → lesion center"],
         ["Edge gap",           f"{tier.gap_mm:.1f} mm ({tier.gap_vox} vox)",
                                "Metal edge → lesion edge"],
         ["Blockage fraction",  f"{tier.blockage_frac*100:.2f}%",

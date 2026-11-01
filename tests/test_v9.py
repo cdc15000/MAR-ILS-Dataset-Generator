@@ -105,7 +105,7 @@ class TestFBP:
 
     def test_roi_matches_full(self):
         p = 0.2 * vs.disk_chords(0, 0, 10.0) + 0.05 * vs.disk_chords(0.5, 0.5, 1.0)
-        r0, r1, c0, c1 = vs.centre_roi()
+        r0, r1, c0, c1 = vs.center_roi()
         np.testing.assert_allclose(vs.fbp(p, (r0, r1, c0, c1)), vs.fbp(p)[r0:r1, c0:c1], atol=1e-12)
 
 
@@ -142,8 +142,8 @@ class TestOracleAndNull:
         ow, ob, of = vs.line_integrals(**kw, metal=False)
         assert of.max() == 0.0 and lf.max() > 0.0
         dbs = sum(vs.disk_chords(cx, cy, vp.DBS_RADIUS_CM)
-                  for cx, cy in vp.rotate(np.array(vp.DBS_CENTRES_CM), 0.4))
-        # same geometry with metal relabelled; DBS become inset tissue (1.05 water)
+                  for cx, cy in vp.rotate(np.array(vp.DBS_CENTERS_CM), 0.4))
+        # same geometry with metal relabeled; DBS become inset tissue (1.05 water)
         np.testing.assert_allclose(ow + ob, lw + lb + lf + (vp.INSET_WATER_FACTOR - 1.0) * dbs, atol=1e-9)
 
     def test_null_class_is_independent_and_signal_free(self):

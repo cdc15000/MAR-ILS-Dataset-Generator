@@ -88,7 +88,7 @@ def gaussian_integrals(cx: float, cy: float, w: float) -> np.ndarray:
 
 @lru_cache(maxsize=1)
 def _signal_disk_rays() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Flat indices of rays through the centred signal disk, with their entry and exit t."""
+    """Flat indices of rays through the centered signal disk, with their entry and exit t."""
     d0, t0 = _offset_and_foot(0.0, 0.0)
     r = vp.SIGNAL_RADIUS_CM
     idx = np.flatnonzero(np.abs(d0) < r)
@@ -97,7 +97,7 @@ def _signal_disk_rays() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 def gaussian_integrals_in_disk(cx: float, cy: float, w: float, r: float = vp.SIGNAL_RADIUS_CM) -> np.ndarray:
-    """Part of the Gaussian line integral inside the centred signal disk."""
+    """Part of the Gaussian line integral inside the centered signal disk."""
     assert r == vp.SIGNAL_RADIUS_CM
     sx, sy, ux, uy = ray_geometry()
     idx, ta, tb = _signal_disk_rays()
@@ -123,7 +123,7 @@ def _static_line_integrals(metal: bool = True) -> tuple[np.ndarray, np.ndarray, 
     bone += disk_chords(0, 0, vp.OUTER_RADIUS_CM) - c_inner
     water += c_inner
     water += (vp.INSET_WATER_FACTOR - 1.0) * disk_chords(0, 0, vp.INSET_RADIUS_CM)
-    for n, (cx, cy) in enumerate(vp.tooth_centres_cm()):
+    for n, (cx, cy) in enumerate(vp.tooth_centers_cm()):
         c = disk_chords(cx, cy, vp.TOOTH_RADIUS_CM)
         water -= c
         bone += c
@@ -131,7 +131,7 @@ def _static_line_integrals(metal: bool = True) -> tuple[np.ndarray, np.ndarray, 
             f = disk_chords(cx, cy, vp.FILLING_RADIUS_CM)
             bone -= f
             iron += f
-    for cx, cy in vp.COCHLEAR_CENTRES_CM if metal else ():
+    for cx, cy in vp.COCHLEAR_CENTERS_CM if metal else ():
         c = disk_chords(cx, cy, vp.COCHLEAR_RADIUS_CM)
         bone -= c
         iron += c
@@ -152,7 +152,7 @@ def line_integrals(*, angle: float, amplitude: float | None, lumps: vp.Lumps,
     """
     sw, sb, sf = _static_line_integrals(metal)
     water, bone, iron = sw.copy(), sb.copy(), sf.copy()
-    rot = vp.rotate(lumps.centres, angle)
+    rot = vp.rotate(lumps.centers, angle)
     for (cx, cy), w, a in zip(rot, lumps.widths, lumps.amplitudes):
         water += lump_scale * a * gaussian_integrals(cx, cy, w)
     if amplitude is not None:
@@ -160,7 +160,7 @@ def line_integrals(*, angle: float, amplitude: float | None, lumps: vp.Lumps,
         water += (amplitude * vp.signal_baseline(lump_scale) - vp.INSET_WATER_FACTOR) * c_sig
         for (cx, cy), w, a in zip(rot, lumps.widths, lumps.amplitudes):
             water -= lump_scale * a * gaussian_integrals_in_disk(cx, cy, w)
-    for cx, cy in vp.rotate(np.array(vp.DBS_CENTRES_CM), angle) if metal else ():
+    for cx, cy in vp.rotate(np.array(vp.DBS_CENTERS_CM), angle) if metal else ():
         c = disk_chords(cx, cy, vp.DBS_RADIUS_CM)
         water -= vp.INSET_WATER_FACTOR * c
         iron += c
@@ -171,7 +171,7 @@ def line_integrals(*, angle: float, amplitude: float | None, lumps: vp.Lumps,
 
 @lru_cache(maxsize=1)
 def spectrum() -> tuple[np.ndarray, np.ndarray]:
-    """Bin-centre energies (keV) and photon-number weights summing to 1."""
+    """Bin-center energies (keV) and photon-number weights summing to 1."""
     import spekpy
     s = spekpy.Spek(kvp=KVP, th=ANODE_ANGLE_DEG, dk=ENERGY_BIN_KEV)
     s.filter("Al", AL_FILTER_MM)
@@ -299,13 +299,13 @@ def fbp(sino: np.ndarray, roi: tuple[int, int, int, int] | None = None) -> np.nd
                         np.ascontiguousarray(xs), np.ascontiguousarray(ys)) * dbeta
 
 
-def centre_roi(size: int = vp.ROI_PX) -> tuple[int, int, int, int]:
+def center_roi(size: int = vp.ROI_PX) -> tuple[int, int, int, int]:
     h = size // 2
     m = vp.IMAGE_PX // 2
     return m - h, m + h + 1, m - h, m + h + 1
 
 
-# Reconstructed μ of water at the centre (r < 2 cm) of a 20 cm water cylinder,
+# Reconstructed μ of water at the center (r < 2 cm) of a 20 cm water cylinder,
 # noise-free, I₀ = 1e6 with the standard scatter (Rev 06 §A1.1(h)).
 MU_WATER_REF_CM: float = 0.2124
 

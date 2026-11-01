@@ -36,7 +36,7 @@ def build_body_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
 
 
 def build_metal_mask(yy: np.ndarray, xx: np.ndarray) -> np.ndarray:
-    """Circular metal rod mask (10 voxel radius, centred)."""
+    """Circular metal rod mask (10 voxel radius, centered)."""
     return (
         (xx - PHANTOM_CENTER_X) ** 2 + (yy - PHANTOM_CENTER_Y) ** 2
         <= METAL_RADIUS_VOX ** 2

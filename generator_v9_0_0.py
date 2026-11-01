@@ -2,7 +2,7 @@
 """
 MAR ILS generator v9.0.0: Vaishnav et al. (2020) head phantom, 2D, polychromatic.
 
-This first version produces the 121 × 121 centre ROIs the CHO reads, for
+This first version produces the 121 × 121 center ROIs the CHO reads, for
 FBP, MAR 1 and MAR 2, as .npz files. It is used for calibration and
 validation; the lab dataset writer (sinograms + DICOM) follows.
 
@@ -66,7 +66,7 @@ def simulate(cls: int, amplitude: float | None, dose: float, lump_scale: float, 
     lw, lb, lf = vs.line_integrals(angle=angle, amplitude=sig, lumps=lumps, lump_scale=lump_scale)
     counts = vs.measure(vs.expected_primary(lw, lb, lf, dose), dose, rng)
     p = vs.log_sinogram(counts, dose)
-    roi = vs.centre_roi()
+    roi = vs.center_roi()
     out = {}
     if "fbp" in methods:
         out["fbp"] = vs.fbp(p, roi)

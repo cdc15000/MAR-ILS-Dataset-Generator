@@ -1,4 +1,4 @@
-![Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties, before and after orthopaedic metal artefact reduction.](docs_and_references/images/wellenberg_2019_fig8_ab.jpg)<br>
+![Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties, before and after orthopedic metal artifact reduction.](docs_and_references/images/wellenberg_2019_fig8_ab.jpg)<br>
 <sub>*Adapted from Wellenberg et al., Skeletal Radiology 48:1775 (2019) [[DOI](https://doi.org/10.1007/s00256-019-03206-z)] · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)*</sub>
 
 # MAR ILS Dataset Generator and Evaluation Framework
@@ -128,12 +128,12 @@ mar2  AUC_inf 0.8724 ± 0.0154  (resub 0.8571, holdout 0.8877)
 | Item | Value |
 |---|---|
 | Phantom | Head phantom from Vaishnav et al.: skull, iron dental fillings, cochlear and deep-brain implants, and a rotating textured inset |
-| Lesion | 10 mm disk at the phantom centre |
+| Lesion | 10 mm disk at the phantom center |
 | Contrast levels | 1.020, 1.025 and 1.030 times the background |
 | Scan | Fan beam, 120 kV, 984 views, 888 detector channels |
 | Dose | 1 × 10⁶ photons per detector channel per view |
 | Image | 512 × 512 pixels over a 30 cm field of view |
-| Scored region | 121 × 121 pixels at the image centre |
+| Scored region | 121 × 121 pixels at the image center |
 | Observer | Channelized Hotelling observer, 10 dense difference-of-Gaussians channels |
 | Images | 1000 training and 1000 test images per class and level |
 | Improving control | MAR 2: metal found in the image, then the affected sinogram data interpolated |

@@ -12,7 +12,7 @@ Changes from v7.0.0
       was shared. The jitter set is unchanged and is still shared by LP_i and
       LA_i (background variability is paired; noise is not).
 [LF]  Lesion fixed at (281, 256): written after the jitter rotation. In v7.0.0
-      it rotated with the body (up to 6.3 voxels off the ROI centre).
+      it rotated with the body (up to 6.3 voxels off the ROI center).
 [SC2] Scatter subtracted before the log: p = -ln(max(I - S, 1) / I0). v7.0.0
       added S but never removed it, which shaded the background and cut the
       reconstructed lesion contrast from about 11 HU to about 5 HU.
@@ -46,7 +46,7 @@ Changes in v7.0.0 from v6.0.0 / v5.3.0
 Canonical Parameters (ASTM WKXXXXX Rev 06)
 -------------------------------------------
   Body        : ellipse 85×60 mm (170×120 vox)
-  Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centred at (256,256)
+  Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centered at (256,256)
   Lesion      : circular disc r=2.5 mm (5 vox) at (281,256), slice 128 only
   Contrast    : 12 HU in mu (about 11 HU reconstructed; no post-FBP hard-set)
   Metal HU    : 3000 (restored last)
@@ -855,7 +855,7 @@ def write_provenance_json(
             'metal_radius_mm': 5.0, 'metal_mu_cm': MU_IRON_CM,
             'lesion_radius_mm': 2.5, 'lesion_center_x': LESION_CENTER_X,
             'lesion_slice_index': LESION_SLICE_INDEX,
-            'lesion_placement': 'after jitter rotation (fixed at ROI centre)',
+            'lesion_placement': 'after jitter rotation (fixed at ROI center)',
         },
         'physics': {
             'energy_keV': 60, 'spectrum': 'monochromatic',

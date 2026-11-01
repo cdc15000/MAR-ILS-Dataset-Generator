@@ -49,7 +49,7 @@ from mar_ils_core.constants import (
 )
 from mar_ils_core.dicom_utils import write_dicom_slice
 
-# Lesion offset from the rod centre + lesion radius + 1 voxel: the smallest
+# Lesion offset from the rod center + lesion radius + 1 voxel: the smallest
 # disc whose trace contains every ray through the lesion (31 voxels).
 NULL_RADIUS_VOX: int = (LESION_CENTER_X - PHANTOM_CENTER_X) + LESION_RADIUS_VOX + 1
 

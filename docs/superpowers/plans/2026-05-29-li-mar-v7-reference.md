@@ -56,7 +56,7 @@ class TestLinearInterpMetal:
         W[0, 4] = 0.0
         W[0, 5] = 0.0
         out = li.linear_interp_metal(sino, W)
-        # bins 4,5 linearly interpolated between clean neighbours 3.0 and 6.0
+        # bins 4,5 linearly interpolated between clean neighbors 3.0 and 6.0
         assert out[0, 4] == pytest.approx(4.0)
         assert out[0, 5] == pytest.approx(5.0)
 
@@ -216,17 +216,17 @@ from mar_ils_core.phantom import build_metal_mask  # noqa: E402
 
 
 class TestMetalTraceWeights:
-    def test_centred_rod_flags_central_detector_bins(self):
+    def test_centered_rod_flags_central_detector_bins(self):
         yy, xx = np.mgrid[0:512, 0:512]
-        metal_mask = build_metal_mask(yy, xx)  # centred 10-vox iron rod
+        metal_mask = build_metal_mask(yy, xx)  # centered 10-vox iron rod
         W = li.metal_trace_weights(metal_mask)
         assert W.shape == (720, 512)            # (N_ANGLES, N_DET)
         assert ((W == 0.0) | (W == 1.0)).all()  # binary
-        # A centred rod projects to the central detector region for every view,
+        # A centered rod projects to the central detector region for every view,
         # leaving the detector edges clean.
         assert (W < 0.5).any()                   # some metal-traced rays
         assert W[0, 0] == 1.0 and W[0, -1] == 1.0  # edges clean
-        # Metal-traced bins cluster near detector centre.
+        # Metal-traced bins cluster near detector center.
         metal_cols = np.where(W[0] < 0.5)[0]
         assert abs(metal_cols.mean() - 256) < 60
 ```

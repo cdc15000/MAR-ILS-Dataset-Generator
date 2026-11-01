@@ -29,7 +29,7 @@ body cross-section.  The interpolated values in the metal trace are therefore
 inaccurate, producing reconstruction errors that spread as streaks through the
 lesion ROI.
 
-NMAR normalises by the prior projection first, making sino_norm ≈ 1.0 across
+NMAR normalizes by the prior projection first, making sino_norm ≈ 1.0 across
 all clean rays regardless of tissue thickness.  Interpolating a nearly-flat
 function is far more accurate.  The 12 HU lesion signal is encoded as a ratio
 >1 in the clean lesion rays; it passes through unchanged, and is restored by
@@ -152,13 +152,13 @@ def nmar_slice(sino_meas: np.ndarray, ref_hu: np.ndarray) -> np.ndarray:
     #      sino_meas = −log(exp(−∫μ dl) + SCATTER_FRAC)
     #    Applying the same transform to the prior makes sino_prior_scatter
     #    ≈ sino_meas for clean body rays, so cal_scale → 1.0 and
-    #    sino_norm → 1.0 throughout the body, maximising interpolation
+    #    sino_norm → 1.0 throughout the body, maximizing interpolation
     #    accuracy in the metal trace.
     SCATTER_FRAC      = 0.05          # matches generator (scatter_frac)
     sino_prior_scatter = -np.log(np.exp(-sino_prior) + SCATTER_FRAC)
 
     # ── 5. Calibrate on clean body rays ───────────────────────────────────
-    #    With scatter modelled, the ratio sino_meas / sino_prior_scatter ≈ 1
+    #    With scatter modeled, the ratio sino_meas / sino_prior_scatter ≈ 1
     #    for clean body rays; residual cal_scale corrects any per-realization
     #    drift.  Keep threshold sp_c > 0.3 to stay on thick body rays where
     #    scatter compression is unambiguous.
@@ -176,7 +176,7 @@ def nmar_slice(sino_meas: np.ndarray, ref_hu: np.ndarray) -> np.ndarray:
     # ── 6. Normalize measured sinogram ───────────────────────────────────
     sino_norm = sino_meas / np.maximum(sino_prior_scatter, 1e-6)
 
-    # ── 7. Linear interpolation on normalised sinogram ───────────────────
+    # ── 7. Linear interpolation on normalized sinogram ───────────────────
     sino_norm_LI = _linear_interp_metal(sino_norm, W)
 
     # ── 8. Denormalize → restore tissue/lesion signal ────────────────────
@@ -185,7 +185,7 @@ def nmar_slice(sino_meas: np.ndarray, ref_hu: np.ndarray) -> np.ndarray:
     #    −log(1.05) ≈ −0.049), which with np.maximum(…,1e-6) makes
     #    sino_norm = sino_meas/1e-6 (huge), and then
     #    sino_corr = huge × (−0.049) ≠ sino_meas — catastrophic.
-    #    Only apply NMAR denormalisation at metal-trace positions where
+    #    Only apply NMAR denormalization at metal-trace positions where
     #    sino_prior_scatter > 0 (body interior with tissue + metal).
     sino_corr               = sino_meas.copy()
     metal_trace             = W < 0.5
@@ -196,12 +196,12 @@ def nmar_slice(sino_meas: np.ndarray, ref_hu: np.ndarray) -> np.ndarray:
 
     # ── 10. Physics-based HU calibration ──────────────────────────────────
     #    The FBP output x is proportional to μ_image (with an unknown scale
-    #    factor that depends on the iradon normalisation).  A two-point
+    #    factor that depends on the iradon normalization).  A two-point
     #    calibration anchors tissue to BACKGROUND_HU and air (outside the
     #    reconstruction circle, where iradon sets x = 0) to −1000 HU:
     #      x_cal = (x / x_tissue_mean − 1) × 1000 + BACKGROUND_HU
     #    This is equivalent to std-rescaling with a PHYSICS reference std
-    #    (1000 HU per unit μ_normalised) rather than the noMAR image std,
+    #    (1000 HU per unit μ_normalized) rather than the noMAR image std,
     #    so it does NOT amplify MAR noise-removal benefits.
     body_mask    = (ref_hu > -800) & (~metal_mask)
     x_body_mean  = float(np.mean(x[body_mask]))

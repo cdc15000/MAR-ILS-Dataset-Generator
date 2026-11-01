@@ -116,7 +116,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 1. **I₀ calibration** — 3-FBP analytic approach (fan-beam): noise-free full
    phantom (DC offset), noise-free body-only, 5 noisy MC draws at I₀_ref = 1e5;
    analytic scaling σ ∝ 1/√I₀.
-2. **Phantom construction** — analytic ellipse body, centred iron rod, optional
+2. **Phantom construction** — analytic ellipse body, centered iron rod, optional
    lesion disc at (281, 256) in **slice 128 only**.
 3. **Forward projection** — fan-beam, ray-driven sub-voxel sampling. Numba JIT
    with hand-rolled bilinear interpolation when available.

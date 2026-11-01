@@ -7,7 +7,7 @@ ASTM WKXXXXX Rev 05 — Reference 2D CHO Analysis (Fan-Beam Dataset)
 Changes from run_cho_analysis_v6_0.py
 --------------------------------------
 [SC]  Single canonical configuration — hardcoded v5.3.0/Rev 05 ROI parameters
-      (121×121, centre (281,256), channel width a=7.5 vox). No tier dependency.
+      (121×121, center (281,256), channel width a=7.5 vox). No tier dependency.
 [FB]  References fan-beam generator v7.0.0 dataset (geometry-independent — CHO
       operates on reconstructed DICOM images regardless of projection geometry).
 [AT]  AUC equivalence tolerance relaxed from ±0.001 to ±0.005 (§8.4, Rev 05).
@@ -24,10 +24,10 @@ independent: it operates on HU-calibrated DICOM images, not sinograms.
 Normative Parameters (§A1.5, Rev 05)
 --------------------------------------
   Observer      : 2D CHO — slice 128 ONLY (§A1.5.3)
-  ROI           : 121×121 centred at (281, 256) (§A1.5.4)
+  ROI           : 121×121 centered at (281, 256) (§A1.5.4)
   Channels      : 10 Laguerre-Gauss, a = 7.5 voxels (§A1.5.1)
   Covariance    : LA only, pooled (§A1.5.2(a))
-  Regularisation: Tikhonov λ = 0.01 × trace(K) / 10 (§A1.5.2(c))
+  Regularization: Tikhonov λ = 0.01 × trace(K) / 10 (§A1.5.2(c))
   Internal noise: σ = 15 (normative default, §A1.5.2(d))
   Metric        : Mann-Whitney AUC (LOO hold-out) (§A1.6)
   Tolerance     : ±0.005 AUC (§8.4, Rev 05)
@@ -88,7 +88,7 @@ def calculate_lg_channels() -> np.ndarray:
     """
     Generate 10 2D Laguerre-Gauss channel templates.
 
-    u_n(x,y) = L_n(2π r²/a²) · exp(−π r²/a²), L2-normalised over the ROI.
+    u_n(x,y) = L_n(2π r²/a²) · exp(−π r²/a²), L2-normalized over the ROI.
 
     Returns: U, shape (NUM_CHANNELS, ROI_SIZE²)
     """
@@ -438,7 +438,7 @@ def main() -> None:
     num_real = args.realizations
 
     print("ASTM WKXXXXX Rev 05 — 2D CHO Analysis")
-    print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  centre=({ROI_CENTER_X},{ROI_CENTER_Y})")
+    print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  center=({ROI_CENTER_X},{ROI_CENTER_Y})")
     print(f"LG channel width a = {CHANNEL_WIDTH_A:.1f} vox")
     print(f"Internal noise σ = {args.internal_noise_sigma}")
     print(f"Realizations: {num_real} per condition "

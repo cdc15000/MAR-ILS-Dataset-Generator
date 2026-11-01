@@ -15,7 +15,7 @@ The persistent working directory is `~/projects/claude/mar-ils/`.
 v9 replaces v7 as the design of record (Rev 06 draft in `private/rev06/`; decisions, pre-registrations and results in the gitignored review notes `docs_and_references/ASTM_MAR_Standard_Rev05_Review.md`, items 20 to 33; spec of the phantom in `private/vaishnav_phantom_spec.md`). Everything below this section describes the superseded v7 design and is kept for reference.
 
 - **Modules:** `mar_ils_core/vaishnav_phantom.py` (Table II phantom, lumps, signal baseline), `vaishnav_sim.py` (geometry, analytic projector, SpekPy spectrum, noise, FBP, HU), `ddog.py`, `cho_v9.py` (pooled CHO, Φ(SNR/√2), antler AUC∞), `mar_v9.py` (MAR 1, MAR 2); `generator_v9_0_0.py` (ROI mode, methods fbp/mar1/mar2/oracle/mar1xK); `run_cho_analysis_v9_0.py`; tests in `tests/test_v9.py`.
-- **Fixed parameters:** SID 541 mm, SDD 949 mm, 888 ch at 1 mm, 984 views; 120 kV W 10° 2.5 mm Al; scatter 1e-4·I₀; σ_e² = 160; 512² over 30 cm, centre pixel (256, 256); ROI 121²; D-DOG σ₀ 0.005, α 1.4, Q 1.67, j = 1…10; lump scale s = 0.0588; I₀ = 1e6; levels 1.020/1.025/1.030; τ_counts = 1124, τ_mu = 1.953 cm⁻¹; μ_w = 0.2124 cm⁻¹; estimator null AUC∞ = 0.533.
+- **Fixed parameters:** SID 541 mm, SDD 949 mm, 888 ch at 1 mm, 984 views; 120 kV W 10° 2.5 mm Al; scatter 1e-4·I₀; σ_e² = 160; 512² over 30 cm, center pixel (256, 256); ROI 121²; D-DOG σ₀ 0.005, α 1.4, Q 1.67, j = 1…10; lump scale s = 0.0588; I₀ = 1e6; levels 1.020/1.025/1.030; τ_counts = 1124, τ_mu = 1.953 cm⁻¹; μ_w = 0.2124 cm⁻¹; estimator null AUC∞ = 0.533.
 - **Discipline:** design and validation changes are pre-registered in the review notes and approved by the user before runs; failures are recorded, not re-tuned.
 - **Pending:** v9 dataset writer (sinograms + DICOM), blinding tooling, master dataset; wiki update.
 
@@ -69,7 +69,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 
 ### Scripts (versioned by filename — use the highest version)
 - **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 05): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
-- **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 05 ROI parameters (121×121, centre (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
+- **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 05 ROI parameters (121×121, center (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
 - `patch_2026b_metadata.py` — Legacy one-time utility that retrofits DICOM 2026b CP-2575 MAR metadata into datasets generated before the generator wrote the macro natively. Not needed for v7.0.0 output and not part of the lab workflow.
 - `legacy/generator_v6_0_0.py` — Research tier framework (T1_AB/T2_SB/T3_HEAD). Not normative. Uses parallel-beam geometry and tier-specific parameters. Retained for multi-tier research.
 - `legacy/run_cho_analysis_v6_0.py` — Tier-aware CHO. Not normative. Uses tier_config.py for ROI parameters.
@@ -87,7 +87,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ### CHO Analysis Pipeline (`run_cho_analysis_v7_0.py`)
 1. Loads **only `slice_0129.dcm`** (LESION_SLICE_INDEX = 128, 1-indexed) from each realization. 3D integration shall not be performed (§A1.5.3).
 2. Projects each 121×121 ROI through 10 2D Laguerre-Gauss channels → feature vector of shape `(N, 10)`.
-3. Fits Hotelling template with Tikhonov regularisation (λ = 0.01 × trace(K)/10) using **LA covariance only**.
+3. Fits Hotelling template with Tikhonov regularization (λ = 0.01 × trace(K)/10) using **LA covariance only**.
 4. Computes LOO hold-out AUC (Mann-Whitney) with 1000-resample bootstrap CI and paired ΔAUC bootstrap CI.
 5. Informative diagnostics: Wilcoxon signed-rank test, 50/50 estimation bias, noise sensitivity sweep, sigmoid AUC fit.
 6. Writes `cho_results.json`.
@@ -162,7 +162,7 @@ Historical baselines (superseded):
 - Lesion contrast reconstructs to exactly 12.0 HU
 - Noise σ calibrates to 30 HU target (52.9 HU at I₀=1e5, scaled to 30 HU at I₀=310,853)
 - Screening AUC_noMAR=0.6600 at σ=15 (N=20); CI encompasses parallel-beam baseline of 0.7063
-- Noise sweep: AUC ranges from 0.60 (σ=0) to 0.71 (σ=30), confirming regularisation dependence
+- Noise sweep: AUC ranges from 0.60 (σ=0) to 0.71 (σ=30), confirming regularization dependence
 
 ### Numba Acceleration (2026-04-07)
 - **Forward projection**: Numba @njit with hand-rolled bilinear interpolation replaces `scipy.ndimage.map_coordinates`. ~24x speedup (0.29s compiled vs ~7s NumPy).

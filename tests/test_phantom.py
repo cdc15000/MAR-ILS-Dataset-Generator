@@ -140,7 +140,7 @@ class TestAttenuationMap:
 
 class TestLesionPlacement:
     def test_default_lesion_moves_with_jitter(self, coordinate_grids):
-        """v7.0.0 behaviour: the lesion rotates with the body."""
+        """v7.0.0 behavior: the lesion rotates with the body."""
         yy, xx = coordinate_grids
         mu = build_attenuation_map(True, 14.0)
         assert not np.allclose(mu[build_lesion_mask(yy, xx)], MU_LESION_CM)
