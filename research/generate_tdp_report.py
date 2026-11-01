@@ -816,7 +816,7 @@ def _make_sensitivity_plot(sweep_items: list[dict], tier_id: str,
     ax.axhline(auc_threshold, color="black", linestyle=":",
                linewidth=1.1, alpha=0.6, zorder=4,
                label=f"AUC={auc_threshold:.1f} threshold")
-    ax.axhline(0.5, color="grey", linestyle=":", linewidth=0.5,
+    ax.axhline(0.5, color="gray", linestyle=":", linewidth=0.5,
                alpha=0.35, zorder=1)
 
     # Normative σ operating point

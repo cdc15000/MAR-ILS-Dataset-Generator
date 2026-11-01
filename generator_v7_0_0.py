@@ -24,7 +24,7 @@ Changes from v6.0.0 / v5.3.0
 Canonical Parameters (ASTM WKXXXXX Rev 05)
 -------------------------------------------
   Body        : ellipse 85×60 mm (170×120 vox)
-  Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centred at (256,256)
+  Metal       : iron, μ=2.408 cm⁻¹, r=5 mm (10 vox), centered at (256,256)
   Lesion      : circular disc r=2.5 mm (5 vox) at (281,256), slice 128 only
   Contrast    : ~12 HU sinogram-domain (no post-FBP hard-set)
   Metal HU    : 3000 (restored last)

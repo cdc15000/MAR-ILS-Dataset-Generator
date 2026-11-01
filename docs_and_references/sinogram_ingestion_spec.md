@@ -79,7 +79,7 @@ The data represents noisy line integrals including Poisson photon noise and addi
 **Geometry notes:**
 
 - **Equi-angular detectors.** Elements are uniformly spaced in fan angle γ, not in linear position. Element *j* subtends angle: `γ_j = (j − N_det/2 + 0.5) × Δγ`, where `Δγ = 2 × γ_max / N_det`.
-- **Source rotation convention.** At angle β (from `angles_deg`), the X-ray source position in the reconstruction coordinate frame is: `(cx + SID_vox × cos(β), cy + SID_vox × sin(β))`, where `(cx, cy)` is the isocenter (pixel 256, 256) and `SID_vox = SID_mm / voxel_mm = 1140`. Each ray from the source to detector element *j* travels at angle `β + π + γ_j`. All source/detector distances in the backprojection loop use **voxel units**, not millimetres.
+- **Source rotation convention.** At angle β (from `angles_deg`), the X-ray source position in the reconstruction coordinate frame is: `(cx + SID_vox × cos(β), cy + SID_vox × sin(β))`, where `(cx, cy)` is the isocenter (pixel 256, 256) and `SID_vox = SID_mm / voxel_mm = 1140`. Each ray from the source to detector element *j* travels at angle `β + π + γ_j`. All source/detector distances in the backprojection loop use **voxel units**, not millimeters.
 - **Reconstruction grid.** 512 × 512 pixels, 0.5 mm isotropic. The isocenter is at pixel (256, 256).
 - **Full 360° acquisition.** 720 angles at 0.5° spacing, starting at 0°.
 
@@ -161,7 +161,7 @@ For labs implementing their own fan-beam FBP (without MAR), the reference algori
 4. **Scale** the result by `π / N_angles / (SID_cm × Δγ_rad)` to obtain reconstructed μ in cm⁻¹.
 5. **Convert** from linear attenuation (cm⁻¹) to HU. The reference pipeline uses: `HU = (μ_recon − μ_tissue − dc_offset) / μ_tissue × 1000 + BACKGROUND_HU`, where `μ_tissue = 0.2059 cm⁻¹`, `dc_offset = −0.029 cm⁻¹`, and `BACKGROUND_HU = 40`. This maps soft tissue to exactly 40 HU. Labs using their own HU calibration (e.g., water-referenced) are acceptable provided the resulting soft-tissue HU is consistent.
 
-**Units in grid coordinates:** When computing source positions and distances in the reconstruction loop, use `SID` and `SDD` in **voxel units** (SID_vox = 570 / 0.5 = 1140; SDD_vox = 1040 / 0.5 = 2080), not millimetres. The final μ→HU conversion uses `SID_cm` (57.0 cm) for the analytic scaling factor.
+**Units in grid coordinates:** When computing source positions and distances in the reconstruction loop, use `SID` and `SDD` in **voxel units** (SID_vox = 570 / 0.5 = 1140; SDD_vox = 1040 / 0.5 = 2080), not millimeters. The final μ→HU conversion uses `SID_cm` (57.0 cm) for the analytic scaling factor.
 
 This algorithm is provided for reference and validation only. Labs are expected to use their own reconstruction and MAR pipeline.
 

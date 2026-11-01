@@ -25,7 +25,7 @@ indistinguishable from sinogram-inpainting approaches (iMAR ΔAUC = −0.263).
 
 ### 2.1 Task 1 — "Lesion-Safe" FS-iMAR (Partial Correction Blend)
 
-Standard FS-iMAR was analysed through its Fourier decomposition. The CHO's
+Standard FS-iMAR was analyzed through its Fourier decomposition. The CHO's
 primary Laguerre-Gauss channel (a=6.0 vox) peaks at f ≈ 0.027 cycles/vox.
 At the default σ=1.5, the HP filter passes only 3.2% of this frequency into
 the detail layer — the lesion's detection-relevant signal is almost entirely

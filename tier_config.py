@@ -131,7 +131,7 @@ class TierConfig:
         _s("gap_mm",  float(gap_v) * VOXEL_MM)
 
         # Angular blockage fraction: fraction of 180° projection angles whose
-        # ray through the iso-centre passes through the metal rod.
+        # ray through the iso-center passes through the metal rod.
         # Formula: (2/π) × arcsin(R_metal / L_nominal)
         ratio = min(float(mrv) / float(l_vox), 1.0)
         _s("blockage_frac", (2.0 / math.pi) * math.asin(ratio))
@@ -142,7 +142,7 @@ class TierConfig:
         # μ_lesion: +12 HU sinogram-domain contrast (same for all tiers)
         _s("mu_lesion_cm", MU_TISSUE_CM * MU_LESION_SCALE)
 
-        # CHO ROI centred on the lesion
+        # CHO ROI centered on the lesion
         _s("roi_x_center", self.lesion_center_x)
         _s("roi_y_center", PHANTOM_CENTER_Y)
 
@@ -158,7 +158,7 @@ class TierConfig:
         half = self.roi_size // 2
         return self.roi_y_center - half, self.roi_y_center + half + 1
 
-    # ── Serialisation ─────────────────────────────────────────────────────────
+    # ── Serialization ─────────────────────────────────────────────────────────
 
     def to_dict(self) -> dict:
         """JSON-serializable dict of all fields (for HDF5 attrs and TDP JSON)."""

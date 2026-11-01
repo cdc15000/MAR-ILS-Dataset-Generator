@@ -9,14 +9,14 @@ Lesion PSF Construction (avoids double-noise from LP−LA image differences):
   1. Average 40 pairs of LP/LA sinograms at slice 128 to get the mean
      lesion sinogram delta: Δs = mean_i(sino_LP_i − sino_LA_i)
   2. FBP-reconstruct Δs → PSF_12HU  (the expected 12 HU lesion footprint in
-     image space, calibrated to ~12 HU at the lesion centre)
+     image space, calibrated to ~12 HU at the lesion center)
   3. LP[i] = LA_img[i] + (c/12)·PSF_12HU  for contrast sweep
   4. LP[i] = LA_img[i] + extra_noise + PSF_12HU ; LA[i] = LA_img[i] + extra_noise
      for noise sweep (σ_total = √(30² + σ_extra²))
 
 CHO Specification (normative — ASTM WKXXXXX Rev 03 §A1.5)
   • 2D Laguerre–Gauss channels, n=0..9, a=7.5 voxels
-  • ROI 121×121 centred at (281, 256)
+  • ROI 121×121 centered at (281, 256)
   • Tikhonov λ = 0.01·trace(K)/p
   • Internal noise σ_internal = 15 (§A1.5.2(d))
   • LOO hold-out AUC via Mann–Whitney
@@ -45,7 +45,7 @@ from skimage.transform import iradon, radon
 # ---------------------------------------------------------------------------
 LESION_SLICE_INDEX = 128
 THETA_DEG          = np.linspace(0, 180, 360, endpoint=False)
-ROI_CX, ROI_CY     = 281, 256   # lesion centre in image coords (x, y) = (col, row)
+ROI_CX, ROI_CY     = 281, 256   # lesion center in image coords (x, y) = (col, row)
 ROI_HALF           = 60         # ±60 voxels → 121×121 ROI
 N_CHANNELS         = 10
 A_CHANNEL          = 7.5        # voxels  (1.5 × r_lesion = 1.5 × 5)
@@ -83,8 +83,8 @@ def _calibrate(img: np.ndarray, ref_mean: float, ref_std: float) -> np.ndarray:
 
 def _laguerre_gauss_channels(roi_size: int = 121) -> np.ndarray:
     """
-    Build 2D LG channels for a roi_size × roi_size ROI centred on the lesion.
-    Returns U: (roi_size², N_CHANNELS) float64 (L2-normalised column vectors).
+    Build 2D LG channels for a roi_size × roi_size ROI centered on the lesion.
+    Returns U: (roi_size², N_CHANNELS) float64 (L2-normalized column vectors).
     """
     from numpy.polynomial.laguerre import lagval
 
@@ -100,7 +100,7 @@ def _laguerre_gauss_channels(roi_size: int = 121) -> np.ndarray:
         lval   = lagval(arg, [0.0] * n + [1.0])
         gauss  = np.exp(-np.pi * r2 / A_CHANNEL ** 2)
         u      = lval * gauss
-        # L2-normalise
+        # L2-normalize
         norm = np.linalg.norm(u)
         if norm > 0:
             u /= norm
@@ -122,7 +122,7 @@ def _get_channels() -> np.ndarray:
 
 def _extract_roi_features(img_hu: np.ndarray) -> np.ndarray:
     """
-    Extract normalised 121×121 ROI from img_hu, project through LG channels.
+    Extract normalized 121×121 ROI from img_hu, project through LG channels.
     Returns feature vector of shape (N_CHANNELS,).
     """
     r0 = ROI_CY - ROI_HALF
@@ -240,7 +240,7 @@ def build_lesion_psf(dataset_dir: Path) -> tuple[np.ndarray, float, float]:
     # FBP of the mean delta → lesion PSF in FBP units
     psf_raw = _fbp(delta_mean)
 
-    # Calibrate PSF to 12 HU by matching lesion-centre value to expected 12 HU
+    # Calibrate PSF to 12 HU by matching lesion-center value to expected 12 HU
     # Use the mean LA tissue value as offset reference
     la_stack = np.stack(la_imgs)   # (40, 512, 512)
     metal_mask = la_stack[0] > METAL_HU_THRESH

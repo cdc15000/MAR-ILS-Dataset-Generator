@@ -83,7 +83,7 @@ SCATTER_FRAC = 0.05
 
 # MBIR parameters
 N_ITERATIONS    = 20         # PWLS-TV iterations (Stage 2)
-TV_LAMBDA       = 0.01       # TV regularisation strength
+TV_LAMBDA       = 0.01       # TV regularization strength
 TV_HUBER_DELTA  = 0.01       # Huber norm transition (avoids staircasing)
 
 # Savitzky-Golay (for Stage 1 fusion boundary smoothing)
@@ -405,7 +405,7 @@ def _save_mbir_dicom(img_hu: np.ndarray, template_dcm, out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Visualisation
+# Visualization
 # ---------------------------------------------------------------------------
 
 def generate_comparison_plot(

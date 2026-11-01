@@ -173,7 +173,7 @@ def main():
     diff = sino_lp.astype(np.float64) - sino_la.astype(np.float64)
 
     # ── Quantitative analysis ─────────────────────────────────────────────────
-    # Metal shadow region: detector bins near centre
+    # Metal shadow region: detector bins near center
     metal_lo = N_DET // 2 - METAL_RADIUS_VOX - 2
     metal_hi = N_DET // 2 + METAL_RADIUS_VOX + 2
     # Lesion shadow region: approximate detector offset

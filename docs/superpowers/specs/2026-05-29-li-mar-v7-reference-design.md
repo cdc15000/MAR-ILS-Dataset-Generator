@@ -104,13 +104,13 @@ python run_cho_analysis_v7_0.py \
   with a hint. Never silently default to `0.0` (would mis-calibrate HU by ~141 HU).
 - Sinogram shape ≠ `(256, 720, 512)` → assertion with the actual shape.
 - A projection view with no clean rays (all metal) → leave that view unmodified
-  (guarded, matching the v6 reference behaviour).
+  (guarded, matching the v6 reference behavior).
 
 ## 7. Testing
 
 **Unit (CI, fast — no full dataset required):**
 - `linear_interp_metal`: synthetic sinogram with known metal columns → filled by
-  linear interpolation between clean neighbours; metal-free input (`W` all clean)
+  linear interpolation between clean neighbors; metal-free input (`W` all clean)
   → returned unchanged.
 - `detect_metal_mask`: image containing a 3000-HU disc → mask matches the disc.
 - End-to-end slice: `build_attenuation_map(place_lesion=True)` →

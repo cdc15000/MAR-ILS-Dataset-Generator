@@ -3,7 +3,7 @@
 plot_spectral_transparency.py
 =============================
 Generate a single-realization T2_SB sinogram at 60 keV and 140 keV,
-then plot the pair side-by-side with a difference map to visualise the
+then plot the pair side-by-side with a difference map to visualize the
 spectral transparency jump through the SS-316L rod.
 
 No dataset generation required — everything is computed in-memory.
@@ -138,7 +138,7 @@ def main():
 
     diff = sino_60 - sino_140
 
-    # ── Peak line-integral through metal centre ───────────────────────────────
+    # ── Peak line-integral through metal center ───────────────────────────────
     peak_60  = sino_60.max()
     peak_140 = sino_140.max()
 

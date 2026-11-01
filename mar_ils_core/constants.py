@@ -105,8 +105,8 @@ BASE_SEED: int = 20260314
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ROI_SIZE: int = 121               # 121×121 voxels
-ROI_CENTER_X: int = 281           # lesion centre x (§A1.4(c))
-ROI_CENTER_Y: int = 256           # phantom centre y
+ROI_CENTER_X: int = 281           # lesion center x (§A1.4(c))
+ROI_CENTER_Y: int = 256           # phantom center y
 NUM_CHANNELS: int = 10            # Laguerre-Gauss channels
 CHANNEL_WIDTH_A: float = 7.5      # 1.5 × r_lesion = 1.5 × 5 = 7.5 voxels
 N_BOOT: int = 1000

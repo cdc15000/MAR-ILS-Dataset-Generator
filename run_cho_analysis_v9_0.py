@@ -18,7 +18,7 @@ from mar_ils_core import vaishnav_phantom as vp
 from mar_ils_core.ddog import ddog_channels
 
 
-def analyse(npz_path: str, internal_noise_c: float = 0.0, n_reps: int = cho_v9.DEFAULT_REPS,
+def analyze(npz_path: str, internal_noise_c: float = 0.0, n_reps: int = cho_v9.DEFAULT_REPS,
             first_index: int = 1, seed: int = 0) -> dict:
     d = np.load(npz_path)
     meta = json.loads(str(d["meta"]))
@@ -45,7 +45,7 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=cho_v9.DEFAULT_REPS)
     ap.add_argument("--ddog-first-index", type=int, default=1)
     a = ap.parse_args()
-    res = analyse(a.npz, a.internal_noise_c, a.reps, a.ddog_first_index)
+    res = analyze(a.npz, a.internal_noise_c, a.reps, a.ddog_first_index)
     with open(a.out, "w") as f:
         json.dump(res, f, indent=1)
     for m, r in res["methods"].items():

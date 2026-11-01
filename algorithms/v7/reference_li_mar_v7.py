@@ -121,7 +121,7 @@ def load_dc_offset(dataset_dir) -> float:
 def dicom_write_kwargs(dataset_dir) -> dict:
     """DICOM labels and HU rounding matching the dataset's generator version.
 
-    v8.0.0 datasets are labelled v8.0.0 / Rev06 and rounded to the nearest HU;
+    v8.0.0 datasets are labeled v8.0.0 / Rev06 and rounded to the nearest HU;
     v7.0.0 datasets (or no provenance) keep the v7 defaults.
     """
     prov = Path(dataset_dir) / "generator_provenance.json"

@@ -21,7 +21,7 @@ class TestLGChannels:
         assert channels.shape == (NUM_CHANNELS, ROI_SIZE ** 2)
 
     def test_normalized(self, channels):
-        """Each channel should be L2-normalised."""
+        """Each channel should be L2-normalized."""
         for n in range(NUM_CHANNELS):
             norm = np.linalg.norm(channels[n])
             assert norm == pytest.approx(1.0, abs=1e-10)

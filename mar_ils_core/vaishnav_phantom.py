@@ -7,7 +7,7 @@ integrals per ray:
 
     mu(E, r) = w(r)·mu_water(E) + b(r)·mu_bone(E) + f(r)·mu_iron(E)
 
-Lengths are in cm, angles in radians; the phantom centre is (0, 0).
+Lengths are in cm, angles in radians; the phantom center is (0, 0).
 Interpretations of the paper are listed in private/vaishnav_phantom_spec.md §7–9.
 """
 from __future__ import annotations
@@ -22,15 +22,15 @@ INNER_RADIUS_CM: float = 10.0       # water
 INSET_RADIUS_CM: float = 5.9
 INSET_WATER_FACTOR: float = 1.05
 LUMP_COUNT: int = 20
-LUMP_CENTRE_MAX_CM: float = 4.9
+LUMP_CENTER_MAX_CM: float = 4.9
 SIGNAL_RADIUS_CM: float = 0.5
 
 TOOTH_RADIUS_CM: float = 0.7        # bone (Fig. 1); Table II prints iron
 FILLING_RADIUS_CM: float = 0.2      # iron
 FILLED_TEETH: tuple[int, ...] = (1, 2, 3, 8, 9, 10)   # Fig. 1
-COCHLEAR_CENTRES_CM: tuple[tuple[float, float], ...] = ((11.0, 0.0), (-11.0, 0.0))
+COCHLEAR_CENTERS_CM: tuple[tuple[float, float], ...] = ((11.0, 0.0), (-11.0, 0.0))
 COCHLEAR_RADIUS_CM: float = 0.6
-DBS_CENTRES_CM: tuple[tuple[float, float], ...] = ((1.0, -5.1), (-1.0, -5.1))
+DBS_CENTERS_CM: tuple[tuple[float, float], ...] = ((1.0, -5.1), (-1.0, -5.1))
 DBS_RADIUS_CM: float = 0.3          # rotate with the inset
 
 FOV_CM: float = 30.0                # Fig. 1 axes span ±15 cm
@@ -41,7 +41,7 @@ ROI_PX: int = 121
 LUMP_SEED: int = 20200801           # one physical inset; published with the dataset
 
 
-def tooth_centres_cm() -> np.ndarray:
+def tooth_centers_cm() -> np.ndarray:
     n = np.arange(12)
     return np.stack([7.0 * np.cos(n * np.pi / 11), 9.0 * np.sin(n * np.pi / 11)], axis=1)
 
@@ -52,21 +52,21 @@ class Lumps:
 
     amplitude is in units of mu_water: lump_i(r) = a_i·exp(-pi|r - r_i|²/w_i²).
     """
-    centres: np.ndarray   # (N, 2) cm
+    centers: np.ndarray   # (N, 2) cm
     widths: np.ndarray    # (N,) cm
     amplitudes: np.ndarray  # (N,) × mu_water
 
 
 def draw_lumps(seed: int = LUMP_SEED) -> Lumps:
     """Draw the lump set as printed: w = 1.3 + 2R, R ~ N(0,1);
-    a = 1.5R, R ~ N(-1,1); centres uniform over the disk r < 4.9 cm."""
+    a = 1.5R, R ~ N(-1,1); centers uniform over the disk r < 4.9 cm."""
     rng = np.random.default_rng(seed)
-    radius = LUMP_CENTRE_MAX_CM * np.sqrt(rng.uniform(size=LUMP_COUNT))
+    radius = LUMP_CENTER_MAX_CM * np.sqrt(rng.uniform(size=LUMP_COUNT))
     theta = rng.uniform(0.0, 2.0 * np.pi, size=LUMP_COUNT)
-    centres = np.stack([radius * np.cos(theta), radius * np.sin(theta)], axis=1)
+    centers = np.stack([radius * np.cos(theta), radius * np.sin(theta)], axis=1)
     widths = 1.3 + 2.0 * rng.standard_normal(LUMP_COUNT)
     amplitudes = 1.5 * rng.normal(-1.0, 1.0, size=LUMP_COUNT)
-    return Lumps(centres, widths, amplitudes)
+    return Lumps(centers, widths, amplitudes)
 
 
 def rotate(points: np.ndarray, angle: float) -> np.ndarray:
@@ -75,10 +75,10 @@ def rotate(points: np.ndarray, angle: float) -> np.ndarray:
 
 
 def pixel_grid(n: int = IMAGE_PX, pixel_cm: float = PIXEL_CM) -> tuple[np.ndarray, np.ndarray]:
-    """(x, y) pixel-centre coordinates in cm; row 0 is +y (image convention).
+    """(x, y) pixel-center coordinates in cm; row 0 is +y (image convention).
 
-    Pixel (n//2, n//2) sits on the phantom centre, so the odd-sized ROI and the
-    signal are centred on a pixel.
+    Pixel (n//2, n//2) sits on the phantom center, so the odd-sized ROI and the
+    signal are centered on a pixel.
     """
     c = (np.arange(n) - n // 2) * pixel_cm
     x, y = np.meshgrid(c, -c)
@@ -88,7 +88,7 @@ def pixel_grid(n: int = IMAGE_PX, pixel_cm: float = PIXEL_CM) -> tuple[np.ndarra
 def lump_map(x: np.ndarray, y: np.ndarray, lumps: Lumps, angle: float,
              lump_scale: float = 1.0) -> np.ndarray:
     out = np.zeros_like(x)
-    for (cx, cy), w, a in zip(rotate(lumps.centres, angle), lumps.widths, lumps.amplitudes):
+    for (cx, cy), w, a in zip(rotate(lumps.centers, angle), lumps.widths, lumps.amplitudes):
         out += lump_scale * a * np.exp(-np.pi * ((x - cx) ** 2 + (y - cy) ** 2) / w ** 2)
     return out
 
@@ -139,16 +139,16 @@ def basis_maps(x: np.ndarray, y: np.ndarray, *, angle: float, amplitude: float |
     if amplitude is not None:
         sig = _disk(x, y, 0, 0, SIGNAL_RADIUS_CM)
         water[sig] = amplitude * signal_baseline(lump_scale)
-    for n, (cx, cy) in enumerate(tooth_centres_cm()):
+    for n, (cx, cy) in enumerate(tooth_centers_cm()):
         t = _disk(x, y, cx, cy, TOOTH_RADIUS_CM)
         water[t], bone[t] = 0.0, 1.0
         if n in FILLED_TEETH:
             f = _disk(x, y, cx, cy, FILLING_RADIUS_CM)
             bone[f], iron[f] = 0.0, 1.0
-    for cx, cy in COCHLEAR_CENTRES_CM:
+    for cx, cy in COCHLEAR_CENTERS_CM:
         m = _disk(x, y, cx, cy, COCHLEAR_RADIUS_CM)
         bone[m], iron[m] = 0.0, 1.0
-    for cx, cy in rotate(np.array(DBS_CENTRES_CM), angle):
+    for cx, cy in rotate(np.array(DBS_CENTERS_CM), angle):
         m = _disk(x, y, cx, cy, DBS_RADIUS_CM)
         water[m], iron[m] = 0.0, 1.0
     return water, bone, iron

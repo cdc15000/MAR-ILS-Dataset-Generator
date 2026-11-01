@@ -21,7 +21,7 @@ N_CHANNELS: int = 10
 
 def ddog_channels(size: int, first_index: int = 1, sigma0: float = SIGMA0,
                   alpha: float = ALPHA, q: float = Q, n: int = N_CHANNELS) -> np.ndarray:
-    """Spatial channels, shape (size*size, n), centred on the ROI centre pixel."""
+    """Spatial channels, shape (size*size, n), centered on the ROI center pixel."""
     f = np.fft.fftfreq(size)
     fx, fy = np.meshgrid(f, f)
     rho = np.hypot(fx, fy)

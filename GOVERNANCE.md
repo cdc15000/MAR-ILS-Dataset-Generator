@@ -16,7 +16,7 @@ Any modification that would alter the bit-exact reproducibility of the locked me
 
 - Changing any value in the **ASTM Metrology Baseline** table in CLAUDE.md (AUC, I_0, DC offset, contrast, noise parameters, geometry).
 - Modifying forward-projection, FBP reconstruction, or CHO observer numerics in a way that changes output values.
-- Changing the number of realizations, ROI coordinates, channel parameters, or regularisation constants.
+- Changing the number of realizations, ROI coordinates, channel parameters, or regularization constants.
 - Altering the DICOM encoding in a way that changes pixel values read by the CHO script.
 
 Non-breaking changes (documentation, tooling, diagnostics, additional output formats) do not require Task Group approval.

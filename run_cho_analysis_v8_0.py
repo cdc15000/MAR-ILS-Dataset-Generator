@@ -174,7 +174,7 @@ def main() -> None:
     num_real = args.realizations
     int_var = args.internal_noise_sigma ** 2
     print("ASTM WKXXXXX Rev 06 — 2D CHO Analysis")
-    print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  centre=({ROI_CENTER_X},{ROI_CENTER_Y})")
+    print(f"ROI: {ROI_SIZE}×{ROI_SIZE}  center=({ROI_CENTER_X},{ROI_CENTER_Y})")
     print(f"LG channel width a = {CHANNEL_WIDTH_A:.1f} vox")
     print(f"Covariance regularization σ = {args.internal_noise_sigma}")
     print(f"Realizations: {num_real} per condition "
