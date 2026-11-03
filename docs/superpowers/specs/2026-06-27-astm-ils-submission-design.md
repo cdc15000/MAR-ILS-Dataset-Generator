@@ -220,7 +220,7 @@ The master dataset keeps the labeled layout and stays with the coordinator. The 
 - **Removed from the files:** HDF5 `noise_params` attributes `place_lesion`, `lesion_z_extent`, `seed` and `jitter_deg`; any attributes on `line_integrals` that carry them; DICOM `SeriesDescription` and `ProtocolName`, which hold the condition label; `ContentDate` and `ContentTime`, set to one value; the per-realization jitters in `generator_provenance.json`. Compressed file sizes and leftover HDF5 bytes are not scrubbed.
 - **Key:** `blinding_key.json`, mapping each code to its condition and original realization index, with a random salt. Its SHA-256 hash is published in the dataset record at distribution; the key is published after the manifest deadline.
 - **Submission sequence:** laboratories submit a SHA-256 manifest of each run directory before key release, then score with the key and submit `cho_results.json` and the 80 scored slices per run. The laboratory's `cho_results.json` is the official result; the coordinator's rescoring is a cross-check.
-- **Honesty about strength:** the generator and `BASE_SEED` are public and LP/LA pairs share a seed, so a laboratory could unblind deliberately. The protocol presents blinding as a safeguard against unconscious bias, and the Participation Agreement adds a commitment not to unblind.
+- **Honesty about strength:** the generator and `BASE_SEED` are public and LP/LA pairs share a seed, so a laboratory could unblind deliberately. The protocol presents blinding as a safeguard against unconscious bias, and each laboratory commits in writing not to unblind.
 - **Tooling, not yet built:** the v9 dataset writer (sinograms and DICOM), a blinding script that writes the distribution copy, its checksums, its lab instructions PDF and the key; `run_cho_analysis_v9_0.py --blinding-key`, which rebuilds the class, level and pool lists from the key; a manifest utility; and the coded layout in the control methods and the Python, MATLAB and C harnesses. Regression targets are the reference AUC∞ values recorded when the master dataset is generated. The release containing this tooling is the one the protocol cites.
 - **Zenodo:** only the blinded copy is uploaded, and the record description is updated for the coded layout. Published Zenodo files cannot be changed, so the key is added after the manifest deadline as a new version of the record, with its own DOI; the v1 description carries the key hash. The Drive copy is the coordinator's master archive and is not shared.
 
@@ -231,7 +231,7 @@ The master dataset keeps the labeled layout and stays with the coordinator. The 
 | Work item registered and WK number assigned | November 2026 |
 | Protocol circulated to candidate laboratories | December 2026 |
 | First task group meeting: integration paths, plan approval | January 2027, virtual |
-| Recruitment complete: at least 10 signed agreements | February 2027 |
+| Recruitment complete: at least 10 committed laboratories | February 2027 |
 | Pilot run | March–April 2027 |
 | Pilot review and any protocol revisions | April 2027 |
 | Dataset distributed; execution window opens | May 2027 |
@@ -262,6 +262,6 @@ _Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17
 4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27, re-dated 2026-10-04, restructured after D7778 Table 4 on 2026-10-17
 5. [ ] Complete the ASTM online wizard using the Document 1 field content
 6. [ ] Attach Documents 2, 3, and the Rev 06 draft to the work item registration
-7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17, and with Rev 06 and the ASTM ILS Program process 2026-11-03 (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WKXXXXX with the assigned WK number once received
+7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17, and with Rev 06 and the ASTM ILS Program process 2026-11-03; set aside 2026-11-03 pending ASTM ILS staff advice on whether ASTM's own laboratory terms suffice, with the protocol relying on a written commitment instead (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WKXXXXX with the assigned WK number once received
 8. [ ] Build the blinding tooling and the familiarization dataset, and verify the regression target, before distribution in March 2027
 9. [ ] Upload the blinded copy to Zenodo, publish the key hash in the record, and update the record description
