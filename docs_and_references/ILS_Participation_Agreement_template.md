@@ -2,7 +2,7 @@
 
 **Template version:** v0.3 (draft 2026-11-03)
 **Governing procedure:** ASTM E691-23, Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
-**Study subject:** ASTM Work Item WKXXXXX Revision 06 (draft dated 2026-10-29), Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
+**Study subject:** ASTM Work Item WKXXXXX Revision 06 (draft dated 2026-11-03), Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
 **Study protocol:** ASTM WKXXXXX Interlaboratory Study Protocol, November 2026
 **Study administration:** ASTM Interlaboratory Study (ILS) Program, ILS@astm.org
 **ILS Coordinator:** Christopher D. Cocchiaraley, WKXXXXX Sponsor, ASTM F04 / F04.15 (Consumer Member)
@@ -59,7 +59,7 @@ The Participating Laboratory agrees to:
 
 The ILS Coordinator agrees to:
 
-**4.1 Dataset provision.** Provide the SHA-256 verified reference dataset (12,000 realizations under coded identifiers, covering three signal levels and a control set, as two-dimensional fan-beam sinograms in HDF5 and DICOM reference reconstructions, about 48 GB) and a labeled familiarization dataset through Zenodo, with an integrity manifest. Publish the SHA-256 hash of the blinding key when the dataset is distributed, and the key itself after the manifest deadline.
+**4.1 Dataset provision.** Provide the SHA-256 verified reference dataset (three of a pool of nine independent replicate datasets of 8,000 realizations each under coded identifiers, covering three signal levels, about 96 GB, plus a control dataset for pilot laboratories, as two-dimensional fan-beam sinograms in HDF5 and DICOM reference reconstructions) and a labeled familiarization dataset through Zenodo, with an integrity manifest. Publish the SHA-256 hash of the blinding key when the dataset is distributed, and the key itself after the manifest deadline.
 
 **4.2 Technical support.** Respond to protocol and implementation questions from the Participating Laboratory within 5 business days during the execution window.
 

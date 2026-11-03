@@ -143,7 +143,7 @@ Notes the approved DICOM CP-2575 MAR metadata, now in DICOM 2026b, as complement
 
 - Rev 06 draft standard attached, with 18 normative sections, two annexes and two appendices
 - Pre-registered known-answer validation passed on five replicate datasets (review notes items 28 to 32); improving-control ΔAUC∞ +0.215, +0.238, +0.254 at levels 1.020, 1.025, 1.030; degrading control −0.061
-- Reference dataset: about 12,000 2D realizations (three levels plus a control set), about 48 GB, to be generated with generator v9.0.0
+- Reference dataset: a pool of nine independent replicate datasets of 8,000 2D realizations each (three levels), plus a control set; about 305 GB; each laboratory receives three (review item 37); to be generated with generator v9.0.0
 - Reference CHO implementation: `run_cho_analysis_v9_0.py` (D-DOG channels, antler-plot AUC∞)
 - Control methods: image-segmentation inpainting (improving) and sinogram-threshold inpainting at dose 4e6 (degrading), after Vaishnav et al.
 - 106 automated tests across 9 suites, all passing
@@ -192,7 +192,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 | A4 Participants | Tiers A–C; 10 to 12; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
 | A5 Equipment | Computational platform; integration paths A–C | Table 4 A5 |
 | A6 Test materials | Dataset table; single-material justification; blinding; familiarization dataset | Table 4 A6, §6.3.1, §6.6.3–6.6.4 |
-| A7 Tests | Rev 06, generator v9.0.0, CHO release; two conditions; replicates; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
+| A7 Tests | Rev 06, generator v9.0.0, CHO release; two conditions; replicates are three assigned independent datasets; four-decimal reporting | Table 4 A7, §6.8.4, §6.8.9 |
 | A8 Special instructions | General instructions; Steps 1–7; output specification | Table 4 A8, Fig. X1.2 |
 | A9 Reporting form | Two-part return form, Attachment 2 | Table 4 A9, Fig. X1.3 |
 | A10 Statistical tools | E691-23 §15–19; digit retention; software verification | Table 4 A10, §10.3 |
@@ -204,8 +204,9 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 
 ### Design Decisions, 2026-10-17
 
-- **Pilot run:** separate, before the full-scale run. The first three signed laboratories run Condition 1 only, three replicates, on the blinded dataset; the coordinator scores centrally with the key and returns results. Rev 06 §17.6 requires pilot data from at least 3 laboratories before first ballot showing, at each level, (a) the improving and degrading controls give ΔAUC∞ of the expected sign with 95 % intervals excluding zero, (b) within-laboratory SD of ΔAUC∞ at most 0.05 and (c) the null-signal check within 0.02 of the estimator's null value (0.533). The developer's validation meets all three. Pilot data is not used in the precision estimates. Adds two months to the schedule.
+- **Pilot run:** separate, before the full-scale run. The first three laboratories to join run Condition 1 only, once on each of three assigned replicate datasets; the coordinator scores centrally with the key and returns results. Rev 06 §17.6 requires pilot data from at least 3 laboratories before first ballot showing, at each level, (a) the improving and degrading controls give ΔAUC∞ of the expected sign with 95 % intervals excluding zero, (b) within-laboratory SD of ΔAUC∞ at most 0.05 and (c) the null-signal check within 0.02 of the estimator's null value (0.533). The developer's validation meets all three. Pilot data is not used in the precision estimates. Adds two months to the schedule.
 - **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
+- **Replicates (2026-11-03, review item 37):** a test result is ΔAUC∞ at one level on one replicate dataset; the standard ships three; ILS laboratories each receive three of a pool of nine, with balanced assignment; predictions s_r ≈ 0.004 to 0.008 and s_R ≈ s_r.
 - **Number of materials:** three, the signal levels 1.020, 1.025 and 1.030 at dose 1e6, as E691-23 §10.2.2 recommends. The range is narrow by design (estimator accuracy below, control ceiling above); the precision statement says so.
 - **Funding and staffing:** self-funded by participants. The study is registered with the ASTM ILS Program once the WK number exists; ILS staff assign the random laboratory codes, issue the data report form, receive the results and act as statistician. The coordinator hosts the dataset, holds the blinding key and runs the rescoring check.
 - **Precision basis:** Condition 1 only. Every laboratory runs the same improving control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
@@ -250,7 +251,7 @@ _Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17
 
 ## Attachment: Rev 06 Draft Standard
 
-`private/rev06/ASTM_MAR_Standard_Rev06.md`, dated 2026-10-29, exported to Word beside Rev 05 in the package folder. Rev 05 is superseded.
+`private/rev06/ASTM_MAR_Standard_Rev06.md`, dated 2026-11-03, exported to Word beside Rev 05 in the package folder. Rev 05 is superseded.
 
 ---
 
