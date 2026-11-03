@@ -188,7 +188,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 | Protocol Plan Summary | Activity, plan and status for A1–A12 and B1–B9 | Table 4 |
 | A1 Purpose | Measurand, reference baseline with provenance footnote | Table 4 A1 |
 | A2 Funding | Self-funded by participants; sponsor provides materials; ASTM ILS Program support requested | Table 4 A2, §6.2.1 |
-| A3 Staffing | Coordinator, F04.15 task group, statistician to be appointed | Table 4 A3, §6.2.2–6.2.4 |
+| A3 Staffing | Coordinator, F04.15 task group, ASTM ILS staff as statistician | Table 4 A3, §6.2.2–6.2.4 |
 | A4 Participants | Tiers A–C; 10 to 12; Tier A capped at 3; withdrawal | Table 4 A4, §6.5 |
 | A5 Equipment | Computational platform; integration paths A–C | Table 4 A5 |
 | A6 Test materials | Dataset table; single-material justification; blinding; familiarization dataset | Table 4 A6, §6.3.1, §6.6.3–6.6.4 |
@@ -207,7 +207,7 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 - **Pilot run:** separate, before the full-scale run. The first three signed laboratories run Condition 1 only, three replicates, on the blinded dataset; the coordinator scores centrally with the key and returns results. Rev 06 §17.6 requires pilot data from at least 3 laboratories before first ballot showing, at each level, (a) the improving and degrading controls give ΔAUC∞ of the expected sign with 95 % intervals excluding zero, (b) within-laboratory SD of ΔAUC∞ at most 0.05 and (c) the null-signal check within 0.02 of the estimator's null value (0.533). The developer's validation meets all three. Pilot data is not used in the precision estimates. Adds two months to the schedule.
 - **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
 - **Number of materials:** three, the signal levels 1.020, 1.025 and 1.030 at dose 1e6, as E691-23 §10.2.2 recommends. The range is narrow by design (estimator accuracy below, control ceiling above); the precision statement says so.
-- **Funding and staffing:** self-funded by participants; statistician to be appointed by the task group.
+- **Funding and staffing:** self-funded by participants. The study is registered with the ASTM ILS Program once the WK number exists; ILS staff assign the random laboratory codes, issue the data report form, receive the results and act as statistician. The coordinator hosts the dataset, holds the blinding key and runs the rescoring check.
 - **Precision basis:** Condition 1 only. Every laboratory runs the same improving control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
 - **Laboratory identification:** the Research Report names participating laboratories with contacts and addresses and codes every result, following RR:F04-2001, the F2052 study. Decided 2026-10-17.
 - **Familiarization dataset:** a small labeled dataset with different noise seeds, for trial runs and tuning, so that no laboratory tunes on the ILS dataset, per D7778 Fig. X1.2 item 8 and E691-23 §9.3.
