@@ -1,4 +1,4 @@
-# IEC 60601-2-44 Ed. 4: Post-Publication Compliance-Statement Amendment for §203.6.7.101.1
+# IEC 60601-2-44 Ed. 4: Post-Publication Compliance-Statement Amendment for Clause 203.6.7.101.1
 
 ## Amendment to be submitted after ASTM FXXXX publishes
 
@@ -24,7 +24,7 @@
 
 ## Strategic Timing
 
-The substantive goal is a one-sentence amendment that binds the compliance statement of §203.6.7.101.1 to the TYPE TEST in ASTM FXXXX. ASTM FXXXX does not yet exist as a published standard. ISO/IEC Directives Part 2 allows normative reference only to published documents, so WG 30 could not have accepted the reference at the FDIS stage, and none was proposed. The compliance statement published in Ed. 4, "Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS," stands until the amendment.
+The substantive goal is a one-sentence amendment that binds the compliance statement of Clause 203.6.7.101.1 to the TYPE TEST in ASTM FXXXX. ASTM FXXXX does not yet exist as a published standard. ISO/IEC Directives Part 2 allows normative reference only to published documents, so WG 30 could not have accepted the reference at the FDIS stage, and none was proposed. The compliance statement published in Ed. 4, "Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS," stands until the amendment.
 
 Two dates bound the window:
 
@@ -37,7 +37,7 @@ The ASTM schedule sets the earliest submission date: pilot ILS March to April 20
 
 ## Proposed Amendment
 
-The amendment changes two places in Ed. 4: the compliance statement of §203.6.7.101.1, and Clause 2.
+The amendment changes two places in Ed. 4: the compliance statement of Clause 203.6.7.101.1, and Clause 2.
 
 ### 1. Clause 203.6.7.101.1 Method(s)
 
@@ -85,19 +85,19 @@ The reference dataset and the reference CHO implementation are published openly:
 
 ### 1. "Inspection of accompanying documents" verifies only documentation
 
-The current compliance statement verifies that the manufacturer has described a MAR method. It does not verify that the method has any measurable effect on diagnostic task performance. A MAR method with no effect, or one that degrades lesion detectability, satisfies §203.6.7.101.1 as published.
+The current compliance statement verifies that the manufacturer has described a MAR method. It does not verify that the method has any measurable effect on diagnostic task performance. A MAR method with no effect, or one that degrades lesion detectability, satisfies Clause 203.6.7.101.1 as published.
 
 ### 2. The clause already incorporates an external standard by reference
 
-§203.6.7.101.3 requires that, if MAR is used, it "shall be recorded in the corresponding standard DICOM attribute of the image header." Clause 2 of Ed. 4 lists ISO 12052 as an undated normative reference, so it refers to the current edition, ISO 12052:2026 (third edition, February 2026; adopted unchanged as EN ISO 12052:2026). That edition links to the current DICOM standard in three ways:
+Clause 203.6.7.101.3 requires that, if MAR is used, it "shall be recorded in the corresponding standard DICOM attribute of the image header." Clause 2 of Ed. 4 lists ISO 12052 as an undated normative reference, so it refers to the current edition, ISO 12052:2026 (third edition, February 2026; adopted unchanged as EN ISO 12052:2026). That edition links to the current DICOM standard in three ways:
 
 - It states that it is equivalent to Part 1 of DICOM, describes the content of the standard and the requirements for a conformance claim, and has no normative references of its own (Clauses 1 and 2).
 - It states that DICOM is officially changed when each change is approved as Final Text, that the dated editions such as 2026b are only consolidations for convenience, and that the current standard is the one published at dicomstandard.org (Clause 7).
 - Its preferred citation form is "NEMA PS3 / ISO 12052", without an edition date (Clause 7).
 
-ISO 12052 is therefore not revised when DICOM changes. A reference to ISO 12052 is a reference to DICOM as currently maintained, which has included the Metal Artifact Reduction attributes since CP-2575 was approved as Final Text; DICOM 2026b is the first edition that consolidates them. ISO 12052 also allows regulations to reference specific DICOM features, such as an attribute, as their own requirements (Clause 7), which is what §203.6.7.101.3 does.
+ISO 12052 is therefore not revised when DICOM changes. A reference to ISO 12052 is a reference to DICOM as currently maintained, which has included the Metal Artifact Reduction attributes since CP-2575 was approved as Final Text; DICOM 2026b is the first edition that consolidates them. ISO 12052 also allows regulations to reference specific DICOM features, such as an attribute, as their own requirements (Clause 7), which is what Clause 203.6.7.101.3 does.
 
-§203.6.7.101 therefore already relies on a standard maintained outside IEC to define what manufacturers must do. The amendment applies the same approach to §203.6.7.101.1, with ASTM FXXXX defining the test.
+Clause 203.6.7.101 therefore already relies on a standard maintained outside IEC to define what manufacturers must do. The amendment applies the same approach to Clause 203.6.7.101.1, with ASTM FXXXX defining the test.
 
 A strict reader could note one gap: ISO 12052 describes the other DICOM parts but does not cite them as normative references. The link from Ed. 4 to the attribute definition in PS3.3 and PS3.6 rests on ISO 12052's statement that it is Part 1 of the same standard. It is, however, the way Ed. 4 itself cites DICOM throughout.
 
@@ -107,11 +107,11 @@ The compliance statements show the same pattern of departing from document inspe
 
 | Subclause | Compliance statement in Ed. 4 |
 |---|---|
-| §203.6.7.101.1 | *Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS.* |
-| §203.6.7.101.2 | *Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS.* |
-| **§203.6.7.101.3** | **Compliance is checked by inspection of representative DICOM image headers.** |
+| Clause 203.6.7.101.1 | *Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS.* |
+| Clause 203.6.7.101.2 | *Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS.* |
+| **Clause 203.6.7.101.3** | **Compliance is checked by inspection of representative DICOM image headers.** |
 
-§203.6.7.101.3 names the specific item to be inspected. The amendment applies the same principle to §203.6.7.101.1 by naming the specific test.
+Clause 203.6.7.101.3 names the specific item to be inspected. The amendment applies the same principle to Clause 203.6.7.101.1 by naming the specific test.
 
 The requirement itself has broad support. The FDIS was approved without a vote against, and the abstract of Ed. 4 lists MAR in imaging performance among the new requirements of the edition.
 
@@ -135,14 +135,14 @@ It does not require a new edition of IEC 60601-2-44.
 
 ## Effect on the Regulatory Framework
 
-**From publication of Ed. 4 to the amendment:** §203.6.7.101.1 keeps the published compliance statement. Manufacturers comply through the ACCOMPANYING DOCUMENTS.
+**From publication of Ed. 4 to the amendment:** Clause 203.6.7.101.1 keeps the published compliance statement. Manufacturers comply through the ACCOMPANYING DOCUMENTS.
 
 **After the amendment:** the three-layer framework is complete.
 
 | Layer | Document | Role |
 |---|---|---|
-| 1. MAR method and metadata | IEC 60601-2-44 Ed. 4 §203.6.7.101 (.1 method, .2 user information, .3 DICOM recording) | Requires MAR to be available, described and recorded |
-| 2. Performance verification | ASTM FXXXX, cited by the amendment in §203.6.7.101.1 and Clause 2 | TYPE TEST that measures ΔAUC |
+| 1. MAR method and metadata | IEC 60601-2-44 Ed. 4 Clause 203.6.7.101 (.1 method, .2 user information, .3 DICOM recording) | Requires MAR to be available, described and recorded |
+| 2. Performance verification | ASTM FXXXX, cited by the amendment in Clause 203.6.7.101.1 and Clause 2 | TYPE TEST that measures ΔAUC |
 | 3. Acceptance | FDA guidance and its counterparts at other national regulators | ΔAUC acceptance thresholds for non-degradation and superiority |
 
 IEC and ASTM do not set acceptance thresholds. The TYPE TEST reports the measured ΔAUC, and regulators decide what value is acceptable.
@@ -169,11 +169,11 @@ Attach to the proposal:
 
 This proposal supersedes:
 
-**1. `IEC_203_6_7_102_draft.md` (2026-04-05, superseded 2026-04-14):** Proposed a new §203.6.7.102, "Quantitative evaluation of METAL ARTIFACT REDUCTION performance." Withdrawn because a new normative subclause at the PRVC stage was much less feasible procedurally than a compliance-statement edit, which achieves the same outcome.
+**1. `IEC_203_6_7_102_draft.md` (2026-04-05, superseded 2026-04-14):** Proposed a new Clause 203.6.7.102, "Quantitative evaluation of METAL ARTIFACT REDUCTION performance." Withdrawn because a new normative subclause at the PRVC stage was much less feasible procedurally than a compliance-statement edit, which achieves the same outcome.
 
-**2. Single-phase amendment before approval (2026-04-18):** Proposed binding §203.6.7.101.1 to ASTM FXXXX before FDIS approval. Withdrawn because ASTM FXXXX was not yet published and ISO/IEC Directives Part 2 does not allow normative reference to an unpublished document.
+**2. Single-phase amendment before approval (2026-04-18):** Proposed binding Clause 203.6.7.101.1 to ASTM FXXXX before FDIS approval. Withdrawn because ASTM FXXXX was not yet published and ISO/IEC Directives Part 2 does not allow normative reference to an unpublished document.
 
-**3. Two-phase proposal with an informative NOTE before approval (2026-04-19, superseded the same day):** Considered adding an informative NOTE to §203.6.7.101.1 during the FDIS window to point to the ASTM work. Withdrawn because the benefit did not justify a formal WG 30 or TAG submission and a possible two-thirds vote. Contact with WG 30 leadership continues informally.
+**3. Two-phase proposal with an informative NOTE before approval (2026-04-19, superseded the same day):** Considered adding an informative NOTE to Clause 203.6.7.101.1 during the FDIS window to point to the ASTM work. Withdrawn because the benefit did not justify a formal WG 30 or TAG submission and a possible two-thirds vote. Contact with WG 30 leadership continues informally.
 
 ---
 
@@ -189,7 +189,7 @@ This proposal supersedes:
   - Timing tied to the ASTM schedule and the 2029 stability date.
 - **2026-10-22:**
   - FDIS vote result added.
-  - §203.6.7.101.3 and ISO 12052 cited as the existing incorporation by reference of the DICOM MAR attribute.
+  - Clause 203.6.7.101.3 and ISO 12052 cited as the existing incorporation by reference of the DICOM MAR attribute.
   - IEC 61223-3-5 references corrected to §203.6.7.2.1 and §203.6.7.2.2; §203.7.6 does not cite it.
   - Dated and undated references in Ed. 4 Clause 2 compared.
   - ASTM Category A liaison added as a second submission route.
