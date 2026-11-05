@@ -117,7 +117,7 @@ The requirement itself has broad support. The FDIS was approved without a vote a
 
 ### 3. References to tests in other standards are usual in IEC 60601
 
-Compliance statements in IEC 60601 particular standards routinely refer to tests defined in other standards instead of reproducing them. In the FDIS text of Ed. 4, §203.6.7.2.1 (Quality Assurance) and §203.6.7.2.2 (Performance information) both rely on the constancy and acceptance tests specified in IEC 61223-3-5. The amendment follows the same pattern with ASTM FXXXX as the source of the test. Confirm the subclause numbers against the published Ed. 4 before submission.
+Compliance statements in IEC 60601 particular standards routinely refer to tests defined in other standards instead of reproducing them. In the FDIS text of Ed. 4, Clauses 203.6.7.2.1 (Quality Assurance) and 203.6.7.2.2 (Performance information) both rely on the constancy and acceptance tests specified in IEC 61223-3-5. The amendment follows the same pattern with ASTM FXXXX as the source of the test. Confirm the subclause numbers against the published Ed. 4 before submission.
 
 ### 4. The scope is that of an amendment, not a new edition
 
@@ -190,7 +190,7 @@ This proposal supersedes:
 - **2026-10-22:**
   - FDIS vote result added.
   - Clause 203.6.7.101.3 and ISO 12052 cited as the existing incorporation by reference of the DICOM MAR attribute.
-  - IEC 61223-3-5 references corrected to §203.6.7.2.1 and §203.6.7.2.2; §203.7.6 does not cite it.
+  - IEC 61223-3-5 references corrected to Clauses 203.6.7.2.1 and 203.6.7.2.2; Clause 203.7.6 does not cite it.
   - Dated and undated references in Ed. 4 Clause 2 compared.
   - ASTM Category A liaison added as a second submission route.
 - **2026-10-22, later:** The link between ISO 12052 and current DICOM was confirmed from ISO 12052:2026, Clauses 1, 2 and 7, which replaces the earlier note asking for confirmation.
