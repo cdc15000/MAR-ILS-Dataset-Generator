@@ -174,7 +174,7 @@ Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures
 
 ## Document 3: ILS Protocol, E691 Study Design
 
-**Title:** Interlaboratory Study Protocol, ASTM WKXXXXX: Evaluation of Metal Artifact Reduction Performance
+**Title:** Interlaboratory Study Protocol, ASTM WK101378: Evaluation of Metal Artifact Reduction Performance
 
 **Format:** 13-page PDF/Word attachment. The editable source is `private/d7778/protocol.md`, built with `private/d7778/build_docx.py` using the previous protocol as the style reference.
 
@@ -263,6 +263,6 @@ _Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17
 4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27, re-dated 2026-10-04, restructured after D7778 Table 4 on 2026-10-17
 5. [ ] Complete the ASTM online wizard using the Document 1 field content
 6. [ ] Attach Documents 2, 3, and the Rev 06 draft to the work item registration
-7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17, and with Rev 06 and the ASTM ILS Program process 2026-11-03; set aside 2026-11-03 pending ASTM ILS staff advice on whether ASTM's own laboratory terms suffice, with the protocol relying on a written commitment instead (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WKXXXXX with the assigned WK number once received
+7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17, and with Rev 06 and the ASTM ILS Program process 2026-11-03; set aside 2026-11-03 pending ASTM ILS staff advice on whether ASTM's own laboratory terms suffice, with the protocol relying on a written commitment instead (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WK101378 with the assigned WK number once received
 8. [ ] Build the blinding tooling and the familiarization dataset, and verify the regression target, before distribution in March 2027
 9. [ ] Upload the blinded copy to Zenodo, publish the key hash in the record, and update the record description

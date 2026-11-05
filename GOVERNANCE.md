@@ -6,7 +6,7 @@ This document describes the change-control process for the MAR ILS Dataset Gener
 
 | Role | Who | Authority |
 | :--- | :--- | :--- |
-| WKXXXXX sponsor | Christopher D. Cocchiaraley | Controls normative branch; authors revisions |
+| WK101378 sponsor | Christopher D. Cocchiaraley | Controls normative branch; authors revisions |
 | ASTM Task Group (F04.15) | Committee members | Approves locked-constant changes; conducts ballot |
 | ILS participants | Enrolled laboratories | Submit reconstructed DICOMs; do not modify reference code |
 
@@ -50,4 +50,4 @@ The v7.0.0 baseline (AUC_noMAR = 0.8294, N = 40, internal noise 15) is supersede
 
 ## Standard alignment
 
-This repository tracks **ASTM WKXXXXX Rev 06** (draft, October 2026). When the standard is published as ASTM FXXXX, this governance document and all references will be updated to reflect the published designation.
+This repository tracks **ASTM WK101378 Rev 06** (draft, October 2026). When the standard is published as ASTM FXXXX, this governance document and all references will be updated to reflect the published designation.

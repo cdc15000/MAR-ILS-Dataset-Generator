@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), following **ASTM WKXXXXX Revision 06 (draft, October 2026)** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
+This is the **MAR ILS Dataset Generator** — a reference implementation for generating a standardized, synthetic CT dataset for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), following **ASTM WK101378 Revision 06 (draft, October 2026)** and **IEC 60601-2-44 Ed. 4**. The framework follows the task-based signal detection approach from Vaishnav et al. (Medical Physics, 47(8), 2020).
 
 ## Project Root
 
@@ -68,7 +68,7 @@ python view_sinograms.py sinograms/LP/realization_001.h5 --slice 128
 ## Architecture
 
 ### Scripts (versioned by filename — use the highest version)
-- **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WKXXXXX Rev 05): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
+- **`generator_v7_0_0.py`** — Fan-beam physics-based sinogram dataset generator. **Current normative reference.** Single canonical configuration (ASTM WK101378 Rev 05): fan-beam (SID=570mm, SDD=1040mm), 720 angles, iron rod, circular lesion, ~12 HU sinogram-domain contrast. 40 LP + 40 LA realizations (or 20 for screening).
 - **`run_cho_analysis_v7_0.py`** — Reference 2D CHO implementation. **Current normative reference.** Hardcoded v5.3.0/Rev 05 ROI parameters (121×121, center (281,256), channel width 7.5). AUC equivalence tolerance ±0.005.
 - `patch_2026b_metadata.py` — Legacy one-time utility that retrofits DICOM 2026b CP-2575 MAR metadata into datasets generated before the generator wrote the macro natively. Not needed for v7.0.0 output and not part of the lab workflow.
 - `legacy/generator_v6_0_0.py` — Research tier framework (T1_AB/T2_SB/T3_HEAD). Not normative. Uses parallel-beam geometry and tier-specific parameters. Retained for multi-tier research.

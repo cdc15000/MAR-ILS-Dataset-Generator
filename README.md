@@ -5,7 +5,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)
-![Standard: ASTM WKXXXXX Rev 06 draft](https://img.shields.io/badge/Standard-ASTM%20WKXXXXX%20Rev%2006%20draft-orange)
+![Standard: ASTM WK101378 Rev 06 draft](https://img.shields.io/badge/Standard-ASTM%20WK101378%20Rev%2006%20draft-orange)
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
@@ -27,7 +27,7 @@ Version history and release details are on the [Releases page](https://github.co
 
 ## Overview
 
-This repository is the reference software for a proposed ASTM test method, **ASTM WKXXXXX**: *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*. It also supports the interlaboratory study (ILS) that will measure the method's precision under ASTM E691.
+This repository is the reference software for a proposed ASTM test method, **ASTM WK101378**: *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*. It also supports the interlaboratory study (ILS) that will measure the method's precision under ASTM E691.
 
 The method follows the framework published by FDA researchers in Vaishnav et al., *Medical Physics* 47(8), 2020. It provides:
 
@@ -172,7 +172,7 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 
 ## Citation
 
-> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WKXXXXX: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-Dataset-Generator
+> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WK101378: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-Dataset-Generator
 
 The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489 once the Zenodo record is published.
 
