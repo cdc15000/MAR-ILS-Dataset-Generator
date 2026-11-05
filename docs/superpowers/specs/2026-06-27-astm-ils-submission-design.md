@@ -101,7 +101,7 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 > ASTM F2119-24, Standard Test Method for Evaluation of MR Image Artifacts from Passive Implants. F2119 characterizes the physical extent of image artifacts produced by passive implants under standardized MR scanning conditions. The proposed standard is complementary, not duplicative: it quantifies the observer-based task-detectability impact of MAR, an algorithmic countermeasure applied within CT imaging systems. The two methods address non-overlapping axes: modality, MR versus CT, and object of measurement, physical artifact extent versus algorithmic task impact. No existing ASTM, ISO, IEC, or NEMA standard defines a task-based, model-observer test method for MAR performance evaluation. IEC 60601-2-44 Ed. 4 requires MAR availability but does not specify a test method for performance verification.
 
 **Notify Other:**
-> ASTM E07.11, Computed/Digital Radiography; IEC TC 62/SC 62B WG 30, Computed Tomography; USNC TAG SC 62B
+> ASTM E07.01, Radiography (X and Gamma) Method (jurisdiction over E1441, Standard Guide for Computed Tomography); IEC TC 62/SC 62B WG 30, Computed Tomography; USNC TAG SC 62B
 
 ### Page 5: Summary
 
