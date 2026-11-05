@@ -8,7 +8,7 @@
 
 ## Objective
 
-Prepare a complete submission package for registering a new ASTM work item through Form 01 under F04.15, Material Test Methods, for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the Rev 06 draft standard, its pre-registered validation and the existing reference implementation to present a near-complete standard with a concrete plan to populate §17, Precision and Bias.
+Prepare a complete submission package for registering a new ASTM work item through Form 01 under F04.15, Material Test Methods, for the MAR Type Test standard, with a concurrent Interlaboratory Study (ILS) under ASTM E691. The single-package approach leverages the Rev 06 draft standard, its pre-registered validation and the existing reference implementation to present a near-complete standard with a concrete plan to populate §17, Precision and Bias. _Update 2026-11-05: WK101378 was registered by the F04.15 chair instead, so the package now supports the task group and the ILS rather than a Form 01 submission._
 
 ## Strategic Context
 
@@ -16,15 +16,15 @@ Prepare a complete submission package for registering a new ASTM work item throu
 
 | Layer | Document | Role | Status |
 |---|---|---|---|
-| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; approved for publication 2026-10-09; publication forecast 2026-11 |
-| 2 | ASTM FXXXX, this submission | TYPE TEST measuring ΔAUC | Form 01 not yet submitted |
+| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; approved for publication 2026-10-09; publication scheduled 2026-11-20 |
+| 2 | ASTM FXXXX, this submission | TYPE TEST measuring ΔAUC | Work item WK101378 registered 2026-11-05; task group F04.15.24 |
 | 3 | FDA guidance | Acceptance criteria: non-degradation threshold | Conceptual framework drafted |
 
 ### IEC Incorporation Path
 
 The ASTM standard is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment. The current compliance statement, "Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS", would be replaced with "Compliance is checked by the TYPE TEST specified in ASTM FXXXX." ISO/IEC Directives Part 2 prohibits referencing non-existent standards, so the Amendment is submitted after ASTM FXXXX publishes. The 3-year IEC transition window, ending about 2029, establishes the deadline.
 
-The IEC linkage appears in the Form 01 rationale text only. The Amendment proposal itself is managed separately through USNC TAG SC 62B and is not attached to the ASTM submission.
+The IEC linkage appears in the work item rationale only. The Amendment proposal itself is managed separately through USNC TAG SC 62B and is not attached to the ASTM submission.
 
 ### DICOM CP-2575 Precedent
 
@@ -39,7 +39,7 @@ Terry Woods of FDA CDRH and ASTM advised in November 2023 that F04 has no CT exp
 3. **F2119 provides the direct procedural precedent.** MR artifact evaluation from passive implants → CT artifact reduction evaluation. Same subcommittee, complementary scope.
 4. **The ILS recruits CT expertise into F04.15.** Imaging physics labs and FDA CDRH staff joining the task group bring the domain knowledge the subcommittee currently lacks.
 
-The cover memorandum acknowledges Terry Woods' feedback directly and explains the evolution.
+The superseded cover memorandum acknowledged Terry Woods' feedback; at the 2026-11-04 meeting F04.15 answered it by agreeing to a dedicated CT task group, F04.15.24.
 
 ---
 
@@ -47,130 +47,20 @@ The cover memorandum acknowledges Terry Woods' feedback directly and explains th
 
 | Document | Purpose | Format | Length |
 |---|---|---|---|
-| Document 1: Form 01 field content | Online wizard entries | Text to paste into the ASTM portal | N/A |
-| Document 2: Cover memorandum | Executive summary for F04.15 subcommittee chair | PDF/Word attachment | 2–3 pages |
+| Document 1: Form 01 field content | Superseded 2026-11-05 (WK101378 registered by the F04.15 chair) | N/A | N/A |
+| Document 2: Cover memorandum | Superseded 2026-11-05; never sent | N/A | N/A |
 | Document 3: ILS Protocol | E691 study design, structured after D7778 Table 4, with the coordinator letter, return form and questionnaire as attachments | PDF/Word attachment | 13 pages |
 | Attachment: Rev 06 draft standard | The standard itself | PDF/Word in ASTM manuscript format | ~60 pages |
 
 ---
 
-## Document 1: ASTM Form 01, Complete Wizard Field Content
+## Document 1: ASTM Form 01 Field Content (superseded)
 
-### Page 1: Type
+_Superseded 2026-11-05._ Form 01 was not submitted. After the presentation at F04.15.11 on 2026-11-04, the F04.15 chair registered WK101378 directly. The Technical Contact then entered the scope, keywords, rationale, existing standards and notification fields through the work item edit page; the posted work item page is now the record. The ASTM site does not store characters such as Δ and ∞, so the posted scope spells out "Delta AUC-infinity". The drafted wizard content is in git history.
 
-- **Type:** Proposed New ASTM Standard
-- **Committee:** F04, Medical and Surgical Materials and Devices
-- **Subcommittee:** F04.15, Material Test Methods
+## Document 2: Cover Memorandum (superseded)
 
-### Page 2: Copyright
-
-- **Selection:** "I am submitting original material (i.e. it is not copyrighted, patented, pending patent, or published elsewhere)"
-- **Check** the IP policy acknowledgment box
-
-**IP note:** ~~The draft standard text (`ASTM_MAR_Standard.md`) is currently in a public GitHub repository.~~ **RESOLVED 2026-07-14:** Standard text removed from public repo and moved to the gitignored `private/ASTM_MAR_Standard.md`. The reference implementation code remains public under Apache 2.0; ASTM's copyright covers the standard document, not the software.
-
-### Page 3: Target
-
-| Field | Value | Rationale |
-|---|---|---|
-| Target date for Subcommittee ballot | **June 2028** | Pilot Mar–Apr 2027; full-scale ILS May–Oct 2027; Research Report Jan 2028; ballot Mar–Jun 2028; re-baselined 2026-10-17 after adding the pilot run |
-| Authorized at a Subcommittee meeting? | **No** | Submission itself requests authorization |
-| Authorization date | **10 / 2026** | Month of submission; adjust if submitted later |
-| Emergency / regulatory requirement? | **Yes** | IEC 60601-2-44 Ed. 4 was approved for publication in October 2026, with publication forecast for November 2026 and a 3-year transition window; the ASTM standard must publish within that window for incorporation by normative reference |
-| Patented or pending patent? | **No** | |
-| Expected target date for approval | **18–24 months** | Select the longest available option in the dropdown; if only "3–6 months" is offered, select it and note the actual 18–24 month timeline in the rationale field. The dropdown constrains presentation, not commitment |
-| Technical contact | **I will** | |
-
-### Page 4: Data
-
-**Type of Standard:** Test Method
-
-**Title**, after the dropdown prepends "Test Method for":
-> Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
-
-**Proposed Scope:**
-> This test method specifies a quantitative procedure for evaluating the performance of Metal Artifact Reduction (MAR) methods implemented in tomographic imaging systems. The measurand is the change in the area under the receiver operating characteristic curve, extrapolated to unlimited training data (ΔAUC∞), for a signal-known-exactly, background-known-statistically detection task performed by a channelized Hotelling observer, following the framework of Vaishnav et al. (2020). The method uses a standardized digital dataset of simulated two-dimensional CT scans of a numerical head phantom with iron implants, distributed as fan-beam sinograms and reference reconstructions verified by SHA-256 checksums, and reports the result at three signal levels. It is structured to support precision and bias evaluation in accordance with ASTM E691 and ISO 5725. It is intended for type testing and conformity assessment and does not establish performance acceptance criteria.
-
-**Keywords:**
-> metal artifact reduction; tomographic imaging; computed tomography; model observer; channelized Hotelling observer; area under the ROC curve; ΔAUC; lesion detectability; interlaboratory study; type test; digital phantom; DICOM; sinogram; fan-beam; signal detection; image quality; ISO 5725
-
-**Rationale:**
-> Metal artifact reduction (MAR) algorithms are increasingly incorporated into computed tomography (CT) systems, but no standardized test method exists to objectively quantify their effect on lesion detectability. MAR may improve or degrade diagnostic task performance depending on algorithm design and imaging parameters. IEC 60601-2-44 Ed. 4, approved for publication in October 2026 with publication forecast for November 2026, establishes at §203.6.7.101 that CT systems shall have MAR methods available, described to users, and recorded in DICOM metadata as specified by DICOM CP-2575 in DICOM 2026b. However, the current compliance statement verifies documentation only, not algorithmic performance. This test method provides the missing quantitative measurement. It is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment, establishing a TYPE TEST that quantifies the signed change in lesion detectability (ΔAUC) attributable to MAR. Users include CT system manufacturers demonstrating MAR performance for regulatory submissions such as 510(k) and CE marking, regulatory authorities evaluating MAR claims, and research laboratories conducting interlaboratory comparison studies. An E691 interlaboratory study is proposed concurrently with standard development to establish the precision and bias statement in §17.
-
-**Existing Standards:**
-> ASTM F2119-24, Standard Test Method for Evaluation of MR Image Artifacts from Passive Implants. F2119 characterizes the physical extent of image artifacts produced by passive implants under standardized MR scanning conditions. The proposed standard is complementary, not duplicative: it quantifies the observer-based task-detectability impact of MAR, an algorithmic countermeasure applied within CT imaging systems. The two methods address non-overlapping axes: modality, MR versus CT, and object of measurement, physical artifact extent versus algorithmic task impact. No existing ASTM, ISO, IEC, or NEMA standard defines a task-based, model-observer test method for MAR performance evaluation. IEC 60601-2-44 Ed. 4 requires MAR availability but does not specify a test method for performance verification.
-
-**Notify Other:**
-> ASTM E07.01, Radiography (X and Gamma) Method (jurisdiction over E1441, Standard Guide for Computed Tomography); IEC TC 62/SC 62B WG 30, Computed Tomography; USNC TAG SC 62B
-
-### Page 5: Summary
-
-Review all fields. Collaboration area: **Yes**, to provide a shared workspace for task group members during ILS coordination.
-
-### Page 6: Confirm
-
-Submit.
-
----
-
-## Document 2: Cover Memorandum
-
-**Title:** Cover Memorandum: New Work Item Proposal: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
-
-**Addressee:** F04.15 Subcommittee Chair
-
-**Format:** 2–3 page PDF/Word attachment
-
-### Structure
-
-**Section 1: Purpose**, about 1 paragraph
-
-States that the memorandum accompanies a New Work Item Proposal for a standard test method evaluating MAR performance, and that an interlaboratory study under E691 is proposed concurrently. Identifies the sponsor: Christopher D. Cocchiaraley, Consumer Member, Account 2439061.
-
-**Section 2: Clinical Motivation**, about 2 paragraphs
-
-The problem: MAR algorithms may improve or degrade lesion detectability depending on implementation. No standardized test exists to quantify this effect. Current IEC 60601-2-44 Ed. 4 §203.6.7.101.1 requires only documentation inspection, so a manufacturer can satisfy compliance with a MAR method that has no measurable effect or that degrades diagnostic performance.
-
-The consequence: patients scanned on systems without effective MAR, or with MAR that degrades detectability near implants, face diagnostic risk that is currently invisible to regulatory conformity assessment.
-
-**Section 3: Technical Approach**, about 2 paragraphs
-
-Summarizes the method without requiring the reader to open Rev 06: standardized digital dataset of SHA-256-verified fan-beam sinograms and reconstructions, channelized Hotelling observer scoring a binary lesion detection task, ΔAUC as the scalar measurand. Emphasizes that the test is entirely computational; no CT scanner hardware is required. References the framework of Vaishnav et al. (Medical Physics, 2020) as the scientific basis.
-
-Notes the approved DICOM CP-2575 MAR metadata, now in DICOM 2026b, as complementary infrastructure. The recording mechanism for MAR status already exists; this test method provides the performance measurement.
-
-**Section 4: Maturity of the Draft Standard**, about 1 bulleted paragraph
-
-- Rev 06 draft standard attached, with 18 normative sections, two annexes and two appendices
-- Pre-registered known-answer validation passed on five replicate datasets (review notes items 28 to 32); improving-control ΔAUC∞ +0.215, +0.238, +0.254 at levels 1.020, 1.025, 1.030; degrading control −0.061
-- Reference dataset: a pool of nine independent replicate datasets of 8,000 2D realizations each (three levels), plus a control set; about 305 GB; each laboratory receives three (review item 37); to be generated with generator v9.0.0
-- Reference CHO implementation: `run_cho_analysis_v9_0.py` (D-DOG channels, antler-plot AUC∞)
-- Control methods: image-segmentation inpainting (improving) and sinogram-threshold inpainting at dose 4e6 (degrading), after Vaishnav et al.
-- 106 automated tests across 9 suites, all passing
-- DICOM 2026b compliant output with the CP-2575 Metal Artifact Reduction Macro
-
-**Section 5: Jurisdictional Fit: F04.15**, about 2 paragraphs
-
-Acknowledges the November 2023 feedback from Terry Woods of FDA CDRH that F04 has no CT experts or CT-related standards. Explains why the method's evolution addresses this:
-
-1. The method evaluates a medical device feature, the MAR algorithm, not CT hardware. Jurisdictionally it is a medical-device matter, not industrial CT.
-2. The test is entirely computational; the expertise needed is metrology and signal detection theory, not CT scanner operation.
-3. F2119 provides the direct procedural precedent: MR artifact evaluation from passive implants → CT artifact reduction evaluation. Same subcommittee, complementary scope.
-4. The ILS will recruit imaging physics laboratories and FDA CDRH staff into the task group, bringing CT domain expertise into F04.15.
-
-Notes that per Dr. Woods' recommendation, the sponsor joined the CT groups IEC SC 62B WG30 and DICOM WG-21. The ASTM standard and IEC incorporation are complementary efforts, not duplicative.
-
-**Section 6: Regulatory Context and Timeline**, about 1 paragraph
-
-Three-layer framework: IEC 60601-2-44 Ed. 4 requires MAR → ASTM FXXXX measures ΔAUC → FDA guidance establishes acceptance criteria. The IEC 3-year transition window, ending about 2029, establishes the deadline for ASTM publication. Target: pilot run March–April 2027, full-scale ILS May–October 2027, Research Report January 2028, ballot March–June 2028, F-designation late 2028.
-
-**Section 7: Requested Actions**, about 3 bullets
-
-1. Register the work item and assign a WK number
-2. Constitute a task group, or assign an existing one
-3. Authorize the sponsor to begin E691 ILS lab recruitment under the registered work item
-
----
+_Superseded 2026-11-05._ The memorandum, addressed to the F04.15 chair, accompanied the planned Form 01 and asked F04.15 to register the work item, constitute a task group and authorize ILS recruitment. The first two were done on 2026-11-05 (WK101378; task group F04.15.24), and the memorandum was never sent. It is retired from the submission package; the drafted content is in git history.
 
 ## Document 3: ILS Protocol, E691 Study Design
 
@@ -207,8 +97,9 @@ Restructured 2026-10-17 to follow the ILS Protocol Plan in ASTM D7778-15(2026) T
 - **Pilot run:** separate, before the full-scale run. The first three laboratories to join run Condition 1 only, once on each of three assigned replicate datasets; the coordinator scores centrally with the key and returns results. Rev 06 §17.6 requires pilot data from at least 3 laboratories before first ballot showing, at each level, (a) the improving and degrading controls give ΔAUC∞ of the expected sign with 95 % intervals excluding zero, (b) within-laboratory SD of ΔAUC∞ at most 0.05 and (c) the null-signal check within 0.02 of the estimator's null value (0.533). The developer's validation meets all three. Pilot data is not used in the precision estimates. Adds two months to the schedule.
 - **Blinding:** the distributed dataset is blinded, and the key is released after the manifest deadline so that laboratories score their own runs. See Blinded Distribution below.
 - **Replicates (2026-11-03, review item 37):** a test result is ΔAUC∞ at one level on one replicate dataset; the standard ships three; ILS laboratories each receive three of a pool of nine, with balanced assignment; predictions s_r ≈ 0.004 to 0.008 and s_R ≈ s_r.
+- **Registration and task group (2026-11-05):** presented at F04.15.11 on 2026-11-04 (WebEx, New Business); F04.15 had MRI rather than CT expertise, so the chairs agreed to a new CT task group. The F04.15 chair registered WK101378 on 2026-11-05 and asked staff to establish F04.15.24 with the sponsor as chair. Recruitment of CT experts goes through IEC SC 62B WG30, the USNC TAG for IEC SC 62B, DICOM WG-21 and the AAPM Computed Tomography Subcommittee.
 - **Number of materials:** three, the signal levels 1.020, 1.025 and 1.030 at dose 1e6, as E691-23 §10.2.2 recommends. The range is narrow by design (estimator accuracy below, control ceiling above); the precision statement says so.
-- **Funding and staffing:** self-funded by participants. The study is registered with the ASTM ILS Program once the WK number exists; ILS staff assign the random laboratory codes, issue the data report form, receive the results and act as statistician. The coordinator hosts the dataset, holds the blinding key and runs the rescoring check.
+- **Funding and staffing:** self-funded by participants. The study is registered with the ASTM ILS Program under WK101378; ILS staff assign the random laboratory codes, issue the data report form, receive the results and act as statistician. The coordinator hosts the dataset, holds the blinding key and runs the rescoring check.
 - **Precision basis:** Condition 1 only. Every laboratory runs the same improving control, so it is a common material under E691. In Condition 2 each laboratory measures a different algorithm, mostly research or reference methods outside Tier A, so its between-laboratory spread reflects differences between algorithms, not the method's precision. Condition 2 is reported descriptively by algorithm class, for applicability, discriminating range and manufacturer participation. Decided 2026-10-17.
 - **Laboratory identification:** the Research Report names participating laboratories with contacts and addresses and codes every result, following RR:F04-2001, the F2052 study. Decided 2026-10-17.
 - **Familiarization dataset:** a small labeled dataset with different noise seeds, for trial runs and tuning, so that no laboratory tunes on the ILS dataset, per D7778 Fig. X1.2 item 8 and E691-23 §9.3.
@@ -229,7 +120,7 @@ The master dataset keeps the labeled layout and stays with the coordinator. The 
 
 | Milestone | Target Date |
 |---|---|
-| Work item registered and WK number assigned | November 2026 |
+| WK101378 registered; task group F04.15.24 formed | 2026-11-05 (done) |
 | Protocol circulated to candidate laboratories | December 2026 |
 | First task group meeting: integration paths, plan approval | January 2027, virtual |
 | Recruitment complete: at least 10 committed laboratories | February 2027 |
@@ -259,10 +150,10 @@ _Re-baselined 2026-10-04 for registration in November 2026, and again 2026-10-17
 
 1. [x] ~~Resolve IP question~~ DONE 2026-07-14: standard text moved to the gitignored `private/` folder and removed from the public repo
 2. [x] Export Rev 06 draft standard to Word (PDF pending) in ASTM manuscript format
-3. [x] Write Document 2, the Cover Memorandum, as a standalone PDF: drafted 2026-07-27 and re-dated 2026-10-04 in `~/Desktop/ASTM Submission Package/`
+3. [x] Write Document 2, the Cover Memorandum, as a standalone PDF: drafted 2026-07-27 and re-dated 2026-10-04 in `~/Desktop/ASTM Submission Package/`; superseded 2026-11-05 and retired from the package
 4. [x] Write Document 3, the ILS Protocol, as a standalone PDF: drafted 2026-07-27, re-dated 2026-10-04, restructured after D7778 Table 4 on 2026-10-17
-5. [ ] Complete the ASTM online wizard using the Document 1 field content
-6. [ ] Attach Documents 2, 3, and the Rev 06 draft to the work item registration
+5. [x] Superseded 2026-11-05: WK101378 registered by the F04.15 chair; fields edited by the Technical Contact
+6. [x] Superseded 2026-11-05: the chair registered WK101378 directly; Documents 2 and 3 and the Rev 06 draft go to the F04.15.24 collaboration area instead
 7. [x] ILS Participation Agreement template aligned with the protocol 2026-10-17, and with Rev 06 and the ASTM ILS Program process 2026-11-03; set aside 2026-11-03 pending ASTM ILS staff advice on whether ASTM's own laboratory terms suffice, with the protocol relying on a written commitment instead (v0.2: no-unblinding clause, two-phase submission, algorithm class only, six-laboratory minimum, CC BY 4.0 dataset license); [ ] replace WK101378 with the assigned WK number once received
 8. [ ] Build the blinding tooling and the familiarization dataset, and verify the regression target, before distribution in March 2027
 9. [ ] Upload the blinded copy to Zenodo, publish the key hash in the record, and update the record description
