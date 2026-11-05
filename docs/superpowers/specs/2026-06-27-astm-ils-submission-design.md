@@ -16,19 +16,19 @@ Prepare a complete submission package for registering a new ASTM work item throu
 
 | Layer | Document | Role | Status |
 |---|---|---|---|
-| 1 | IEC 60601-2-44 Ed. 4 §203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; approved for publication 2026-10-09; publication scheduled 2026-11-20 |
+| 1 | IEC 60601-2-44 Ed. 4 Clause 203.6.7.101 | Requires MAR availability, user info, DICOM recording | FDIS approved 2026-07-17; approved for publication 2026-10-09; publication scheduled 2026-11-20 |
 | 2 | ASTM FXXXX, this submission | TYPE TEST measuring ΔAUC | Work item WK101378 registered 2026-11-05; task group F04.15.24 |
 | 3 | FDA guidance | Acceptance criteria: non-degradation threshold | Conceptual framework drafted |
 
 ### IEC Incorporation Path
 
-The ASTM standard is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.1 via a post-publication Amendment. The current compliance statement, "Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS", would be replaced with "Compliance is checked by the TYPE TEST specified in ASTM FXXXX." ISO/IEC Directives Part 2 prohibits referencing non-existent standards, so the Amendment is submitted after ASTM FXXXX publishes. The 3-year IEC transition window, ending about 2029, establishes the deadline.
+The ASTM standard is intended for incorporation by normative reference into IEC 60601-2-44 Ed. 4 Clause 203.6.7.101.1 via a post-publication Amendment. The current compliance statement, "Compliance is checked by inspection of the ACCOMPANYING DOCUMENTS", would be replaced with "Compliance is checked by the TYPE TEST specified in ASTM FXXXX." ISO/IEC Directives Part 2 prohibits referencing non-existent standards, so the Amendment is submitted after ASTM FXXXX publishes. The 3-year IEC transition window, ending about 2029, establishes the deadline.
 
 The IEC linkage appears in the work item rationale only. The Amendment proposal itself is managed separately through USNC TAG SC 62B and is not attached to the ASTM submission.
 
 ### DICOM CP-2575 Precedent
 
-DICOM CP-2575, which introduced the Metal Artifact Reduction Macro in DICOM 2026b, was approved and is already incorporated by reference into IEC 60601-2-44 Ed. 4 §203.6.7.101.3. This establishes that §203.6.7.101 already references external standards by compliance statement. The proposed Amendment to §203.6.7.101.1 is syntactically identical, substituting ASTM FXXXX for DICOM PS3.3 as the referenced standard.
+DICOM CP-2575, which introduced the Metal Artifact Reduction Macro in DICOM 2026b, was approved and is already incorporated by reference into IEC 60601-2-44 Ed. 4 Clause 203.6.7.101.3. This establishes that Clause 203.6.7.101 already references external standards by compliance statement. The proposed Amendment to Clause 203.6.7.101.1 is syntactically identical, substituting ASTM FXXXX for DICOM PS3.3 as the referenced standard.
 
 ### Committee Selection: F04.15
 
