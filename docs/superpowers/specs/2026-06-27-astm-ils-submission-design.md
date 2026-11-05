@@ -34,12 +34,12 @@ DICOM CP-2575, which introduced the Metal Artifact Reduction Macro in DICOM 2026
 
 Terry Woods of FDA CDRH and ASTM advised in November 2023 that F04 has no CT experts and no CT-related standards, and recommended IEC TC 62B WG30 instead. The sponsor subsequently joined WG30 as Consumer Advocate and DICOM WG-21 as Consumer Member. F04.15 remains the correct ASTM home for four reasons:
 
-1. **The method evaluates a medical device feature, the MAR algorithm, not CT hardware.** F04 covers medical devices; E07/E17 cover industrial CT.
-2. **The test is entirely computational.** The expertise needed to evaluate the standard is metrology and signal detection theory, not CT scanner operation.
+1. **The method evaluates a medical device feature, the MAR algorithm, not CT hardware.** F04 covers medical devices; industrial CT belongs to E07 (Nondestructive Testing).
+2. **The test is entirely computational.** Laboratories need no scanner: the test runs on a standardized digital dataset, with a computer and the MAR software under test. Developing and reviewing the method still needs CT imaging expertise, in reconstruction, MAR algorithms and artifacts, together with metrology and signal detection theory.
 3. **F2119 provides the direct procedural precedent.** MR artifact evaluation from passive implants → CT artifact reduction evaluation. Same subcommittee, complementary scope.
-4. **The ILS recruits CT expertise into F04.15.** Imaging physics labs and FDA CDRH staff joining the task group bring the domain knowledge the subcommittee currently lacks.
+4. **CT expertise comes through task group F04.15.24.** At the 2026-11-04 meeting, F04.15 agreed to a dedicated CT task group, which recruits CT imaging experts through IEC SC 62B WG30, the USNC TAG for IEC SC 62B, DICOM WG-21 and the AAPM Computed Tomography Subcommittee. ILS laboratories add imaging physics expertise, and FDA participation is welcome.
 
-The superseded cover memorandum acknowledged Terry Woods' feedback; at the 2026-11-04 meeting F04.15 answered it by agreeing to a dedicated CT task group, F04.15.24.
+The superseded cover memorandum acknowledged Terry Woods' feedback; the 2026-11-04 meeting answered it directly.
 
 ---
 
