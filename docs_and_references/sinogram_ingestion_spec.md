@@ -1,6 +1,6 @@
 # Sinogram Ingestion and Reconstruction Output Specification
 
-**ASTM WKXXXXX Rev 05 — MAR Interlaboratory Study**\
+**ASTM WK101378 Rev 05 — MAR Interlaboratory Study**\
 **Version:** 1.0\
 **Date:** 2026-07-13
 

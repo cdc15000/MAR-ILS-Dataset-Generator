@@ -18,7 +18,7 @@
 | Stability date | | 2029 |
 
 **Target stage:** Amendment to Ed. 4, submitted after ASTM FXXXX publishes (F designation targeted for late 2028)
-**Gating prerequisite:** Publication of ASTM FXXXX, now Work Item WKXXXXX at ASTM F04.15
+**Gating prerequisite:** Publication of ASTM FXXXX, now Work Item WK101378 at ASTM F04.15
 
 ---
 
@@ -63,7 +63,7 @@ Clause 2 of IEC 60601-1 applies, with the additions listed in Clause 2 of Ed. 4.
 >
 > ASTM FXXXX-YY, *Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer*
 
-The title is the WKXXXXX working title. Replace it with the published title.
+The title is the WK101378 working title. Replace it with the published title.
 
 ### 3. Dated reference
 

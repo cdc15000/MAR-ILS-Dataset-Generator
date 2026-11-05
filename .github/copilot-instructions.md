@@ -23,7 +23,7 @@ pip install numba                 # Optional: ~24× speedup (JIT + batch geometr
 
 The **MAR ILS Dataset Generator** produces a standardized, synthetic CT dataset
 for Metal Artifact Reduction (MAR) Interlaboratory Studies (ILS), compliant with
-**ASTM WKXXXXX Revision 05** and **IEC 60601-2-44 Ed. 4**. It implements the
+**ASTM WK101378 Revision 05** and **IEC 60601-2-44 Ed. 4**. It implements the
 task-based signal detection approach of Vaishnav et al. (*Medical Physics*,
 47(8), 2020).
 
@@ -224,7 +224,7 @@ approval and full regeneration + re-validation.
 
 ## References
 
-- **ASTM WKXXXXX Rev 05** — draft standard for MAR performance assessment via task-based ILS.
+- **ASTM WK101378 Rev 05** — draft standard for MAR performance assessment via task-based ILS.
 - **IEC 60601-2-44 Ed. 4** — medical electrical equipment safety & performance (CT).
 - **Vaishnav et al. (2020)** — *Medical Physics*, 47(8), 3858-3866.
 - **`CLAUDE.md`** — authoritative internal documentation (pipeline, physics, design rationale).

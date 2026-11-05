@@ -1,7 +1,7 @@
 # Reference MAR Algorithms
 
 **The `reference_*.py` files in this directory use parallel-beam geometry
-(v6.0.0 / ASTM WKXXXXX Rev 03)** and are **not compatible** with v7.0.0 fan-beam
+(v6.0.0 / ASTM WK101378 Rev 03)** and are **not compatible** with v7.0.0 fan-beam
 sinograms (SID=570mm, SDD=1040mm, 720 angles).
 
 Fan-beam (v7.0.0) reference algorithms live in the [`v7/`](v7/) subdirectory —

@@ -1,11 +1,11 @@
-# ASTM WKXXXXX MAR Type Test: Interlaboratory Study Participation Agreement
+# ASTM WK101378 MAR Type Test: Interlaboratory Study Participation Agreement
 
 **Template version:** v0.3 (draft 2026-11-03)
 **Governing procedure:** ASTM E691-23, Standard Practice for Conducting an Interlaboratory Study to Determine the Precision of a Test Method
-**Study subject:** ASTM Work Item WKXXXXX Revision 06 (draft dated 2026-11-03), Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
-**Study protocol:** ASTM WKXXXXX Interlaboratory Study Protocol, November 2026
+**Study subject:** ASTM Work Item WK101378 Revision 06 (draft dated 2026-11-03), Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer
+**Study protocol:** ASTM WK101378 Interlaboratory Study Protocol, November 2026
 **Study administration:** ASTM Interlaboratory Study (ILS) Program, ILS@astm.org
-**ILS Coordinator:** Christopher D. Cocchiaraley, WKXXXXX Sponsor, ASTM F04 / F04.15 (Consumer Member)
+**ILS Coordinator:** Christopher D. Cocchiaraley, WK101378 Sponsor, ASTM F04 / F04.15 (Consumer Member)
 
 ---
 
@@ -13,7 +13,7 @@
 
 This Agreement is between:
 
-**(a) The ILS Coordinator:** Christopher D. Cocchiaraley, acting as Sponsor of ASTM Work Item WKXXXXX, responsible for coordinating the interlaboratory precision study leading to ASTM F04.15 ballot and ASTM Research Report publication.
+**(a) The ILS Coordinator:** Christopher D. Cocchiaraley, acting as Sponsor of ASTM Work Item WK101378, responsible for coordinating the interlaboratory precision study leading to ASTM F04.15 ballot and ASTM Research Report publication.
 
 **(b) The Participating Laboratory:** __________________________________________________________
 
@@ -27,7 +27,7 @@ This Agreement is between:
 
 ## 2. Purpose
 
-The Participating Laboratory agrees to execute the test method specified in WKXXXXX Revision 06 against the reference dataset provided by the Coordinator, following the Study Protocol and ASTM E691-23. The Laboratory returns its results to the ASTM ILS Program, which performs the statistical analysis, and its run files to the Coordinator, who checks them. The results support the precision statement of the test method and the ASTM Research Report.
+The Participating Laboratory agrees to execute the test method specified in WK101378 Revision 06 against the reference dataset provided by the Coordinator, following the Study Protocol and ASTM E691-23. The Laboratory returns its results to the ASTM ILS Program, which performs the statistical analysis, and its run files to the Coordinator, who checks them. The results support the precision statement of the test method and the ASTM Research Report.
 
 ---
 
@@ -35,13 +35,13 @@ The Participating Laboratory agrees to execute the test method specified in WKXX
 
 The Participating Laboratory agrees to:
 
-**3.1 Protocol adherence.** Execute the test method strictly as specified in WKXXXXX Revision 06 and the Study Protocol, without substitution, modification, or omission of any normative parameter, including the reference reconstruction of Annex A1.1, the 121 × 121 region of interest centered on pixel (256, 256) counted from zero, the ten dense difference-of-Gaussians channels, the antler-plot AUC∞ of Annex A1.6, and the ±0.005 equivalence tolerance on AUC∞(noMAR). Any deviation, however minor, shall be reported to the Coordinator in writing and recorded on the return form.
+**3.1 Protocol adherence.** Execute the test method strictly as specified in WK101378 Revision 06 and the Study Protocol, without substitution, modification, or omission of any normative parameter, including the reference reconstruction of Annex A1.1, the 121 × 121 region of interest centered on pixel (256, 256) counted from zero, the ten dense difference-of-Gaussians channels, the antler-plot AUC∞ of Annex A1.6, and the ±0.005 equivalence tolerance on AUC∞(noMAR). Any deviation, however minor, shall be reported to the Coordinator in writing and recorded on the return form.
 
 **3.2 Blinding and familiarization.** Not attempt to identify which coded realizations are lesion-present, or which form pairs, before the Coordinator releases the blinding key. Use the familiarization dataset, not the study dataset, for all trial runs and any tuning of MAR parameters.
 
-**3.3 MAR algorithm disclosure.** Apply the provided improving control in Condition 1. State on the return form which MAR algorithm the Laboratory applies in Condition 2: either (i) the Laboratory's own MAR implementation, identified by algorithm class, such as "projection-domain interpolation" or "iterative reconstruction," or (ii) a published method or one of the reference implementations provided in the WKXXXXX repository. Disclosure of the product name or version is at the Laboratory's discretion.
+**3.3 MAR algorithm disclosure.** Apply the provided improving control in Condition 1. State on the return form which MAR algorithm the Laboratory applies in Condition 2: either (i) the Laboratory's own MAR implementation, identified by algorithm class, such as "projection-domain interpolation" or "iterative reconstruction," or (ii) a published method or one of the reference implementations provided in the WK101378 repository. Disclosure of the product name or version is at the Laboratory's discretion.
 
-**3.4 Computational environment disclosure.** Report the computational environment used (OS, Python version, NumPy/SciPy/pydicom/numba versions, CPU or accelerator model) in the questionnaire, per WKXXXXX §16.1(i).
+**3.4 Computational environment disclosure.** Report the computational environment used (OS, Python version, NumPy/SciPy/pydicom/numba versions, CPU or accelerator model) in the questionnaire, per WK101378 §16.1(i).
 
 **3.5 Deliverables.** Return the following within the timeline of §7, in two submissions:
 - Before the key is released, to the Coordinator: a SHA-256 manifest of each run directory, and Part I of the return form
@@ -89,7 +89,7 @@ The ILS Coordinator agrees to:
 
 **6.2 Peer-reviewed publication.** A companion peer-reviewed manuscript is planned for submission to *Medical Physics* or equivalent. Participating Laboratories completing the protocol are eligible for co-authorship under ICMJE criteria, with the Principal Investigator of each lab invited as co-author.
 
-**6.3 ASTM F04.15 ballot package.** Participation is acknowledged in the WKXXXXX ballot package circulated to F04.15 members.
+**6.3 ASTM F04.15 ballot package.** Participation is acknowledged in the WK101378 ballot package circulated to F04.15 members.
 
 ---
 
@@ -125,12 +125,12 @@ The Coordinator provides the reference dataset and reference CHO implementation 
 
 ## 10. Attestation and Signatures
 
-By signing below, the Principal Investigator of the Participating Laboratory attests that (a) the Laboratory will execute the WKXXXXX Revision 06 test method and the Study Protocol without modification, (b) the Laboratory will not attempt to unblind the study dataset before the key is released, (c) results will be returned in good faith within the timeline of §7, and (d) the terms of this Agreement are understood and accepted.
+By signing below, the Principal Investigator of the Participating Laboratory attests that (a) the Laboratory will execute the WK101378 Revision 06 test method and the Study Protocol without modification, (b) the Laboratory will not attempt to unblind the study dataset before the key is released, (c) results will be returned in good faith within the timeline of §7, and (d) the terms of this Agreement are understood and accepted.
 
 | Party | Name | Title | Signature | Date |
 |---|---|---|---|---|
 | Participating Laboratory | _____________ | _____________ | _____________ | _____________ |
-| ILS Coordinator | Christopher D. Cocchiaraley | WKXXXXX Sponsor, ASTM F04.15 | _____________ | _____________ |
+| ILS Coordinator | Christopher D. Cocchiaraley | WK101378 Sponsor, ASTM F04.15 | _____________ | _____________ |
 
 ---
 
@@ -142,4 +142,4 @@ By signing below, the Principal Investigator of the Participating Laboratory att
 - **Foreign-lab considerations:** if EU/UK/Japan labs participate, verify GDPR/equivalent compliance language is not needed. The dataset is fully synthetic with no PHI, so most privacy regimes are a non-issue, but the Agreement should say so explicitly if asked.
 - **FDA / government labs:** federal labs may require FAR/DFARS language, cooperative research agreement (CRADA), or similar. Flag Vaishnav / FDA CDRH group as a potential special-form case.
 - **Commercial MAR vendor participation:** Tier A manufacturer labs may want additional IP protection, non-disclosure, or clean-room attestation. Those conversations happen lab-by-lab, not via this template.
-- **Before sending:** replace WKXXXXX with the registered WK number, and confirm the dates against the Study Protocol.
+- **Before sending:** replace WK101378 with the registered WK number, and confirm the dates against the Study Protocol.
