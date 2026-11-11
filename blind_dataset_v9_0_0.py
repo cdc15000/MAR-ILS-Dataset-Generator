@@ -167,6 +167,8 @@ def write_checksums(root: Path) -> None:
 def blind_dataset(master: Path, dist: Path, codes_taken: set[str], copy: bool, mtime: float) -> dict:
     """Coded copy of one master dataset; returns the key entries for it."""
     record = json.loads((master / "dataset_record.json").read_text())
+    if record.get("dataset") != master.name:
+        raise RuntimeError(f"{master}: the record names dataset {record.get('dataset')!r}, not {master.name!r}")
     reals = record["realizations"]
     codes = new_codes(len(reals), codes_taken)
     entries = {}

@@ -259,6 +259,8 @@ def dataset_record(spec: DatasetSpec, realizations: list[dict], state: dict, ext
                      "energy_keV": k.tolist(), "photon_fraction": w.tolist()},
         "image": {"pixels": vp.IMAGE_PX, "fov_mm": 300.0, "center_pixel": [256, 256],
                   "mu_water_cm": vs.MU_WATER_REF_CM, "stored": "HU rounded to integer, int16, slope 1, intercept 0"},
+        "observer": {"roi_px": vp.ROI_PX, "roi_center_pixel": [256, 256], "antler_seed": 0,
+                     "antler_draws": 50, "estimator_null_auc_inf": 0.533},
         "mar2_tau_mu_cm": TAU_MU_CM,
         "mar1_tau_counts": TAU_COUNTS,
         "dicom": state,
