@@ -49,6 +49,23 @@ MAR1_SWEEP = (2, 4, 8)   # graded-harm multipliers of tau_counts ("mar1x2", ...)
 METHODS = ("fbp", "mar1", "mar2", "oracle") + tuple(f"mar1x{k}" for k in MAR1_SWEEP)
 
 
+def realization(cls: int, amplitude: float | None, dose: float, lump_scale: float, pool: int,
+                idx: int, crn: bool = False):
+    """One realization: (rng, inset angle, lumps, detector counts, line integrals p).
+
+    The generator is returned in the state after the counts were drawn, so a
+    caller (the oracle of simulate) can continue drawing from it. Shared by
+    simulate() and the dataset writer, so both produce the same realizations.
+    """
+    rng = image_rng(cls, amplitude, pool, idx, None if crn else dose)
+    angle = rng.uniform(0.0, 2.0 * np.pi)
+    sig = amplitude if cls else None
+    lumps = vp.draw_lumps()
+    lw, lb, lf = vs.line_integrals(angle=angle, amplitude=sig, lumps=lumps, lump_scale=lump_scale)
+    counts = vs.measure(vs.expected_primary(lw, lb, lf, dose), dose, rng)
+    return rng, angle, lumps, counts, vs.log_sinogram(counts, dose)
+
+
 def simulate(cls: int, amplitude: float | None, dose: float, lump_scale: float, pool: int, idx: int,
              methods: tuple[str, ...], tau_counts: float, tau_mu: float,
              crn: bool = False) -> dict[str, np.ndarray]:
@@ -59,13 +76,8 @@ def simulate(cls: int, amplitude: float | None, dose: float, lump_scale: float, 
     with every metal object replaced by the material it displaces, with its own
     noise draw. "mar1xK" is MAR 1 with the threshold multiplied by K.
     """
-    rng = image_rng(cls, amplitude, pool, idx, None if crn else dose)
-    angle = rng.uniform(0.0, 2.0 * np.pi)
+    rng, angle, lumps, counts, p = realization(cls, amplitude, dose, lump_scale, pool, idx, crn)
     sig = amplitude if cls else None
-    lumps = vp.draw_lumps()
-    lw, lb, lf = vs.line_integrals(angle=angle, amplitude=sig, lumps=lumps, lump_scale=lump_scale)
-    counts = vs.measure(vs.expected_primary(lw, lb, lf, dose), dose, rng)
-    p = vs.log_sinogram(counts, dose)
     roi = vs.center_roi()
     out = {}
     if "fbp" in methods:
