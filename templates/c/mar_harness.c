@@ -1,428 +1,341 @@
 /*
- * MAR ILS Lab Harness — C
- * ASTM WKXXXXX Rev 05
+ * MAR ILS laboratory harness, C (ASTM WK101378 draft Rev 06, v9 dataset).
  *
- * Turnkey harness that reads HDF5 sinograms, calls the lab's apply_mar(),
- * and writes DICOM CT output with CP-2575 MAR macro.
+ * Reads the coded sinograms of one replicate dataset in the format of the
+ * sinogram ingestion specification (version 2.0), calls apply_mar() for
+ * each, and writes one DICOM CT image per realization, named by its code,
+ * with the CP-2575 MAR Macro (protocol §A8.3).
  *
- * Build:  make
- * Usage:  ./mar_harness ./astm_reference_dataset ./mar_recon
+ * Usage:
+ *   ./mar_harness --recon-check FAMILIARIZATION/recon_check/recon_check.h5
+ *   ./mar_harness REP04 C2_R1
  *
- * Dependencies: libhdf5 (HDF Group)
- * DICOM output uses a minimal Part 10 writer (no external DICOM library).
+ * Then produce the run directory's manifest (protocol §A8.2), for example:
+ *   (cd C2_R1 && shasum -a 256 *.dcm) > C2_R1_checksums_sha256.txt
+ *
+ * Dependencies: libhdf5. DICOM output uses a minimal Part 10 writer.
  */
-
+#include <dirent.h>
+#include <errno.h>
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include <sys/stat.h>
-#include <dirent.h>
-#include <math.h>
 
 #include "hdf5.h"
 #include "apply_mar.h"
 
-/* ── Minimal DICOM Part 10 writer ──────────────────────────────────────── */
+#define RECON_CHECK_TOL_HU 1.0
+#define NPIX (IMAGE_PX * IMAGE_PX)
 
-static void write_u16_le(uint8_t *buf, uint16_t v) {
-    buf[0] = v & 0xFF;
-    buf[1] = (v >> 8) & 0xFF;
-}
+/* ── Ingestion spec §4 ─────────────────────────────────────────────────── */
 
-static void write_u32_le(uint8_t *buf, uint32_t v) {
-    buf[0] = v & 0xFF;
-    buf[1] = (v >> 8) & 0xFF;
-    buf[2] = (v >> 16) & 0xFF;
-    buf[3] = (v >> 24) & 0xFF;
-}
-
-/* Write a DICOM element with Explicit VR Little Endian encoding. */
-static size_t write_elem(uint8_t *buf, uint16_t group, uint16_t elem,
-                         const char *vr, const void *data, uint32_t len)
+static int attr_double(hid_t obj, const char *name, double *out)
 {
-    size_t pos = 0;
-    write_u16_le(buf + pos, group); pos += 2;
-    write_u16_le(buf + pos, elem);  pos += 2;
-    buf[pos++] = vr[0];
-    buf[pos++] = vr[1];
+    hid_t a = H5Aopen(obj, name, H5P_DEFAULT);
+    if (a < 0) { fprintf(stderr, "missing attribute %s\n", name); return -1; }
+    herr_t rc = H5Aread(a, H5T_NATIVE_DOUBLE, out);
+    H5Aclose(a);
+    return rc < 0 ? -1 : 0;
+}
 
-    int long_vr = (memcmp(vr, "OB", 2) == 0 || memcmp(vr, "OW", 2) == 0 ||
-                   memcmp(vr, "SQ", 2) == 0 || memcmp(vr, "UN", 2) == 0 ||
-                   memcmp(vr, "UC", 2) == 0 || memcmp(vr, "UT", 2) == 0);
-    if (long_vr) {
-        write_u16_le(buf + pos, 0); pos += 2;  /* reserved */
-        write_u32_le(buf + pos, len); pos += 4;
-    } else {
-        write_u16_le(buf + pos, (uint16_t)len); pos += 2;
+static int attr_int(hid_t obj, const char *name, int32_t *out)
+{
+    hid_t a = H5Aopen(obj, name, H5P_DEFAULT);
+    if (a < 0) { fprintf(stderr, "missing attribute %s\n", name); return -1; }
+    herr_t rc = H5Aread(a, H5T_NATIVE_INT32, out);
+    H5Aclose(a);
+    return rc < 0 ? -1 : 0;
+}
+
+static void free_geometry(Geometry *g)
+{
+    free(g->betas_rad);
+    free(g->gammas_rad);
+    g->betas_rad = g->gammas_rad = NULL;
+}
+
+/* Reads /line_integrals as double, p[k * n_channels + j], and its attributes. */
+static int read_sinogram(const char *path, double **p_out, Geometry *g)
+{
+    memset(g, 0, sizeof(*g));
+    *p_out = NULL;
+    hid_t f = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (f < 0) return -1;
+    hid_t d = H5Dopen2(f, "/line_integrals", H5P_DEFAULT);
+    if (d < 0) { H5Fclose(f); return -1; }
+
+    int rc = 0;
+    rc |= attr_double(d, "SID_mm", &g->sid_mm);
+    rc |= attr_double(d, "SDD_mm", &g->sdd_mm);
+    rc |= attr_int(d, "n_views", &g->n_views);
+    rc |= attr_int(d, "n_channels", &g->n_channels);
+    rc |= attr_double(d, "delta_gamma_rad", &g->delta_gamma_rad);
+    rc |= attr_double(d, "gamma0_rad", &g->gamma0_rad);
+    rc |= attr_double(d, "I0", &g->I0);
+    rc |= attr_double(d, "scatter_counts", &g->scatter_counts);
+    rc |= attr_double(d, "electronic_variance_counts2", &g->electronic_variance_counts2);
+    rc |= attr_double(d, "log_floor_counts", &g->log_floor_counts);
+
+    hid_t space = H5Dget_space(d);
+    hsize_t dims[2] = {0, 0};
+    if (rc == 0 && (H5Sget_simple_extent_ndims(space) != 2 ||
+                    H5Sget_simple_extent_dims(space, dims, NULL) < 0 ||
+                    dims[0] != (hsize_t)g->n_views || dims[1] != (hsize_t)g->n_channels)) {
+        fprintf(stderr, "%s: line_integrals is not (n_views, n_channels)\n", path);
+        rc = -1;
     }
-
-    if (data && len > 0) {
-        memcpy(buf + pos, data, len);
-        pos += len;
-    }
-    return pos;
-}
-
-static size_t write_elem_str(uint8_t *buf, uint16_t group, uint16_t elem,
-                             const char *vr, const char *str)
-{
-    uint32_t slen = (uint32_t)strlen(str);
-    uint32_t padded = slen + (slen % 2);
-    size_t pos = 0;
-    write_u16_le(buf + pos, group); pos += 2;
-    write_u16_le(buf + pos, elem);  pos += 2;
-    buf[pos++] = vr[0];
-    buf[pos++] = vr[1];
-    write_u16_le(buf + pos, (uint16_t)padded); pos += 2;
-    memcpy(buf + pos, str, slen);
-    if (slen % 2) buf[pos + slen] = ' ';
-    pos += padded;
-    return pos;
-}
-
-static size_t write_elem_u16(uint8_t *buf, uint16_t group, uint16_t elem,
-                             uint16_t val)
-{
-    uint8_t v[2];
-    write_u16_le(v, val);
-    return write_elem(buf, group, elem, "US", v, 2);
-}
-
-static void mkdirs(const char *path) {
-    char tmp[4096];
-    snprintf(tmp, sizeof(tmp), "%s", path);
-    for (char *p = tmp + 1; *p; p++) {
-        if (*p == '/') {
-            *p = '\0';
-            mkdir(tmp, 0755);
-            *p = '/';
-        }
-    }
-    mkdir(tmp, 0755);
-}
-
-static int write_dicom_slice(const float *hu_slice, int z,
-                             const char *output_dir, double voxel_mm)
-{
-    char fname[4096];
-    snprintf(fname, sizeof(fname), "%s/slice_%04d.dcm", output_dir, z + 1);
-
-    /* Clip to int16 */
-    int16_t *pixels = (int16_t *)malloc(512 * 512 * sizeof(int16_t));
-    if (!pixels) return -1;
-    for (int i = 0; i < 512 * 512; i++) {
-        double v = hu_slice[i];
-        if (v < -1024) v = -1024;
-        if (v > 32767) v = 32767;
-        pixels[i] = (int16_t)v;
-    }
-
-    /* Build DICOM in memory */
-    uint8_t *dcm = (uint8_t *)calloc(1, 512 * 512 * 2 + 65536);
-    if (!dcm) { free(pixels); return -1; }
-    size_t pos = 0;
-
-    /* Preamble (128 bytes) + "DICM" */
-    pos += 128;
-    memcpy(dcm + pos, "DICM", 4); pos += 4;
-
-    /* File Meta Information Group Length — placeholder */
-    size_t meta_len_pos = pos;
-    pos += write_elem(dcm + pos, 0x0002, 0x0000, "UL", "\0\0\0\0", 4);
-    size_t meta_start = pos;
-
-    /* Transfer Syntax: Explicit VR Little Endian */
-    pos += write_elem_str(dcm + pos, 0x0002, 0x0010, "UI",
-                          "1.2.840.10008.1.2.1");
-    /* Media Storage SOP Class UID: CT Image Storage */
-    pos += write_elem_str(dcm + pos, 0x0002, 0x0002, "UI",
-                          "1.2.840.10008.5.1.4.1.1.2");
-    /* Media Storage SOP Instance UID */
-    char sop_uid[128];
-    snprintf(sop_uid, sizeof(sop_uid), "2.25.%lu%d%d",
-             (unsigned long)time(NULL), z, rand());
-    pos += write_elem_str(dcm + pos, 0x0002, 0x0003, "UI", sop_uid);
-
-    /* Patch meta group length */
-    uint32_t meta_len = (uint32_t)(pos - meta_start);
-    write_u32_le(dcm + meta_len_pos + 8, meta_len);
-
-    /* Dataset elements */
-    pos += write_elem_str(dcm + pos, 0x0008, 0x0016, "UI",
-                          "1.2.840.10008.5.1.4.1.1.2");
-    pos += write_elem_str(dcm + pos, 0x0008, 0x0060, "CS", "CT");
-    pos += write_elem_str(dcm + pos, 0x0008, 0x1030, "LO",
-                          "MAR ILS Lab Submission");
-
-    char inst_str[16];
-    snprintf(inst_str, sizeof(inst_str), "%d", z + 1);
-    pos += write_elem_str(dcm + pos, 0x0020, 0x0013, "IS", inst_str);
-
-    char sloc_str[32];
-    snprintf(sloc_str, sizeof(sloc_str), "%.4f", (double)z * voxel_mm);
-    pos += write_elem_str(dcm + pos, 0x0020, 0x1041, "DS", sloc_str);
-
-    char ps_str[32];
-    snprintf(ps_str, sizeof(ps_str), "%.4f\\%.4f", voxel_mm, voxel_mm);
-    pos += write_elem_str(dcm + pos, 0x0028, 0x0030, "DS", ps_str);
-
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0010, 512);  /* Rows */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0011, 512);  /* Columns */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0100, 16);   /* BitsAllocated */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0101, 16);   /* BitsStored */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0102, 15);   /* HighBit */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0103, 1);    /* signed */
-    pos += write_elem_u16(dcm + pos, 0x0028, 0x0002, 1);    /* SamplesPerPixel */
-    pos += write_elem_str(dcm + pos, 0x0028, 0x0004, "CS", "MONOCHROME2");
-    pos += write_elem_str(dcm + pos, 0x0028, 0x1052, "DS", "0");
-    pos += write_elem_str(dcm + pos, 0x0028, 0x1053, "DS", "1");
-
-    /* CP-2575 MAR Macro: (0018,9390) SQ containing (0018,9391) = "YES" */
-    /* SQ item: FFFE,E000 (Item) + FFFE,E00D (Item Delimitation) */
-    write_u16_le(dcm + pos, 0x0018); pos += 2;  /* group */
-    write_u16_le(dcm + pos, 0x9390); pos += 2;  /* element */
-    dcm[pos++] = 'S'; dcm[pos++] = 'Q';
-    write_u16_le(dcm + pos, 0); pos += 2;        /* reserved */
-    size_t sq_len_pos = pos;
-    pos += 4;                                     /* SQ length placeholder */
-    size_t sq_start = pos;
-
-    /* Item tag */
-    write_u16_le(dcm + pos, 0xFFFE); pos += 2;
-    write_u16_le(dcm + pos, 0xE000); pos += 2;
-    size_t item_len_pos = pos;
-    pos += 4;
-    size_t item_start = pos;
-
-    /* (0018,9391) CS "YES" */
-    pos += write_elem_str(dcm + pos, 0x0018, 0x9391, "CS", "YES");
-
-    /* Patch item length */
-    write_u32_le(dcm + item_len_pos, (uint32_t)(pos - item_start));
-
-    /* Patch SQ length */
-    write_u32_le(dcm + sq_len_pos, (uint32_t)(pos - sq_start));
-
-    /* Pixel Data */
-    uint32_t pixel_len = 512 * 512 * 2;
-    pos += write_elem(dcm + pos, 0x7FE0, 0x0010, "OW",
-                      pixels, pixel_len);
-
-    /* Write file */
-    FILE *fp = fopen(fname, "wb");
-    if (!fp) { free(pixels); free(dcm); return -1; }
-    fwrite(dcm, 1, pos, fp);
-    fclose(fp);
-
-    free(pixels);
-    free(dcm);
-    return 0;
-}
-
-
-/* ── HDF5 reader ───────────────────────────────────────────────────────── */
-
-static double *read_h5_attr_double_array(hid_t loc, const char *name, int *n)
-{
-    hid_t attr = H5Aopen(loc, name, H5P_DEFAULT);
-    hid_t space = H5Aget_space(attr);
-    hsize_t dims[1];
-    H5Sget_simple_extent_dims(space, dims, NULL);
-    *n = (int)dims[0];
-    double *buf = (double *)malloc(*n * sizeof(double));
-    H5Aread(attr, H5T_NATIVE_DOUBLE, buf);
     H5Sclose(space);
-    H5Aclose(attr);
-    return buf;
+
+    if (rc == 0) {
+        g->betas_rad = malloc((size_t)g->n_views * sizeof(double));
+        g->gammas_rad = malloc((size_t)g->n_channels * sizeof(double));
+        *p_out = malloc((size_t)g->n_views * g->n_channels * sizeof(double));
+        if (!g->betas_rad || !g->gammas_rad || !*p_out) rc = -1;
+    }
+    if (rc == 0) {
+        rc |= attr_double(d, "betas_rad", g->betas_rad);
+        rc |= attr_double(d, "gammas_rad", g->gammas_rad);
+        /* stored as float32; HDF5 converts to double on read */
+        if (H5Dread(d, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, *p_out) < 0) rc = -1;
+    }
+    H5Dclose(d);
+    H5Fclose(f);
+    if (rc != 0) { free(*p_out); *p_out = NULL; free_geometry(g); }
+    return rc;
 }
 
-static double read_h5_attr_double(hid_t loc, const char *name)
+/* ── Minimal DICOM Part 10 writer (Explicit VR Little Endian) ──────────── */
+
+typedef struct { uint8_t *b; size_t n; } Buf;
+
+static void put16(Buf *o, uint16_t v) { o->b[o->n++] = v & 0xFF; o->b[o->n++] = v >> 8; }
+static void put32(Buf *o, uint32_t v) { put16(o, v & 0xFFFF); put16(o, v >> 16); }
+static void set32(uint8_t *at, uint32_t v) { at[0] = v; at[1] = v >> 8; at[2] = v >> 16; at[3] = v >> 24; }
+
+/* Elements must be written in ascending tag order. */
+static void elem(Buf *o, uint16_t grp, uint16_t el, const char *vr, const void *data, uint32_t len)
 {
-    double val;
-    hid_t attr = H5Aopen(loc, name, H5P_DEFAULT);
-    H5Aread(attr, H5T_NATIVE_DOUBLE, &val);
-    H5Aclose(attr);
-    return val;
+    put16(o, grp); put16(o, el);
+    o->b[o->n++] = vr[0]; o->b[o->n++] = vr[1];
+    int long_form = !strcmp(vr, "OB") || !strcmp(vr, "OW") || !strcmp(vr, "SQ") ||
+                    !strcmp(vr, "UN") || !strcmp(vr, "UT");
+    if (long_form) { put16(o, 0); put32(o, len); } else put16(o, (uint16_t)len);
+    if (len) { memcpy(o->b + o->n, data, len); o->n += len; }
 }
 
-static int read_h5_attr_int(hid_t loc, const char *name)
+/* Text element padded to even length: UI with a null byte, other VRs with a space. */
+static void elem_str(Buf *o, uint16_t grp, uint16_t el, const char *vr, const char *s)
 {
-    int val;
-    hid_t attr = H5Aopen(loc, name, H5P_DEFAULT);
-    H5Aread(attr, H5T_NATIVE_INT, &val);
-    H5Aclose(attr);
-    return val;
+    char tmp[256];
+    size_t len = strlen(s);
+    memcpy(tmp, s, len);
+    if (len % 2) tmp[len++] = strcmp(vr, "UI") ? ' ' : '\0';
+    elem(o, grp, el, vr, tmp, (uint32_t)len);
 }
 
-static int read_sinogram(const char *h5_path,
-                         float **sinogram_out,
-                         FanBeamGeometry *geo)
+static void elem_us(Buf *o, uint16_t grp, uint16_t el, uint16_t v)
 {
-    hid_t file = H5Fopen(h5_path, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if (file < 0) return -1;
-
-    /* Read line_integrals */
-    hid_t dset = H5Dopen2(file, "/line_integrals", H5P_DEFAULT);
-    hid_t space = H5Dget_space(dset);
-    hsize_t dims[3];
-    H5Sget_simple_extent_dims(space, dims, NULL);
-
-    size_t total = (size_t)dims[0] * dims[1] * dims[2];
-    float *sino = (float *)malloc(total * sizeof(float));
-    H5Dread(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, sino);
-    H5Sclose(space);
-    H5Dclose(dset);
-
-    /* Read geometry attributes */
-    hid_t geo_grp = H5Gopen2(file, "/geometry", H5P_DEFAULT);
-
-    geo->n_slices       = read_h5_attr_int(geo_grp, "n_slices");
-    geo->n_angles       = read_h5_attr_int(geo_grp, "n_angles");
-    geo->n_det          = read_h5_attr_int(geo_grp, "n_det");
-    geo->voxel_mm       = read_h5_attr_double(geo_grp, "voxel_mm");
-    geo->sid_mm         = read_h5_attr_double(geo_grp, "SID_mm");
-    geo->sdd_mm         = read_h5_attr_double(geo_grp, "SDD_mm");
-    geo->gamma_max_deg  = read_h5_attr_double(geo_grp, "gamma_max_deg");
-    geo->delta_gamma_deg = read_h5_attr_double(geo_grp, "delta_gamma_deg");
-
-    int n_a, n_d;
-    geo->angles_deg          = read_h5_attr_double_array(geo_grp, "angles_deg", &n_a);
-    geo->det_fan_angles_deg  = read_h5_attr_double_array(geo_grp, "det_fan_angles_deg", &n_d);
-
-    H5Gclose(geo_grp);
-    H5Fclose(file);
-
-    *sinogram_out = sino;
-    return 0;
+    uint8_t b[2] = { v & 0xFF, v >> 8 };
+    elem(o, grp, el, "US", b, 2);
 }
 
-
-/* ── Main harness ──────────────────────────────────────────────────────── */
-
-static int process_realization(const char *h5_path,
-                               const char *output_dir,
-                               double voxel_mm)
+static void make_uid(char *out, size_t size)
 {
-    float *sinogram = NULL;
-    FanBeamGeometry geo;
-    memset(&geo, 0, sizeof(geo));
-
-    if (read_sinogram(h5_path, &sinogram, &geo) != 0) {
-        fprintf(stderr, "Failed to read %s\n", h5_path);
-        return -1;
-    }
-
-    size_t vol_size = (size_t)geo.n_slices * 512 * 512;
-    float *hu_out = (float *)calloc(vol_size, sizeof(float));
-    if (!hu_out) {
-        free(sinogram);
-        return -1;
-    }
-
-    int rc = apply_mar(sinogram, &geo, hu_out);
-    free(sinogram);
-    free(geo.angles_deg);
-    free(geo.det_fan_angles_deg);
-
-    if (rc != 0) {
-        fprintf(stderr, "apply_mar failed for %s\n", h5_path);
-        free(hu_out);
-        return -1;
-    }
-
-    mkdirs(output_dir);
-    for (int z = 0; z < geo.n_slices; z++) {
-        write_dicom_slice(hu_out + (size_t)z * 512 * 512,
-                          z, output_dir, voxel_mm);
-    }
-
-    free(hu_out);
-    return 0;
+    uint64_t r[2] = {0, 0};
+    FILE *u = fopen("/dev/urandom", "rb");
+    if (!u || fread(r, sizeof(r), 1, u) != 1) { r[0] = (uint64_t)rand() + 1; r[1] = (uint64_t)rand(); }
+    if (u) fclose(u);
+    if (r[0] == 0) r[0] = 1;
+    /* 2.25 UIDs are integers below 2^128: at most 20 + 18 digits here */
+    snprintf(out, size, "2.25.%llu%018llu", (unsigned long long)r[0],
+             (unsigned long long)(r[1] % 1000000000000000000ULL));
 }
 
-static int process_condition(const char *dataset_dir,
-                             const char *output_dir,
-                             const char *condition)
+static int write_dicom(const double *hu, const char *path, const char *study_uid, const char *series_uid)
 {
-    char sino_dir[4096];
-    snprintf(sino_dir, sizeof(sino_dir), "%s/sinograms/%s", dataset_dir, condition);
+    static const char *CT = "1.2.840.10008.5.1.4.1.1.2";
+    static const char *EVRLE = "1.2.840.10008.1.2.1";
+    char sop_uid[96];
+    make_uid(sop_uid, sizeof(sop_uid));
 
-    DIR *d = opendir(sino_dir);
-    if (!d) {
-        fprintf(stderr, "  No sinogram directory: %s\n", sino_dir);
-        return -1;
+    Buf o = { calloc(1, (size_t)NPIX * 2 + 4096), 0 };
+    int16_t *px = malloc((size_t)NPIX * sizeof(int16_t));
+    if (!o.b || !px) { free(o.b); free(px); return -1; }
+    for (int i = 0; i < NPIX; i++) {
+        double v = rint(hu[i]);
+        if (v < -32768.0) v = -32768.0;
+        if (v > 32767.0) v = 32767.0;
+        px[i] = (int16_t)v;
     }
 
-    int count = 0;
-    struct dirent *entry;
-    while ((entry = readdir(d)) != NULL) {
-        if (strstr(entry->d_name, "realization_") &&
-            strstr(entry->d_name, ".h5"))
-            count++;
-    }
-    rewinddir(d);
+    o.n = 128;
+    memcpy(o.b + o.n, "DICM", 4); o.n += 4;
 
-    printf("  %s: %d realizations\n", condition, count);
+    /* File meta information */
+    size_t glen_at = o.n + 8;
+    elem(&o, 0x0002, 0x0000, "UL", "\0\0\0\0", 4);
+    size_t meta_start = o.n;
+    elem(&o, 0x0002, 0x0001, "OB", "\0\1", 2);
+    elem_str(&o, 0x0002, 0x0002, "UI", CT);
+    elem_str(&o, 0x0002, 0x0003, "UI", sop_uid);
+    elem_str(&o, 0x0002, 0x0010, "UI", EVRLE);
+    elem_str(&o, 0x0002, 0x0012, "UI", "2.25.329800735698586629295641978511506172918");
+    set32(o.b + glen_at, (uint32_t)(o.n - meta_start));
 
-    while ((entry = readdir(d)) != NULL) {
-        if (!strstr(entry->d_name, "realization_") ||
-            !strstr(entry->d_name, ".h5"))
-            continue;
+    /* Data set */
+    elem_str(&o, 0x0008, 0x0016, "UI", CT);
+    elem_str(&o, 0x0008, 0x0018, "UI", sop_uid);
+    elem_str(&o, 0x0008, 0x0060, "CS", "CT");
 
-        /* Extract tag (e.g. "realization_001") */
-        char tag[256];
-        strncpy(tag, entry->d_name, sizeof(tag) - 1);
-        char *dot = strrchr(tag, '.');
-        if (dot) *dot = '\0';
+    /* (0018,9390) Metal Artifact Reduction Sequence, one item: (0018,9391) = YES */
+    put16(&o, 0x0018); put16(&o, 0x9390);
+    o.b[o.n++] = 'S'; o.b[o.n++] = 'Q'; put16(&o, 0);
+    size_t sq_len_at = o.n; put32(&o, 0);
+    size_t sq_start = o.n;
+    put16(&o, 0xFFFE); put16(&o, 0xE000);
+    size_t item_len_at = o.n; put32(&o, 0);
+    size_t item_start = o.n;
+    elem_str(&o, 0x0018, 0x9391, "CS", "YES");
+    set32(o.b + item_len_at, (uint32_t)(o.n - item_start));
+    set32(o.b + sq_len_at, (uint32_t)(o.n - sq_start));
 
-        char h5_path[4096];
-        snprintf(h5_path, sizeof(h5_path), "%s/%s", sino_dir, entry->d_name);
+    elem_str(&o, 0x0020, 0x000D, "UI", study_uid);
+    elem_str(&o, 0x0020, 0x000E, "UI", series_uid);
+    elem_str(&o, 0x0020, 0x0013, "IS", "1");
+    elem_str(&o, 0x0020, 0x0032, "DS", "-150\\-150\\0");      /* center of pixel (0, 0) */
+    elem_str(&o, 0x0020, 0x0037, "DS", "1\\0\\0\\0\\1\\0");
+    elem_us(&o, 0x0028, 0x0002, 1);
+    elem_str(&o, 0x0028, 0x0004, "CS", "MONOCHROME2");
+    elem_us(&o, 0x0028, 0x0010, IMAGE_PX);
+    elem_us(&o, 0x0028, 0x0011, IMAGE_PX);
+    elem_str(&o, 0x0028, 0x0030, "DS", "0.5859375\\0.5859375");
+    elem_us(&o, 0x0028, 0x0100, 16);
+    elem_us(&o, 0x0028, 0x0101, 16);
+    elem_us(&o, 0x0028, 0x0102, 15);
+    elem_us(&o, 0x0028, 0x0103, 1);
+    elem_str(&o, 0x0028, 0x1052, "DS", "0");
+    elem_str(&o, 0x0028, 0x1053, "DS", "1");
 
-        char real_dir[4096];
-        snprintf(real_dir, sizeof(real_dir), "%s/%s/%s",
-                 output_dir, condition, tag);
+    /* Pixel data, little-endian int16 */
+    uint8_t *pd = malloc((size_t)NPIX * 2);
+    if (!pd) { free(o.b); free(px); return -1; }
+    for (int i = 0; i < NPIX; i++) { uint16_t v = (uint16_t)px[i]; pd[2 * i] = v & 0xFF; pd[2 * i + 1] = v >> 8; }
+    elem(&o, 0x7FE0, 0x0010, "OW", pd, (uint32_t)NPIX * 2);
 
-        printf("    %s ... ", tag);
-        fflush(stdout);
-
-        if (process_realization(h5_path, real_dir, 0.5) != 0) {
-            printf("FAILED\n");
-            closedir(d);
-            return -1;
-        }
-        printf("done\n");
-    }
-
-    closedir(d);
-    return 0;
+    FILE *fp = fopen(path, "wb");
+    int rc = (fp && fwrite(o.b, 1, o.n, fp) == o.n) ? 0 : -1;
+    if (fp) fclose(fp);
+    free(pd); free(px); free(o.b);
+    return rc;
 }
 
-int main(int argc, char *argv[])
+/* ── Modes ─────────────────────────────────────────────────────────────── */
+
+static int recon_check(const char *path)
 {
-    if (argc < 2) {
-        fprintf(stderr,
-            "Usage: %s <dataset_dir> [output_dir]\n"
-            "\n"
-            "  dataset_dir  Path to the ILS sinogram dataset\n"
-            "  output_dir   Output directory (default: ./mar_recon)\n",
-            argv[0]);
+    double *p = NULL;
+    Geometry g;
+    if (read_sinogram(path, &p, &g) != 0) { fprintf(stderr, "cannot read %s\n", path); return 1; }
+
+    double *ref = malloc((size_t)NPIX * sizeof(double));
+    double *hu = malloc((size_t)NPIX * sizeof(double));
+    hid_t f = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hid_t d = f < 0 ? -1 : H5Dopen2(f, "/reference_image_hu", H5P_DEFAULT);
+    int ok = ref && hu && d >= 0 &&
+             H5Dread(d, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref) >= 0;
+    if (d >= 0) H5Dclose(d);
+    if (f >= 0) H5Fclose(f);
+    if (!ok || reconstruct(p, &g, hu) != 0) {
+        fprintf(stderr, "reconstruction check failed to run\n");
+        free(p); free(ref); free(hu); free_geometry(&g);
         return 1;
     }
+    double worst = 0.0;
+    for (int i = 0; i < NPIX; i++) { double e = fabs(hu[i] - ref[i]); if (e > worst) worst = e; }
+    int pass = worst <= RECON_CHECK_TOL_HU;
+    printf("Reconstruction check: largest difference %.6f HU (%s, tolerance %.1f HU)\n",
+           worst, pass ? "PASS" : "FAIL", RECON_CHECK_TOL_HU);
+    free(p); free(ref); free(hu); free_geometry(&g);
+    return pass ? 0 : 1;
+}
 
-    const char *dataset_dir = argv[1];
-    const char *output_dir  = argc >= 3 ? argv[2] : "./mar_recon";
+static int mkdirs(const char *path)
+{
+    char tmp[4096];
+    snprintf(tmp, sizeof(tmp), "%s", path);
+    for (char *s = tmp + 1; *s; s++) {
+        if (*s != '/') continue;
+        *s = '\0';
+        if (mkdir(tmp, 0755) != 0 && errno != EEXIST) return -1;
+        *s = '/';
+    }
+    return (mkdir(tmp, 0755) != 0 && errno != EEXIST) ? -1 : 0;
+}
 
-    printf("MAR ILS Harness (C)\n");
-    printf("  Dataset:  %s\n", dataset_dir);
-    printf("  Output:   %s\n", output_dir);
-    printf("\n");
+static int cmp_str(const void *a, const void *b) { return strcmp(*(char *const *)a, *(char *const *)b); }
 
-    mkdirs(output_dir);
+static int run(const char *dataset_dir, const char *run_dir)
+{
+    char sino_dir[4096];
+    snprintf(sino_dir, sizeof(sino_dir), "%s/sinograms", dataset_dir);
+    DIR *dp = opendir(sino_dir);
+    if (!dp) { fprintf(stderr, "no directory %s\n", sino_dir); return 1; }
 
-    if (process_condition(dataset_dir, output_dir, "LP") != 0) return 1;
-    if (process_condition(dataset_dir, output_dir, "LA") != 0) return 1;
+    char **names = NULL;
+    size_t n = 0, cap = 0;
+    struct dirent *e;
+    while ((e = readdir(dp)) != NULL) {
+        size_t len = strlen(e->d_name);
+        if (len < 4 || strcmp(e->d_name + len - 3, ".h5") != 0) continue;
+        if (n == cap) { cap = cap ? 2 * cap : 1024; names = realloc(names, cap * sizeof(char *)); }
+        names[n++] = strdup(e->d_name);
+    }
+    closedir(dp);
+    if (n == 0) { fprintf(stderr, "no sinograms in %s\n", sino_dir); return 1; }
+    qsort(names, n, sizeof(char *), cmp_str);
 
-    printf("\nDone. Submit %s/ to the ILS coordinator.\n", output_dir);
-    return 0;
+    if (mkdirs(run_dir) != 0) { perror(run_dir); return 1; }
+    char study_uid[96], series_uid[96];
+    make_uid(study_uid, sizeof(study_uid));
+    make_uid(series_uid, sizeof(series_uid));
+    printf("%s -> %s: %zu realizations\n", dataset_dir, run_dir, n);
+
+    double *hu = malloc((size_t)NPIX * sizeof(double));
+    int status = 0;
+    for (size_t i = 0; i < n && status == 0; i++) {
+        char in[4096], out[4096], code[256];
+        snprintf(code, sizeof(code), "%.*s", (int)(strlen(names[i]) - 3), names[i]);
+        snprintf(in, sizeof(in), "%s/%s", sino_dir, names[i]);
+        snprintf(out, sizeof(out), "%s/%s.dcm", run_dir, code);
+
+        double *p = NULL;
+        Geometry g;
+        if (read_sinogram(in, &p, &g) != 0) { fprintf(stderr, "cannot read %s\n", in); status = 1; break; }
+        if (apply_mar(p, &g, hu) != 0) { fprintf(stderr, "apply_mar failed for %s\n", code); status = 1; }
+        else if (write_dicom(hu, out, study_uid, series_uid) != 0) { fprintf(stderr, "cannot write %s\n", out); status = 1; }
+        free(p);
+        free_geometry(&g);
+        if ((i + 1) % 100 == 0 || i + 1 == n) printf("  %zu/%zu\n", i + 1, n);
+    }
+    for (size_t i = 0; i < n; i++) free(names[i]);
+    free(names);
+    free(hu);
+    if (status == 0)
+        printf("Now write the manifest: (cd %s && shasum -a 256 *.dcm) > %s_checksums_sha256.txt\n",
+               run_dir, run_dir);
+    return status;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 3 && strcmp(argv[1], "--recon-check") == 0) return recon_check(argv[2]);
+    if (argc == 3) return run(argv[1], argv[2]);
+    fprintf(stderr,
+            "Usage:\n"
+            "  %s --recon-check <recon_check.h5>   reconstruction check, draft standard 12.2\n"
+            "  %s <dataset_dir> <run_dir>          e.g. REP04 C2_R1\n", argv[0], argv[0]);
+    return 2;
 }
