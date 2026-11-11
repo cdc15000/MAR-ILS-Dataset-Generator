@@ -215,3 +215,86 @@ class TestDatasetWriter:
         with pytest.raises(SystemExit):
             w.main()
         assert not (tmp_path / "REP01").exists()
+
+
+class TestAssignment:
+    """blind_dataset_v9_0_0: balanced design of review item 37."""
+
+    @pytest.mark.parametrize("n_labs", [1, 3, 6, 10, 12, 20, 84, 90])
+    def test_balanced_and_distinct(self, n_labs):
+        import blind_dataset_v9_0_0 as b
+        labs = [f"L{i:03d}" for i in range(n_labs)]
+        design = b.draw_assignment(labs)
+        assert sorted(design) == labs and not b.check_assignment(design)
+
+    def test_reproducible_from_seed(self):
+        import blind_dataset_v9_0_0 as b
+        labs = [f"L{i}" for i in range(12)]
+        assert b.draw_assignment(labs) == b.draw_assignment(list(reversed(labs)))
+        assert b.draw_assignment(labs) != b.draw_assignment(labs, seed=1)
+
+    def test_rejects_unbalanced(self):
+        import blind_dataset_v9_0_0 as b
+        bad = {"A": ["REP01", "REP02", "REP03"], "B": ["REP01", "REP02", "REP03"]}
+        assert b.check_assignment(bad)
+
+
+@pytest.fixture(scope="module")
+def blinded(tmp_path_factory):
+    import write_dataset_v9_0_0 as w
+    import blind_dataset_v9_0_0 as b
+    base = tmp_path_factory.mktemp("blind")
+    masters = base / "masters"
+    for name, pools, fam in (("REP01", (0, 1), False), ("REP02", (2, 3), False), ("FAMILIARIZATION", (4, 5), True)):
+        w.write_dataset(w.DatasetSpec(name, pools, 1e6, (1.03,), 1, 1, fam), masters, workers=2)
+    design = {"LAB1": ["REP01", "REP02", "REP03"], "LAB2": ["REP04", "REP05", "REP06"],
+              "LAB3": ["REP07", "REP08", "REP09"]}
+    h = b.blind(masters, base / "dist", base / "key" / "blinding_key.json", design, "ILS staff",
+                mtime=1.8e9, require_all=False)
+    return b, masters, base / "dist", base / "key" / "blinding_key.json", h
+
+
+class TestBlinding:
+    def test_coded_copies_identical_to_master(self, blinded):
+        import json
+        b, masters, dist, key_path, _ = blinded
+        key = json.loads(key_path.read_text())
+        codes = [c for d in key["datasets"].values() for c in d]
+        assert len(codes) == len(set(codes)) == 8
+        for d, entries in key["datasets"].items():
+            for code, e in entries.items():
+                assert len(code) == 8 and set(code) <= set(b.CODE_ALPHABET)
+                for sub, ext in (("sinograms", "h5"), ("noMAR", "dcm")):
+                    assert (b.sha256_file(dist / d / sub / f"{code}.{ext}")
+                            == b.sha256_file(masters / d / sub / f"{e['master_name']}.{ext}"))
+
+    def test_no_labels_left(self, blinded):
+        import json
+        b, masters, dist, key_path, h = blinded
+        for d in ("REP01", "REP02"):
+            names = [p.name for p in (dist / d).rglob("*") if p.is_file()]
+            assert not any(s in n for n in names for s in ("absent", "present", "train", "test"))
+            rec = json.loads((dist / d / "dataset_record.json").read_text())
+            assert "realizations" not in rec and rec["blinding_key_sha256"] == h
+            files = [p for p in (dist / d).rglob("*.h5")] + [p for p in (dist / d).rglob("*.dcm")]
+            assert len({p.stat().st_mtime for p in files}) == 1
+            assert len({p.stat().st_size for p in (dist / d).rglob("*.h5")}) == 1
+            assert len({p.stat().st_size for p in (dist / d).rglob("*.dcm")}) == 1
+        assert not list(dist.rglob("blinding_key*"))
+        assert (dist / "FAMILIARIZATION" / "labels.csv").exists()
+        assert not (dist / "FAMILIARIZATION" / ".writer_state.json").exists()
+
+    def test_key_hash_and_checksums(self, blinded):
+        import hashlib
+        b, masters, dist, key_path, h = blinded
+        assert hashlib.sha256(key_path.read_bytes()).hexdigest() == h
+        for d in ("REP01", "REP02", "FAMILIARIZATION"):
+            b.verify_master(dist / d)
+
+    def test_refuses_key_inside_out_and_nonempty_out(self, blinded, tmp_path):
+        b, masters, dist, key_path, _ = blinded
+        design = {"L": ["REP01", "REP02", "REP03"]}
+        with pytest.raises(RuntimeError):
+            b.blind(masters, tmp_path / "d", tmp_path / "d" / "k.json", design, "x", require_all=False)
+        with pytest.raises(RuntimeError):
+            b.blind(masters, dist, tmp_path / "k.json", design, "x", require_all=False)
