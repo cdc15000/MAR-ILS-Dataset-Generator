@@ -16,7 +16,6 @@ ingestion specification only (protocol §A7).
 from __future__ import annotations
 
 import numpy as np
-
 import reference_fbp
 
 

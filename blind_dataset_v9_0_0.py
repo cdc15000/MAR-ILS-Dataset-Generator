@@ -161,8 +161,7 @@ def place(src: Path, dst: Path, copy: bool, mtime: float) -> None:
 def write_checksums(root: Path) -> None:
     files = sorted(p for p in root.rglob("*") if p.is_file() and p.name != "checksums_sha256.txt")
     with open(root / "checksums_sha256.txt", "w") as f:
-        for p in files:
-            f.write(f"{sha256_file(p)}  {p.relative_to(root).as_posix()}\n")
+        f.writelines(f"{sha256_file(p)}  {p.relative_to(root).as_posix()}\n" for p in files)
 
 
 def blind_dataset(master: Path, dist: Path, codes_taken: set[str], copy: bool, mtime: float) -> dict:

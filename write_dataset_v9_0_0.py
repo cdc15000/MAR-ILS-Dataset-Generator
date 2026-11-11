@@ -40,7 +40,7 @@ import csv
 import hashlib
 import importlib.metadata
 import json
-import math
+import multiprocessing
 import os
 import subprocess
 import sys
@@ -195,9 +195,9 @@ def sha256_file(path: Path) -> str:
 def git_commit() -> str:
     try:
         here = Path(__file__).resolve().parent
-        rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here, capture_output=True, text=True)
+        rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here, capture_output=True, text=True, check=False)
         dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=here,
-                               capture_output=True, text=True).stdout.strip()
+                               capture_output=True, text=True, check=False).stdout.strip()
         return rev.stdout.strip() + ("-dirty" if dirty else "")
     except OSError:
         return "unknown"
@@ -277,7 +277,10 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     t0 = time.time()
     print(f"{spec.name}: {len(jobs)} realizations -> {root}", flush=True)
     realizations = []
-    with ProcessPoolExecutor(workers, initializer=_init_worker) as ex:
+    # spawn, not fork: forking after numba's parallel threading layer has started in
+    # the parent kills the workers on Linux (macOS already defaults to spawn)
+    ctx = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(workers, mp_context=ctx, initializer=_init_worker) as ex:
         for n, rec in enumerate(ex.map(_write_one, [(j, root, spec.dose, uids) for j in jobs],
                                        chunksize=2), 1):
             realizations.append(rec)
@@ -302,8 +305,7 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     files = sorted(p for p in root.rglob("*") if p.is_file() and p.name not in
                    ("checksums_sha256.txt", ".writer_state.json") and not p.name.endswith(".partial"))
     with open(root / "checksums_sha256.txt", "w") as f:
-        for p in files:
-            f.write(f"{sha256_file(p)}  {p.relative_to(root).as_posix()}\n")
+        f.writelines(f"{sha256_file(p)}  {p.relative_to(root).as_posix()}\n" for p in files)
     print(f"  done in {(time.time() - t0) / 60:.1f} min; {len(files)} files checksummed", flush=True)
     return root
 

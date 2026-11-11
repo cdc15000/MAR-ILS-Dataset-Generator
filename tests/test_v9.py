@@ -191,15 +191,16 @@ class TestDatasetWriter:
 
     def test_nomar_dicom(self, written):
         import pydicom
-        w, root = written
+        _w, root = written
         ds = pydicom.dcmread(root / "noMAR" / "absent_train_0000.dcm")
         assert ds[0x00189390].value[0][0x00189391].value == "NO"
         assert (ds.Rows, ds.Columns, ds.PixelRepresentation) == (512, 512, 1)
         assert "SeriesDescription" not in ds and ds.InstanceNumber == 1
 
     def test_record_and_checksums(self, written):
-        import hashlib, json
-        w, root = written
+        import hashlib
+        import json
+        _w, root = written
         rec = json.loads((root / "dataset_record.json").read_text())
         assert rec["n_realizations"] == 4 and rec["subset"] is True
         assert rec["mar2_tau_mu_cm"] == 1.9529025691374509
@@ -210,6 +211,7 @@ class TestDatasetWriter:
 
     def test_study_pools_need_production(self, tmp_path, monkeypatch):
         import sys
+
         import write_dataset_v9_0_0 as w
         monkeypatch.setattr(sys, "argv", ["w", "--dataset", "REP01", "--out-root", str(tmp_path)])
         with pytest.raises(SystemExit):
@@ -241,8 +243,8 @@ class TestAssignment:
 
 @pytest.fixture(scope="module")
 def blinded(tmp_path_factory):
-    import write_dataset_v9_0_0 as w
     import blind_dataset_v9_0_0 as b
+    import write_dataset_v9_0_0 as w
     base = tmp_path_factory.mktemp("blind")
     masters = base / "masters"
     for name, pools, fam in (("REP01", (0, 1), False), ("REP02", (2, 3), False), ("FAMILIARIZATION", (4, 5), True)):
@@ -270,7 +272,7 @@ class TestBlinding:
 
     def test_no_labels_left(self, blinded):
         import json
-        b, masters, dist, key_path, h = blinded
+        _b, _masters, dist, _key_path, h = blinded
         for d in ("REP01", "REP02"):
             names = [p.name for p in (dist / d).rglob("*") if p.is_file()]
             assert not any(s in n for n in names for s in ("absent", "present", "train", "test"))
@@ -286,13 +288,13 @@ class TestBlinding:
 
     def test_key_hash_and_checksums(self, blinded):
         import hashlib
-        b, masters, dist, key_path, h = blinded
+        b, _masters, dist, key_path, h = blinded
         assert hashlib.sha256(key_path.read_bytes()).hexdigest() == h
         for d in ("REP01", "REP02", "FAMILIARIZATION"):
             b.verify_master(dist / d)
 
     def test_refuses_key_inside_out_and_nonempty_out(self, blinded, tmp_path):
-        b, masters, dist, key_path, _ = blinded
+        b, masters, dist, _key_path, _ = blinded
         design = {"L": ["REP01", "REP02", "REP03"]}
         with pytest.raises(RuntimeError):
             b.blind(masters, tmp_path / "d", tmp_path / "d" / "k.json", design, "x", require_all=False)

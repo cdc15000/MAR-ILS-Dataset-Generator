@@ -28,10 +28,9 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+from apply_mar import apply_mar, reconstruct
 from pydicom.dataset import Dataset, FileDataset, FileMetaDataset
 from pydicom.uid import CTImageStorage, ExplicitVRLittleEndian, generate_uid
-
-from apply_mar import apply_mar, reconstruct
 
 IMAGE_PX = 512
 PIXEL_MM = 300.0 / IMAGE_PX
