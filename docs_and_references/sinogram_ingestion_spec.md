@@ -1,318 +1,213 @@
 # Sinogram Ingestion and Reconstruction Output Specification
 
-**ASTM WK101378 Rev 05 — MAR Interlaboratory Study**\
-**Version:** 1.0\
-**Date:** 2026-07-13
+**ASTM WK101378, draft Revision 06: MAR Interlaboratory Study**\
+**Version:** 2.0 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
+**Date:** 2026-11-11\
+**Status:** draft. The v9 dataset writer and the blinding tooling shall produce files in exactly this format; any difference found when they are built is resolved before distribution, and this document is reissued.
 
 ---
 
-## 1. Purpose
+## 1. Purpose and Scope
 
-This document specifies the data interface for the MAR ILS. Participating laboratories receive a dataset of HDF5 sinogram files and must return DICOM image volumes produced by their MAR reconstruction pipeline. The interface is **language-agnostic** — implementations in C, C++, CUDA, MATLAB, Python, or any other environment are equally valid provided the input is read and output is written according to this specification.
+This document describes how the files of the MAR ILS dataset are organized and how to read them, and the format in which laboratories return their reconstructions. It is language-independent: any environment that reads HDF5 and writes DICOM can be used.
+
+In the study's Condition 1 (protocol §A7), each laboratory reads the sinograms from this document, implements the improving control of draft standard §A1.9 and the reconstruction of §A1.1(g) from the text of the standard, and does not consult or reuse the reference software. This document is the only reading aid allowed for Condition 1. For that reason it describes the data and their coordinates only. It does not describe how to reconstruct or how to apply MAR 2; those are defined by the standard alone, and where this document and the standard differ, the standard governs.
 
 ---
 
-## 2. Dataset Layout
+## 2. Datasets
 
-The dataset delivered to each laboratory has this structure:
+| Dataset | Content | Labels |
+|---|---|---|
+| Replicate datasets `REP01` to `REP09` | 8,000 realizations each (draft standard §8.2.1). Each laboratory receives three (protocol §A6.3). | Coded |
+| Control dataset `CONTROL` | 4,000 realizations at level 1.030 and dose 4 × 10⁶, for the degrading control in the pilot | Coded |
+| Familiarization dataset `FAMILIARIZATION` | A small set of realizations with the same configuration and different seeds, the reconstruction check of draft standard §12.2, and the noMAR images. No improving-control output (protocol §A6.4). | Labeled |
+
+---
+
+## 3. Directory Layout
+
+Each dataset is distributed as one directory:
 
 ```
-astm_reference_dataset/
+REP01/
     sinograms/
-        LP/                          ← Lesion-Present condition
-            realization_001.h5
-            realization_002.h5
-            ...
-            realization_040.h5
-        LA/                          ← Lesion-Absent condition
-            realization_001.h5
-            ...
-            realization_040.h5
-    noMAR_recon/                     ← Reference FBP (provided for validation)
-        LP/  realization_001/ ... realization_040/
-        LA/  realization_001/ ... realization_040/
-    checksums_sha256.txt
-    generator_provenance.json
+        <code>.h5          one file per realization
+    noMAR/
+        <code>.dcm         the noMAR reconstruction of the same realization
+    dataset_record.json    dataset-level parameters (§3.2)
+    checksums_sha256.txt   SHA-256 of every other file in the directory
 ```
 
-Each condition contains **40 realizations** (screening studies may use 20). LP and LA sinograms are paired by realization number and differ only in whether a lesion signal is present in the sinogram domain.
+The familiarization dataset has the same layout, plus:
+
+```
+FAMILIARIZATION/
+    labels.csv             code, class, level, pool, index for each realization
+    recon_check/
+        recon_check.h5     the reconstruction check sinogram and its reference image (§5)
+```
+
+### 3.1 Coded identifiers
+
+- In the replicate and control datasets, each realization is named by a code of eight characters from `0-9` and `A-Z` (for example `K7Q2M9XD`). Codes are unique across all datasets of the study.
+- The code says nothing about the realization's class (lesion present or absent), signal level, pool (training or test) or index. Files are listed in no meaningful order.
+- `<code>.h5` and `<code>.dcm` with the same code belong to the same realization.
+- The key that maps codes to labels is released after the manifest deadline (protocol §A6.3 and §A8.2, Step 5). No information in the distributed files is needed to read, process or reconstruct a realization.
+
+### 3.2 `dataset_record.json`
+
+A JSON object with the dataset identifier, the generator version, the number of realizations, the parameters of draft standard §A1.1 and §A1.2 that are the same for every realization, the spectrum table of §A1.1(d), the MAR 2 threshold of §A1.9(f), and the SHA-256 of the blinding key as published in the study's Zenodo record. It contains no per-realization entries in the coded datasets.
 
 ---
 
-## 3. HDF5 Sinogram Format
+## 4. HDF5 Sinogram File (`<code>.h5`)
 
-Each `realization_NNN.h5` file contains three groups:
+Each file holds one realization: one 2D fan-beam sinogram of one slice.
 
-### 3.1 Dataset: `/line_integrals`
+### 4.1 Dataset `/line_integrals`
 
 | Property | Value |
 |---|---|
-| **Shape** | `(256, 720, 512)` — `(n_slices, n_angles, n_det)` |
-| **Dtype** | `float32` |
-| **Units** | **Neper** (dimensionless) — line integrals of linear attenuation: ∫μ(l) dl |
-| **Compression** | gzip level 4 |
-| **Chunking** | `(1, 720, 512)` — one chunk per slice |
+| Shape | `(984, 888)`, indexed `[view k, channel j]` |
+| Type | 32-bit IEEE floating point, little-endian |
+| Storage | contiguous, uncompressed |
+| Units | dimensionless (natural logarithm of an intensity ratio) |
 
-The data represents noisy line integrals including Poisson photon noise and additive electronic noise. The forward model is: `I_measured = Poisson(I₀ · exp(−p) + S) + N(0, σ_e²)`, where `p` is the clean line integral, `S = scatter_frac × I₀`, and `σ_e` is electronic noise. The stored value is: `p_measured = −ln(max(I_measured, 0.1) / I₀)`. Note that scatter is **not** subtracted before the log transform — this is intentional and matches the reference reconstruction pipeline. The stored line integrals are in neper and are ready to reconstruct as-is.
+Each value is the line integral p = −ln(max(counts, 1)/I₀) of draft standard §A1.1(f), where counts is the noisy detector reading of that ray and I₀ = 1 × 10⁶. Scatter and electronic noise are included in the reading and are not subtracted. No scatter or beam-hardening correction has been applied. The values are ready for reconstruction as stored.
 
-**Axis convention:**
-- Axis 0: slice index (z), 0-indexed. Slice 128 contains the lesion signal in LP realizations.
-- Axis 1: projection angle index, corresponding to `geometry/angles_deg`.
-- Axis 2: detector element index, corresponding to `geometry/det_fan_angles_deg`.
+A method that needs detector counts instead of line integrals recovers them as I₀ · exp(−p). Readings below one count were set to one before the logarithm, so the largest possible value of p is ln(10⁶) ≈ 13.8155; rays with this value carry no information beyond "at most one count."
 
-### 3.2 Group: `/geometry` (attributes)
+Row order: row k is view k. Within a row, element j is channel j. No views or channels are omitted, reordered or flipped.
 
-| Attribute | Type | Value | Description |
+### 4.2 Attributes of `/line_integrals`
+
+These attributes repeat the fixed acquisition of draft standard §A1.1 for convenience. They are identical in every file.
+
+| Attribute | Type | Value |
+|---|---|---|
+| `geometry` | string | `"fan-beam, equi-angular curved detector"` |
+| `SID_mm` | float64 | 541.0 |
+| `SDD_mm` | float64 | 949.0 |
+| `n_views` | int32 | 984 |
+| `n_channels` | int32 | 888 |
+| `channel_pitch_mm` | float64 | 1.0 (on the detector arc) |
+| `delta_gamma_rad` | float64 | 0.1/94.9 = 0.001 053 740 779 768 177 |
+| `gamma0_rad` | float64 | −443.5 × `delta_gamma_rad`, the fan angle of channel 0 |
+| `betas_rad` | float64[984] | source angle of each view, β~k~ = 2πk/984 |
+| `gammas_rad` | float64[888] | fan angle of each channel, γ~j~ = (j − 443.5) Δγ |
+| `I0` | float64 | 1.0e6 counts per detector bin per view |
+| `scatter_counts` | float64 | 100.0 (10⁻⁴ I₀) |
+| `electronic_variance_counts2` | float64 | 160.0 |
+| `log_floor_counts` | float64 | 1.0 |
+
+The coded files carry no other attributes. In particular, the lesion flag, signal level, seed and inset angle are not present. In the familiarization dataset they are given in `labels.csv`, not in the HDF5 files.
+
+### 4.3 Coordinates
+
+The coordinates are those of draft standard §A1.1(i), restated here so that the axes of the array can be interpreted. The standard governs.
+
+- x and y lie in the image plane, with the origin at the isocenter and y pointing toward row 0 of the image (§6.2).
+- View k has the source at (SID cos β~k~, SID sin β~k~). β increases from the positive x axis toward the positive y axis, which is counterclockwise as the image is displayed with row 0 at the top.
+- For a point (x, y) and source angle β, let u = SID − (x cos β + y sin β) and v = x sin β − y cos β. The fan angle of the ray through the point is γ = atan2(v, u), and its distance from the source is L = √(u² + v²).
+- Channel j lies at fan angle γ~j~ = (j − 443.5) Δγ. The central ray, through the isocenter, falls midway between channels 443 and 444; no channel lies on it.
+
+**Units.** The reconstructed attenuation must come out in cm⁻¹ (§A1.1(h), §A1.9(a) and (b)). p is dimensionless, so the unit of μ is set by the unit of length used in the reconstruction. Express SID, L and the pixel coordinates in centimeters (SID = 54.1 cm). Using millimeters gives μ in mm⁻¹, a factor of 10 too small, and the MAR 2 threshold in cm⁻¹ would then select no pixels.
+
+### 4.4 Reading example (Python)
+
+```python
+import h5py
+import numpy as np
+
+with h5py.File("REP01/sinograms/K7Q2M9XD.h5", "r") as f:
+    p = f["line_integrals"][()].astype(np.float64)   # shape (984, 888), [view, channel]
+    betas = f["line_integrals"].attrs["betas_rad"]
+    gammas = f["line_integrals"].attrs["gammas_rad"]
+```
+
+The equivalent calls are `h5read` in MATLAB and `H5Dread` with `H5T_NATIVE_FLOAT` in C. MATLAB's `h5read` returns HDF5 arrays with the axes reversed, as (888, 984); transpose before indexing by [view, channel].
+
+---
+
+## 5. Reconstruction Check (`recon_check/recon_check.h5`)
+
+This file serves the check of draft standard §12.2 and protocol §A8.2, Step 2.1.
+
+| Dataset | Shape | Type | Content |
 |---|---|---|---|
-| `type` | string | `"fan-beam"` | Acquisition geometry type |
-| `n_slices` | int | `256` | Number of axial slices |
-| `n_angles` | int | `720` | Number of projection angles (full 360°) |
-| `n_det` | int | `512` | Number of equi-angular detector elements |
-| `voxel_mm` | float | `0.5` | Isotropic voxel size (mm) |
-| `SID_mm` | float | `570.0` | Source-to-isocenter distance (mm) |
-| `SDD_mm` | float | `1040.0` | Source-to-detector distance (mm) |
-| `gamma_max_deg` | float | ~12.97° | Half fan-angle: arcsin(FOV_half / SID) |
-| `delta_gamma_deg` | float | ~0.0507° | Angular spacing between detector elements |
-| `angles_deg` | float[720] | 0.0, 0.5, 1.0, … 359.5 | Source rotation angles (degrees) |
-| `det_fan_angles_deg` | float[512] | −12.94 … +12.94 | Fan angle of each detector element (degrees) |
+| `/line_integrals` | (984, 888) | float32 | a sinogram in the format of §4, with the same attributes |
+| `/reference_image_hu` | (512, 512) | float64 | its reconstruction by the reference implementation of §A1.1(g), in HU per §A1.1(h), indexed [row, column] as in §6.2 |
 
-**Geometry notes:**
-
-- **Equi-angular detectors.** Elements are uniformly spaced in fan angle γ, not in linear position. Element *j* subtends angle: `γ_j = (j − N_det/2 + 0.5) × Δγ`, where `Δγ = 2 × γ_max / N_det`.
-- **Source rotation convention.** At angle β (from `angles_deg`), the X-ray source position in the reconstruction coordinate frame is: `(cx + SID_vox × cos(β), cy + SID_vox × sin(β))`, where `(cx, cy)` is the isocenter (pixel 256, 256) and `SID_vox = SID_mm / voxel_mm = 1140`. Each ray from the source to detector element *j* travels at angle `β + π + γ_j`. All source/detector distances in the backprojection loop use **voxel units**, not millimeters.
-- **Reconstruction grid.** 512 × 512 pixels, 0.5 mm isotropic. The isocenter is at pixel (256, 256).
-- **Full 360° acquisition.** 720 angles at 0.5° spacing, starting at 0°.
-
-### 3.3 Group: `/noise_params` (attributes)
-
-| Attribute | Type | Description |
-|---|---|---|
-| `I0` | float | Calibrated incident photon count (310,853) |
-| `scatter_frac` | float | Scatter-to-primary ratio (0.05) |
-| `sigma_e_counts` | float | Electronic noise σ in counts (5.0) |
-| `seed` | int | Random seed for this realization |
-| `jitter_deg` | float | Angular jitter applied to this realization |
-| `place_lesion` | int | 1 = LP (lesion present), 0 = LA (lesion absent) |
-| `lesion_slice_index` | int | 0-indexed slice containing lesion (128) |
-| `lesion_z_extent` | int | Number of slices with lesion signal (0 or 1) |
-
-These attributes are provided for traceability. Labs do not need them for reconstruction — the line integrals are ready to reconstruct as-is.
+The reference image is stored in floating point, not as DICOM, so that the comparison is not limited by integer rounding: a 16-bit DICOM image rounded to whole HU would use up half of the 1 HU tolerance. Reconstruct `/line_integrals` with the implementation to be used, convert to HU per §A1.1(h), and record the largest absolute difference from `/reference_image_hu` over all 512 × 512 pixels. The implementation passes if it is 1 HU or less.
 
 ---
 
-## 4. Reading the Sinograms
+## 6. Images
 
-### 4.1 Pseudocode
+### 6.1 Supplied noMAR images (`noMAR/<code>.dcm`)
 
-```
-file = HDF5_open("sinograms/LP/realization_001.h5", read_only)
+One single-frame DICOM CT image per realization: the reference reconstruction of the uncorrected sinogram. These images are the noMAR series of draft standard §14.2.
 
-# Line integrals: float32 array, shape (256, 720, 512)
-sinogram = file["/line_integrals"]           # full volume
-sinogram_slice = file["/line_integrals"][128] # single slice (720, 512)
-
-# Geometry
-geo = file["/geometry"].attrs
-sid_mm   = geo["SID_mm"]            # 570.0
-sdd_mm   = geo["SDD_mm"]            # 1040.0
-angles   = geo["angles_deg"]        # float array, length 720
-det_angles = geo["det_fan_angles_deg"]  # float array, length 512
-voxel_mm = geo["voxel_mm"]          # 0.5
-n_det    = geo["n_det"]             # 512
-
-file.close()
-```
-
-### 4.2 Language-Specific HDF5 Libraries
-
-| Language | Library | Read call |
-|---|---|---|
-| C/C++ | HDF5 C API (libhdf5) | `H5Dread(dataset, H5T_NATIVE_FLOAT, ...)` |
-| CUDA | HDF5 C API (host-side) | Read to host, then `cudaMemcpy` to device |
-| MATLAB | Built-in `h5read` | `h5read('file.h5', '/line_integrals')` |
-| Python | `h5py` | `f['line_integrals'][:]` |
-| Java | HDF5 Java (HDF Group) | `H5.H5Dread(...)` |
-
----
-
-## 5. Reconstruction Requirements
-
-### 5.1 What the Lab Must Do
-
-1. **Read** each HDF5 sinogram file (§3–4).
-2. **Reconstruct** 256 axial slices from the `(256, 720, 512)` line integrals using the fan-beam geometry specified in `/geometry` attributes.
-3. **Apply** the lab's MAR algorithm during or after reconstruction.
-4. **Calibrate** reconstructed pixel values to **Hounsfield Units** (HU), where water = 0 HU and air = −1000 HU.
-5. **Write** 256 DICOM slices per realization (§6).
-
-### 5.2 What the Lab Must NOT Do
-
-- **Do not** alter the sinogram data (no pre-processing of the delivered line integrals beyond what the MAR algorithm itself performs).
-- **Do not** change the reconstruction grid size (must remain 512 × 512 × 256 at 0.5 mm isotropic).
-- **Do not** apply post-reconstruction spatial filtering, windowing, or cropping that would affect the pixel values in the scoring ROI.
-
-### 5.3 Reconstruction Geometry Reference
-
-For labs implementing their own fan-beam FBP (without MAR), the reference algorithm is:
-
-1. **Pre-weight** each sinogram row by `cos(γ_j)` (cosine weighting for equi-angular detectors).
-2. **Filter** each pre-weighted row with a Ram-Lak (ramp) filter in the frequency domain.
-3. **Backproject** with distance weighting: for each pixel at position `(x, y)`, each angle β contributes `(SID / L)²` × (interpolated filtered value at γ), where `L` is the source-to-pixel distance and `γ` is the fan angle from source through pixel.
-4. **Scale** the result by `π / N_angles / (SID_cm × Δγ_rad)` to obtain reconstructed μ in cm⁻¹.
-5. **Convert** from linear attenuation (cm⁻¹) to HU. The reference pipeline uses: `HU = (μ_recon − μ_tissue − dc_offset) / μ_tissue × 1000 + BACKGROUND_HU`, where `μ_tissue = 0.2059 cm⁻¹`, `dc_offset = −0.029 cm⁻¹`, and `BACKGROUND_HU = 40`. This maps soft tissue to exactly 40 HU. Labs using their own HU calibration (e.g., water-referenced) are acceptable provided the resulting soft-tissue HU is consistent.
-
-**Units in grid coordinates:** When computing source positions and distances in the reconstruction loop, use `SID` and `SDD` in **voxel units** (SID_vox = 570 / 0.5 = 1140; SDD_vox = 1040 / 0.5 = 2080), not millimeters. The final μ→HU conversion uses `SID_cm` (57.0 cm) for the analytic scaling factor.
-
-This algorithm is provided for reference and validation only. Labs are expected to use their own reconstruction and MAR pipeline.
-
----
-
-## 6. DICOM Output Format
-
-### 6.1 Directory Structure
-
-```
-mar_recon/
-    LP/
-        realization_001/
-            slice_0001.dcm
-            slice_0002.dcm
-            ...
-            slice_0256.dcm
-        realization_002/
-            ...
-        realization_040/
-            ...
-    LA/
-        realization_001/
-            ...
-        realization_040/
-            ...
-```
-
-### 6.2 File Naming
-
-- Slices are **1-indexed**: `slice_0001.dcm` through `slice_0256.dcm`.
-- Slice number corresponds to `z + 1` where `z` is the 0-indexed axis-0 index in the HDF5 sinogram.
-- The CHO analysis reads **only `slice_0129.dcm`** (z-index 128, the lesion slice).
-
-### 6.3 Required DICOM Attributes
-
-| Tag | Keyword | Required Value |
-|---|---|---|
-| `(0028,0010)` | Rows | `512` |
-| `(0028,0011)` | Columns | `512` |
-| `(0028,0030)` | PixelSpacing | `[0.5, 0.5]` |
-| `(0028,0100)` | BitsAllocated | `16` |
-| `(0028,1052)` | RescaleIntercept | Any valid value (see below) |
-| `(0028,1053)` | RescaleSlope | Any valid value (see below) |
-| `(0008,0060)` | Modality | `CT` |
-
-**HU calibration:** The CHO scoring pipeline computes display HU as `stored_value × RescaleSlope + RescaleIntercept`. Labs may use any valid combination — for example, `RescaleIntercept = −1024, RescaleSlope = 1` with unsigned pixels (common on commercial scanners), or `RescaleIntercept = 0, RescaleSlope = 1` with signed pixels (as in the reference implementation). What matters is that the resulting HU values are correctly calibrated.
-
-### 6.4 DICOM 2026b Metal Artifact Reduction Macro (CP-2575)
-
-Labs **must** include the MAR Macro in their output DICOM files:
-
-| Tag | VR | Keyword | Value |
-|---|---|---|---|
-| `(0018,9390)` | SQ | Metal Artifact Reduction Sequence | 1 item |
-| `(0018,9391)` | CS | Metal Artifact Reduction Applied | `YES` |
-
-**Optional:** `(0018,9392)` Metal Artifact Reduction Algorithm — a code string from CID 10036 (e.g., `MAR_IMAR`, `MAR_SPECTRAL`, `MAR_MBIR`).
-
-Because pydicom and most DICOM toolkits do not yet include the 2026b tag definitions, these must be written using hex tags:
-
-```
-# Python (pydicom)
-mar_item = Dataset()
-mar_item.add_new(0x00189391, 'CS', 'YES')
-ds.add_new(0x00189390, 'SQ', [mar_item])
-
-// C++ (DCMTK)
-DcmItem *marItem = new DcmItem();
-marItem->putAndInsertString(DcmTag(0x0018, 0x9391), "YES");
-DcmSequenceOfItems *marSeq = new DcmSequenceOfItems(DcmTag(0x0018, 0x9390));
-marSeq->insert(marItem);
-dataset->insert(marSeq);
-
-% MATLAB
-dcmInfo.MetalArtifactReductionApplied = 'YES';
-% or use dicomwrite with raw tag specification
-```
-
-### 6.5 HU Calibration Validation
-
-The reference `noMAR_recon/` is provided so labs can validate their reconstruction pipeline before applying MAR:
-
-- **Soft tissue ROI** (away from metal): should reconstruct to approximately **40 HU**.
-- **Metal region**: the reference pipeline hard-sets metal pixels to **3000 HU**. Labs may handle metal pixels differently.
-- **Lesion contrast** (LP, slice 129 only): approximately **12 HU** above background in the reference reconstruction.
-
----
-
-## 7. CHO Scoring Region
-
-The CHO observer evaluates a single region of interest from each realization:
-
-| Parameter | Value |
+| Attribute | Value |
 |---|---|
-| Scored slice | `slice_0129.dcm` (z-index 128) |
-| ROI center | pixel **(281, 256)** |
-| ROI size | **121 × 121** pixels |
-| Dimensionality | **2D only** — 3D integration shall not be performed |
+| Rows, Columns (0028,0010), (0028,0011) | 512, 512 |
+| Pixel Spacing (0028,0030) | 0.5859375\0.5859375 (300/512 mm) |
+| Bits Allocated, Bits Stored (0028,0100), (0028,0101) | 16, 16 |
+| Pixel Representation (0028,0103) | 1 (signed) |
+| Rescale Slope, Rescale Intercept (0028,1053), (0028,1052) | 1, 0 |
+| Modality (0008,0060) | CT |
+| Metal Artifact Reduction Sequence (0018,9390) | one item, with Metal Artifact Reduction Applied (0018,9391) = NO |
 
-Labs do not need to know the CHO algorithm details. The scoring pipeline is run centrally by the ILS coordinator on the submitted DICOM files.
+Stored values are HU per §A1.1(h), rounded to the nearest integer; values beyond the signed 16-bit range are clipped. Series Description, Protocol Name and any other attribute that could reveal a label are blank in the coded datasets, and Content Date and Content Time have one value for all files.
+
+Because of the rounding and clipping, the noMAR DICOM images shall not be used for the MAR 2 segmentation (draft standard §A1.9(a)). MAR 2 starts from the sinogram.
+
+### 6.2 Pixel indexing
+
+Pixel (row r, column c) counts from zero. Its center is at x = (c − 256) Δ, y = (256 − r) Δ, with Δ = 300/512 mm, so pixel (256, 256) is at the isocenter, in the 257th row and column, and row 0 is at the largest y. In the DICOM pixel array, row r is the r-th row transmitted.
+
+### 6.3 Laboratory output
+
+Each run directory holds one image per coded realization of the replicate dataset (protocol §A8.3):
+
+```
+C1_R1/
+    <code>.dcm
+```
+
+| Requirement | Value |
+|---|---|
+| File name | the code of the realization, with extension `.dcm` |
+| Matrix and pixel indexing | 512 × 512, pixel spacing 300/512 mm, pixel (256, 256) at the isocenter, indexed as in §6.2 |
+| Pixel values | HU per §A1.1(h), stored in 16 bits; any Rescale Slope and Rescale Intercept that represent them correctly |
+| Modality | CT |
+| MAR Macro | Metal Artifact Reduction Sequence (0018,9390) with one item, Metal Artifact Reduction Applied (0018,9391) = YES |
+
+The scoring tool computes HU as stored value × Rescale Slope + Rescale Intercept and reads the 121 × 121 region centered on pixel (256, 256). Clipping of values outside that region does not affect the score.
+
+The MAR Macro tags are recent additions to DICOM (2026b, CP-2575) and may be missing from a toolkit's dictionary; they can be written by their numeric tags, for example in pydicom:
+
+```python
+from pydicom.dataset import Dataset
+item = Dataset()
+item.add_new(0x00189391, "CS", "YES")
+ds.add_new(0x00189390, "SQ", [item])
+```
 
 ---
 
-## 8. Submission Checklist
+## 7. Checklist Before Submission
 
-Before submitting `mar_recon/` to the ILS coordinator, verify:
-
-- [ ] Directory structure matches §6.1 (LP and LA subdirectories, 40 realizations each)
-- [ ] Each realization folder contains 256 DICOM slices named `slice_0001.dcm` through `slice_0256.dcm`
-- [ ] DICOM pixel values are in Hounsfield Units (RescaleSlope=1, RescaleIntercept=0)
-- [ ] Image matrix is 512 × 512 at 0.5 mm pixel spacing
-- [ ] Metal Artifact Reduction Macro is present with `(0018,9391) = "YES"`
-- [ ] `slice_0129.dcm` exists and is valid in every realization folder
-- [ ] Soft tissue HU in non-metal regions is plausible (~0–100 HU range)
+- [ ] Every file of the assigned datasets matches `checksums_sha256.txt`.
+- [ ] The reconstruction check passed, and the largest difference is recorded on the return form.
+- [ ] Each run directory holds exactly one `<code>.dcm` for every `<code>.h5` of its replicate dataset, and nothing else.
+- [ ] Every image is 512 × 512, indexed as in §6.2, in HU, with (0018,9391) = YES.
+- [ ] The SHA-256 manifest of each run directory has been produced in the format of `checksums_sha256.txt`.
 
 ---
 
-## Appendix A: Quick-Start Validation
+## Revision History
 
-To verify correct sinogram ingestion, reconstruct a single LP realization without MAR and compare `slice_0129.dcm` against the reference:
-
-```
-Reference noMAR_recon/LP/realization_001/slice_0129.dcm:
-  - Tissue background: ~40 HU
-  - Metal rod:         3000 HU (hard-set)
-  - Lesion region:     ~52 HU (40 + 12)
-  - Noise σ:           ~30 HU in soft tissue
-```
-
-If your reconstruction produces similar values in non-metal regions, your sinogram ingestion is correct and you can proceed to apply MAR.
-
----
-
-## Appendix B: Coordinate System
-
-```
-              0        256       512
-          0   ┌─────────┼─────────┐
-              │         │         │
-              │    ┌────┼────┐    │
-              │    │  body   │    │
-              │    │ (ellip) │    │
-        256   ┼────│──●──────│────┤   ● = isocenter (256, 256)
-              │    │  │ ○    │    │   │ = metal rod (center)
-              │    │  └─┤    │    │   ○ = lesion at (281, 256)
-              │    │    │    │    │
-              │    └────┼────┘    │
-        512   └─────────┼─────────┘
-
-  Pixel (row, col) = (y, x).  Isocenter at (256, 256).
-  Metal rod centered at isocenter.  Lesion at col=281, row=256.
-  Body ellipse: semi-axes 170 (x) × 120 (y) voxels.
-```
+- **2.0 (2026-11-11):** rewritten for the v9 design and draft Revision 06: single-slice 984 × 888 sinograms (SID 541 mm, SDD 949 mm), coded layout of protocol §A6.3, coordinates of §A1.1(i), reconstruction check file, laboratory output under coded names. The description of the reference reconstruction in version 1.0 is removed, because in Condition 1 the reconstruction is implemented from the standard's text.
+- **1.0 (2026-07-13):** v7 design, Revision 05.
