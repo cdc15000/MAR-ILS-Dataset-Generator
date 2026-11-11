@@ -300,3 +300,106 @@ class TestBlinding:
             b.blind(masters, tmp_path / "d", tmp_path / "d" / "k.json", design, "x", require_all=False)
         with pytest.raises(RuntimeError):
             b.blind(masters, dist, tmp_path / "k.json", design, "x", require_all=False)
+
+
+def _fake_master(root, name, n, signal_hu, seed):
+    """A labeled master dataset of synthetic images (white noise plus a centered disk), no FBP."""
+    import json
+
+    from mar_ils_core import dicom_v9
+    rng = np.random.default_rng(seed)
+    yy, xx = np.mgrid[:512, :512]
+    disk = ((yy - 256) ** 2 + (xx - 256) ** 2) <= 8 ** 2
+    uids = {"study_uid": "1.2.3", "series_uid": "1.2.4", "content_date": "20261111", "content_time": "000000"}
+    (root / name / "noMAR").mkdir(parents=True)
+    (root / name / "sinograms").mkdir()
+    reals = []
+    for split, pool in (("train", 0), ("test", 1)):
+        for i in range(n):
+            for cls, lev in ((0, None), (1, 1.03)):
+                nm = f"{'absent' if cls == 0 else 'present1030'}_{split}_{i:04d}"
+                img = 20.0 * rng.standard_normal((512, 512)) + (signal_hu * disk if cls else 0.0)
+                dicom_v9.write_ct(img, root / name / "noMAR" / f"{nm}.dcm", mar_applied=False, **uids)
+                (root / name / "sinograms" / f"{nm}.h5").write_bytes(b"x")
+                reals.append({"name": nm, "cls": cls, "level": lev, "split": split, "pool": pool, "index": i})
+    (root / name / "dataset_record.json").write_text(json.dumps({"dataset": name, "realizations": reals}))
+    import blind_dataset_v9_0_0 as b
+    b.write_checksums(root / name)
+
+
+@pytest.fixture(scope="module")
+def scoring(tmp_path_factory):
+    import json
+    import os
+
+    import blind_dataset_v9_0_0 as b
+    base = tmp_path_factory.mktemp("score")
+    _fake_master(base / "masters", "REP01", 100, 2.0, 1)
+    _fake_master(base / "masters", "FAMILIARIZATION", 2, 6.0, 2)
+    design = {"L1": ["REP01", "REP02", "REP03"], "L2": ["REP04", "REP05", "REP06"],
+              "L3": ["REP07", "REP08", "REP09"]}
+    key = base / "key" / "blinding_key.json"
+    b.blind(base / "masters", base / "dist", key, design, "test", require_all=False)
+    codes = json.loads(key.read_text())["datasets"]["REP01"]
+    same, stronger = base / "C1_R1", base / "C1_R2"        # MAR = noMAR; MAR with twice the signal
+    same.mkdir()
+    stronger.mkdir()
+    from mar_ils_core import dicom_v9
+    yy, xx = np.mgrid[:512, :512]
+    disk = ((yy - 256) ** 2 + (xx - 256) ** 2) <= 8 ** 2
+    uids = {"study_uid": "1.2.3", "series_uid": "1.2.5", "content_date": "20261111", "content_time": "000000"}
+    for code, e in codes.items():
+        src = base / "masters" / "REP01" / "noMAR" / f"{e['master_name']}.dcm"
+        os.link(src, same / f"{code}.dcm")
+        hu = dicom_v9.read_hu(src) + (2.0 * disk if e["class"] == "present" else 0.0)
+        dicom_v9.write_ct(hu, stronger / f"{code}.dcm", mar_applied=True, **uids)
+    return base, key
+
+
+class TestScoring:
+    """mar_ils_core.score_v9: run directory scoring with the released key (protocol Step 5)."""
+
+    def test_identical_series_give_zero_delta(self, scoring):
+        from mar_ils_core import score_v9
+        base, key = scoring
+        res, regions = score_v9.score_run(base / "dist" / "REP01", base / "C1_R1", key, n_reps=10)
+        r = res["levels"]["1.030"]
+        assert r["delta_AUC_inf"] == 0.0 and r["delta_error"]["error"] == 0.0
+        assert r["noMAR"]["AUC_inf"] > 0.6
+        assert regions["MAR"].shape == (400, 121, 121)
+
+    def test_coded_equals_labeled(self, scoring):
+        import json
+        import os
+
+        from mar_ils_core import score_v9
+        base, key = scoring
+        coded, _ = score_v9.score_run(base / "dist" / "REP01", base / "C1_R2", key, n_reps=10)
+        codes = json.loads(key.read_text())["datasets"]["REP01"]
+        labeled_run = base / "labeled_run"
+        labeled_run.mkdir()
+        for code, e in codes.items():
+            os.link(base / "C1_R2" / f"{code}.dcm", labeled_run / f"{e['master_name']}.dcm")
+        labeled, _ = score_v9.score_run(base / "masters" / "REP01", labeled_run, None, n_reps=10)
+        assert coded["levels"] == labeled["levels"]
+        assert coded["levels"]["1.030"]["delta_AUC_inf"] > 0.05
+
+    def test_paired_delta_error_not_larger_than_unpaired(self, scoring):
+        from mar_ils_core import score_v9
+        base, key = scoring
+        r = score_v9.score_run(base / "dist" / "REP01", base / "C1_R2", key, n_reps=10)[0]["levels"]["1.030"]
+        assert r["delta_error"]["variance"] <= np.hypot(r["MAR"]["variance"], r["noMAR"]["variance"]) * 1.5
+
+    def test_refuses_wrong_key_and_incomplete_run(self, scoring, tmp_path):
+        import json
+
+        from mar_ils_core import score_v9
+        base, key = scoring
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps({"datasets": {}}))
+        with pytest.raises(ValueError, match="does not match"):
+            score_v9.score_run(base / "dist" / "REP01", base / "C1_R1", bad)
+        partial = tmp_path / "C1_R9"
+        partial.mkdir()
+        with pytest.raises(ValueError, match="missing"):
+            score_v9.score_run(base / "dist" / "REP01", partial, key)
