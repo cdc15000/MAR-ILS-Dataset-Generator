@@ -51,7 +51,6 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from pydicom.uid import generate_uid
 
 import generator_v9_0_0 as gen
 from mar_ils_core import dicom_v9
@@ -209,7 +208,7 @@ def load_state(root: Path) -> dict:
     if state_path.exists():
         return json.loads(state_path.read_text())
     t = time.gmtime()
-    state = {"study_uid": generate_uid(), "series_uid": generate_uid(),
+    state = {"study_uid": dicom_v9.fixed_length_uid(), "series_uid": dicom_v9.fixed_length_uid(),
              "content_date": time.strftime("%Y%m%d", t), "content_time": "000000"}
     state_path.write_text(json.dumps(state))
     return state

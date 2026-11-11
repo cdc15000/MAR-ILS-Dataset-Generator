@@ -12,16 +12,23 @@ The master files can therefore be distributed under coded names unchanged.
 """
 from __future__ import annotations
 
+import secrets
 from pathlib import Path
 
 import numpy as np
 from pydicom.dataset import Dataset, FileDataset, FileMetaDataset
-from pydicom.uid import CTImageStorage, ExplicitVRLittleEndian, generate_uid
+from pydicom.uid import CTImageStorage, ExplicitVRLittleEndian
 
 IMAGE_PX = 512
 PIXEL_MM = 300.0 / IMAGE_PX
 TAG_MAR_SEQUENCE = 0x00189390
 TAG_MAR_APPLIED = 0x00189391
+
+
+def fixed_length_uid() -> str:
+    """A 2.25 UID with a random 38-digit integer (below 2^128), always 43 characters,
+    so every file of a dataset has the same size whatever its UID."""
+    return "2.25." + str(10 ** 37 + secrets.randbelow(9 * 10 ** 37))
 
 
 def hu_to_pixels(hu: np.ndarray) -> np.ndarray:
@@ -37,7 +44,7 @@ def write_ct(hu: np.ndarray, path: Path, *, study_uid: str, series_uid: str,
 
     meta = FileMetaDataset()
     meta.MediaStorageSOPClassUID = CTImageStorage
-    meta.MediaStorageSOPInstanceUID = generate_uid()
+    meta.MediaStorageSOPInstanceUID = fixed_length_uid()
     meta.TransferSyntaxUID = ExplicitVRLittleEndian
 
     ds = FileDataset(str(path), {}, file_meta=meta, preamble=b"\0" * 128)

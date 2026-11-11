@@ -209,6 +209,16 @@ class TestDatasetWriter:
         h, rel = lines[0].split("  ")
         assert hashlib.sha256((root / rel).read_bytes()).hexdigest() == h
 
+    def test_dicom_size_independent_of_uid(self, tmp_path):
+        from mar_ils_core import dicom_v9
+        uids = {"study_uid": dicom_v9.fixed_length_uid(), "series_uid": dicom_v9.fixed_length_uid(),
+                "content_date": "20261111", "content_time": "000000"}
+        img = np.zeros((512, 512))
+        for i in range(200):
+            dicom_v9.write_ct(img, tmp_path / f"{i}.dcm", mar_applied=False, **uids)
+        assert len({p.stat().st_size for p in tmp_path.glob("*.dcm")}) == 1
+        assert all(len(dicom_v9.fixed_length_uid()) == 43 for _ in range(1000))
+
     def test_study_pools_need_production(self, tmp_path, monkeypatch):
         import sys
 
