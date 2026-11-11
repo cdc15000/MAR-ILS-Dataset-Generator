@@ -1,7 +1,7 @@
 # Sinogram Ingestion and Reconstruction Output Specification
 
 **ASTM WK101378, draft Revision 06: MAR Interlaboratory Study**\
-**Version:** 2.0 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
+**Version:** 2.1 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
 **Date:** 2026-11-11\
 **Status:** draft. The v9 dataset writer and the blinding tooling shall produce files in exactly this format; any difference found when they are built is resolved before distribution, and this document is reissued.
 
@@ -74,15 +74,15 @@ Each file holds one realization: one 2D fan-beam sinogram of one slice.
 | Storage | contiguous, uncompressed |
 | Units | dimensionless (natural logarithm of an intensity ratio) |
 
-Each value is the line integral p = −ln(max(counts, 1)/I₀) of draft standard §A1.1(f), where counts is the noisy detector reading of that ray and I₀ = 1 × 10⁶. Scatter and electronic noise are included in the reading and are not subtracted. No scatter or beam-hardening correction has been applied. The values are ready for reconstruction as stored.
+Each value is the line integral p = −ln(max(counts, 1)/I₀) of draft standard §A1.1(f), where counts is the noisy detector reading of that ray and I₀ is the dose of the dataset: 1 × 10⁶ for the replicate and familiarization datasets and 4 × 10⁶ for the control dataset (attribute `I0`). Scatter and electronic noise are included in the reading and are not subtracted. No scatter or beam-hardening correction has been applied. The values are ready for reconstruction as stored.
 
-A method that needs detector counts instead of line integrals recovers them as I₀ · exp(−p). Readings below one count were set to one before the logarithm, so the largest possible value of p is ln(10⁶) ≈ 13.8155; rays with this value carry no information beyond "at most one count."
+A method that needs detector counts instead of line integrals recovers them as I₀ · exp(−p). Readings below one count were set to one before the logarithm, so the largest possible value of p is ln(I₀), about 13.8155 at 1 × 10⁶; rays with this value carry no information beyond "at most one count."
 
 Row order: row k is view k. Within a row, element j is channel j. No views or channels are omitted, reordered or flipped.
 
 ### 4.2 Attributes of `/line_integrals`
 
-These attributes repeat the fixed acquisition of draft standard §A1.1 for convenience. They are identical in every file.
+These attributes repeat the acquisition of draft standard §A1.1 for convenience. They are identical in every file of a dataset; only `I0` and `scatter_counts` differ between datasets.
 
 | Attribute | Type | Value |
 |---|---|---|
@@ -96,8 +96,8 @@ These attributes repeat the fixed acquisition of draft standard §A1.1 for conve
 | `gamma0_rad` | float64 | −443.5 × `delta_gamma_rad`, the fan angle of channel 0 |
 | `betas_rad` | float64[984] | source angle of each view, β~k~ = 2πk/984 |
 | `gammas_rad` | float64[888] | fan angle of each channel, γ~j~ = (j − 443.5) Δγ |
-| `I0` | float64 | 1.0e6 counts per detector bin per view |
-| `scatter_counts` | float64 | 100.0 (10⁻⁴ I₀) |
+| `I0` | float64 | 1.0e6 counts per detector bin per view (4.0e6 in the control dataset) |
+| `scatter_counts` | float64 | 10⁻⁴ I₀: 100.0 (400.0 in the control dataset) |
 | `electronic_variance_counts2` | float64 | 160.0 |
 | `log_floor_counts` | float64 | 1.0 |
 
@@ -209,5 +209,6 @@ ds.add_new(0x00189390, "SQ", [item])
 
 ## Revision History
 
+- **2.1 (2026-11-11):** `I0` and `scatter_counts` stated per dataset, since the control dataset is at 4 × 10⁶; found when the dataset writer was built. No change to the file format.
 - **2.0 (2026-11-11):** rewritten for the v9 design and draft Revision 06: single-slice 984 × 888 sinograms (SID 541 mm, SDD 949 mm), coded layout of protocol §A6.3, coordinates of §A1.1(i), reconstruction check file, laboratory output under coded names. The description of the reference reconstruction in version 1.0 is removed, because in Condition 1 the reconstruction is implemented from the standard's text.
 - **1.0 (2026-07-13):** v7 design, Revision 05.

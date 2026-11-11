@@ -165,3 +165,53 @@ class TestSignedEstimator:
         squared = cho_v9.antler(*v, n_reps=10, seed=1)
         assert abs(signed.int_holdout.mean() - 0.5) < 0.01
         assert squared.int_holdout.mean() > signed.int_holdout.mean()
+
+
+@pytest.fixture(scope="module")
+def written(tmp_path_factory):
+    import write_dataset_v9_0_0 as w
+    spec = w.DatasetSpec("T", (0, 1), 1e6, (1.03,), 1, 1)
+    return w, w.write_dataset(spec, tmp_path_factory.mktemp("ds"), workers=2)
+
+
+class TestDatasetWriter:
+    """write_dataset_v9_0_0: files in the ingestion spec format, labels only in names and record."""
+
+    def test_sinogram_is_float32_of_realization(self, written):
+        import h5py
+        w, root = written
+        job = w.Job("present1030_test_0000", 1, 1.03, "test", 1, 0)
+        p = gen.realization(1, 1.03, 1e6, w.LUMP_SCALE, 1, 0)[4]
+        with h5py.File(root / "sinograms" / f"{job.name}.h5") as f:
+            d = f["line_integrals"]
+            assert list(f.keys()) == ["line_integrals"]
+            assert d.shape == (984, 888) and d.dtype == np.dtype("<f4") and d.chunks is None
+            assert np.array_equal(d[()], p.astype(np.float32))
+            assert "seed" not in d.attrs and "level" not in d.attrs and d.attrs["I0"] == 1e6
+
+    def test_nomar_dicom(self, written):
+        import pydicom
+        w, root = written
+        ds = pydicom.dcmread(root / "noMAR" / "absent_train_0000.dcm")
+        assert ds[0x00189390].value[0][0x00189391].value == "NO"
+        assert (ds.Rows, ds.Columns, ds.PixelRepresentation) == (512, 512, 1)
+        assert "SeriesDescription" not in ds and ds.InstanceNumber == 1
+
+    def test_record_and_checksums(self, written):
+        import hashlib, json
+        w, root = written
+        rec = json.loads((root / "dataset_record.json").read_text())
+        assert rec["n_realizations"] == 4 and rec["subset"] is True
+        assert rec["mar2_tau_mu_cm"] == 1.9529025691374509
+        lines = (root / "checksums_sha256.txt").read_text().splitlines()
+        assert len(lines) == 9                  # 4 h5 + 4 dcm + record
+        h, rel = lines[0].split("  ")
+        assert hashlib.sha256((root / rel).read_bytes()).hexdigest() == h
+
+    def test_study_pools_need_production(self, tmp_path, monkeypatch):
+        import sys
+        import write_dataset_v9_0_0 as w
+        monkeypatch.setattr(sys, "argv", ["w", "--dataset", "REP01", "--out-root", str(tmp_path)])
+        with pytest.raises(SystemExit):
+            w.main()
+        assert not (tmp_path / "REP01").exists()
