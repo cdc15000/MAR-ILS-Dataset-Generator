@@ -210,7 +210,7 @@ ds.add_new(0x00189390, "SQ", [item])
 
 ## Revision History
 
-- **2.2 (2026-11-12):** null-check dataset `NULL` added (draft standard §8.2.1 and §A1.7). No change to the file format.
+- **2.2 (2026-11-11):** null-check dataset `NULL` added (draft standard §8.2.1 and §A1.7). No change to the file format.
 - **2.1 (2026-11-11):** `I0` and `scatter_counts` stated per dataset, since the control dataset is at 4 × 10⁶; found when the dataset writer was built. No change to the file format.
 - **2.0 (2026-11-11):** rewritten for the v9 design and draft Revision 06: single-slice 984 × 888 sinograms (SID 541 mm, SDD 949 mm), coded layout of protocol §A6.3, coordinates of §A1.1(i), reconstruction check file, laboratory output under coded names. The description of the reference reconstruction in version 1.0 is removed, because in Condition 1 the reconstruction is implemented from the standard's text.
 - **1.0 (2026-07-13):** v7 design, Revision 05.
