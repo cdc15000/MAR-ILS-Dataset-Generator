@@ -23,8 +23,10 @@ Datasets and seed pools follow review item 37:
   REP01..REP09     pools 50+2(m-1) / 51+2(m-1), I0 1e6, levels 1.020 1.025 1.030
   CONTROL          pools 68 / 69, I0 4e6, level 1.030
   FAMILIARIZATION  pools 70 / 71, I0 1e6, levels 1.020 1.025 1.030, small and labeled
+  NULL             pools 72 / 73, I0 1e6, lesion-absent plus an independent second
+                   lesion-absent set (Rev 06 A1.7; review item 41), labeled
 
-Pools 50 to 71 belong to the study material: writing them needs --production
+Pools 50 to 73 belong to the study material: writing them needs --production
 (review item 37: generated under issue #11). For validation, --custom NAME
 --pools TR TE writes any other pools.
 
@@ -62,7 +64,7 @@ LUMP_SCALE = 0.0588                     # Rev 06 §A1.2(a)
 TAU_MU_CM = 1.9529025691374509          # Rev 06 §A1.9(b), private/ruggedness/data/meta.json
 TAU_COUNTS = 1124.2100350620863         # MAR 1 (degrading control), same source
 LEVELS = (1.020, 1.025, 1.030)
-STUDY_POOLS = range(50, 72)
+STUDY_POOLS = range(50, 74)
 SPLITS = ("train", "test")
 
 
@@ -75,6 +77,7 @@ class DatasetSpec:
     n_train: int
     n_test: int
     familiarization: bool = False
+    null_check: bool = False      # second, independent lesion-absent set in place of the present class
 
 
 def standard_specs(n_familiarization: int) -> dict[str, DatasetSpec]:
@@ -83,6 +86,7 @@ def standard_specs(n_familiarization: int) -> dict[str, DatasetSpec]:
     specs["CONTROL"] = DatasetSpec("CONTROL", (68, 69), 4e6, (1.030,), 1000, 1000)
     specs["FAMILIARIZATION"] = DatasetSpec("FAMILIARIZATION", (70, 71), 1e6, LEVELS,
                                            n_familiarization, n_familiarization, True)
+    specs["NULL"] = DatasetSpec("NULL", (72, 73), 1e6, (), 1000, 1000, null_check=True)
     return specs
 
 
@@ -97,7 +101,7 @@ class Job:
 
 
 def realization_name(cls: int, level: float | None, split: str, index: int) -> str:
-    head = "absent" if cls == 0 else f"present{round(1000 * level)}"
+    head = "absent" if cls == 0 else ("absent2" if level is None else f"present{round(1000 * level)}")
     return f"{head}_{split}_{index:04d}"
 
 
@@ -108,6 +112,8 @@ def jobs_for(spec: DatasetSpec) -> list[Job]:
             jobs.append(Job(realization_name(0, None, split, i), 0, None, split, pool, i))
             for lev in spec.levels:
                 jobs.append(Job(realization_name(1, lev, split, i), 1, lev, split, pool, i))
+            if spec.null_check:      # class 1 with no signal: independent of class 0 (generator seed rule)
+                jobs.append(Job(realization_name(1, None, split, i), 1, None, split, pool, i))
     return jobs
 
 
@@ -237,7 +243,7 @@ def dataset_record(spec: DatasetSpec, realizations: list[dict], state: dict, ext
         "generator_version": gen.DATASET_VERSION,
         "source_commit": git_commit(),
         "standard": "ASTM WK101378 draft Revision 06",
-        "ingestion_spec_version": "2.1",
+        "ingestion_spec_version": "2.2",
         "subset": not full,
         "base_seed": gen.BASE_SEED,
         "lump_seed": vp.LUMP_SEED,
@@ -293,11 +299,13 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     extra = {}
     if spec.familiarization:
         extra["recon_check"] = write_recon_check(root, spec)
+    if spec.familiarization or spec.null_check:
         with open(root / "labels.csv", "w", newline="") as f:
             wr = csv.writer(f)
             wr.writerow(["code", "class", "level", "pool", "index"])
             for r in realizations:
-                wr.writerow([r["name"], "present" if r["cls"] else "absent",
+                cls_name = "absent" if not r["cls"] else ("absent2" if r["level"] is None else "present")
+                wr.writerow([r["name"], cls_name,
                              "" if r["level"] is None else f"{r['level']:.3f}", r["split"], r["index"]])
 
     record = dataset_record(spec, realizations, state, {**extra, "seconds": round(time.time() - t0, 1)})
@@ -314,7 +322,7 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     which = ap.add_mutually_exclusive_group(required=True)
-    which.add_argument("--dataset", help="REP01..REP09, CONTROL or FAMILIARIZATION")
+    which.add_argument("--dataset", help="REP01..REP09, CONTROL, NULL or FAMILIARIZATION")
     which.add_argument("--custom", metavar="NAME", help="a validation dataset with the pools given")
     ap.add_argument("--out-root", type=Path, required=True)
     ap.add_argument("--pools", type=int, nargs=2, metavar=("TRAIN", "TEST"))
@@ -325,7 +333,7 @@ def main() -> None:
     ap.add_argument("--n-familiarization", type=int, default=25,
                     help="training and test realizations per class in FAMILIARIZATION")
     ap.add_argument("--production", action="store_true",
-                    help="allow the study pools 50 to 71 (review item 37, issue #11)")
+                    help="allow the study pools 50 to 73 (review item 37, issue #11)")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
 
@@ -336,7 +344,8 @@ def main() -> None:
         spec = specs[a.dataset]
         if a.n_train or a.n_test:
             spec = DatasetSpec(spec.name, spec.pools, spec.dose, spec.levels,
-                               a.n_train or spec.n_train, a.n_test or spec.n_test, spec.familiarization)
+                               a.n_train or spec.n_train, a.n_test or spec.n_test, spec.familiarization,
+                               spec.null_check)
     else:
         if not a.pools:
             ap.error("--custom needs --pools")
@@ -344,7 +353,7 @@ def main() -> None:
                            a.n_train or 1000, a.n_test or 1000)
 
     if any(p in STUDY_POOLS for p in spec.pools) and not a.production:
-        sys.exit(f"pools {spec.pools} are study material (50 to 71); generating them needs --production")
+        sys.exit(f"pools {spec.pools} are study material (50 to 73); generating them needs --production")
     write_dataset(spec, a.out_root, a.workers)
 
 

@@ -1,7 +1,7 @@
 # Sinogram Ingestion and Reconstruction Output Specification
 
 **ASTM WK101378, draft Revision 06: MAR Interlaboratory Study**\
-**Version:** 2.1 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
+**Version:** 2.2 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
 **Date:** 2026-11-11\
 **Status:** draft. The v9 dataset writer and the blinding tooling shall produce files in exactly this format; any difference found when they are built is resolved before distribution, and this document is reissued.
 
@@ -21,6 +21,7 @@ In the study's Condition 1 (protocol §A7), each laboratory reads the sinograms 
 |---|---|---|
 | Replicate datasets `REP01` to `REP09` | 8,000 realizations each (draft standard §8.2.1). Each laboratory receives three (protocol §A6.3). | Coded |
 | Control dataset `CONTROL` | 4,000 realizations at level 1.030 and dose 4 × 10⁶, for the degrading control in the pilot | Coded |
+| Null-check dataset `NULL` | 4,000 lesion-absent realizations in two independent sets (`absent` and `absent2`), 1,000 training and 1,000 test each, for the null-signal check of draft standard §A1.7. Every laboratory receives it. | Labeled |
 | Familiarization dataset `FAMILIARIZATION` | A small set of realizations with the same configuration and different seeds, the reconstruction check of draft standard §12.2, and the noMAR images. No improving-control output (protocol §A6.4). | Labeled |
 
 ---
@@ -39,7 +40,7 @@ REP01/
     checksums_sha256.txt   SHA-256 of every other file in the directory
 ```
 
-The familiarization dataset has the same layout, plus:
+The null-check and familiarization datasets are labeled: their files are named by label (for example `absent2_test_0000`), and each has `labels.csv`. The familiarization dataset also has the reconstruction check:
 
 ```
 FAMILIARIZATION/
@@ -209,6 +210,7 @@ ds.add_new(0x00189390, "SQ", [item])
 
 ## Revision History
 
+- **2.2 (2026-11-12):** null-check dataset `NULL` added (draft standard §8.2.1 and §A1.7). No change to the file format.
 - **2.1 (2026-11-11):** `I0` and `scatter_counts` stated per dataset, since the control dataset is at 4 × 10⁶; found when the dataset writer was built. No change to the file format.
 - **2.0 (2026-11-11):** rewritten for the v9 design and draft Revision 06: single-slice 984 × 888 sinograms (SID 541 mm, SDD 949 mm), coded layout of protocol §A6.3, coordinates of §A1.1(i), reconstruction check file, laboratory output under coded names. The description of the reference reconstruction in version 1.0 is removed, because in Condition 1 the reconstruction is implemented from the standard's text.
 - **1.0 (2026-07-13):** v7 design, Revision 05.

@@ -44,8 +44,9 @@ def score_run_dir(dataset_dir: Path, run_dir: Path, key: Path | None, out: Path 
                   regions_out: Path | None, reps: int) -> None:
     """Protocol §A8.2, Step 5: score one run directory against its replicate dataset."""
     results, regions = score_v9.score_run(dataset_dir, run_dir, key, n_reps=reps)
-    out = out or run_dir.parent / f"{run_dir.name}_cho_results.json"
-    regions_out = regions_out or run_dir.parent / f"{run_dir.name}_scored_regions.npz"
+    stem = results["run_dir"]
+    out = out or run_dir.parent / f"{stem}_cho_results.json"
+    regions_out = regions_out or run_dir.parent / f"{stem}_scored_regions.npz"
     out.write_text(json.dumps(results, indent=1))
     np.savez_compressed(regions_out, **regions)
     print(f"{results['dataset']} / {results['run_dir']}: {results['n_realizations']} realizations")
@@ -53,6 +54,11 @@ def score_run_dir(dataset_dir: Path, run_dir: Path, key: Path | None, out: Path 
         print(f"  level {lev}: AUC_inf noMAR {r['noMAR']['AUC_inf']:.4f} ± {r['noMAR']['error']:.4f}, "
               f"MAR {r['MAR']['AUC_inf']:.4f} ± {r['MAR']['error']:.4f}, "
               f"ΔAUC_inf {r['delta_AUC_inf']:+.4f} ± {r['delta_error']['error']:.4f}")
+        nul = r.get("null_check")
+        if nul:
+            verdict = "within" if nul["MAR_within_tolerance"] else "OUTSIDE"
+            print(f"  null-signal check: AUC_inf {r['MAR']['AUC_inf']:.4f}, {verdict} "
+                  f"{nul['tolerance']} of {nul['expected_AUC_inf']} (draft standard 17.6(c))")
         chk = r.get("reference_check")
         if chk and not chk["within_0.005"]:
             print(f"  WARNING: AUC_inf noMAR differs from the reference {chk['reference_AUC_inf_noMAR']:.4f} "
@@ -73,8 +79,21 @@ def main() -> None:
     run.add_argument("--mar-output-dir", type=Path, help="the run directory, e.g. C1_R1")
     run.add_argument("--blinding-key", type=Path, help="released key; not needed for labeled datasets")
     run.add_argument("--regions-out", type=Path, help="default <run_dir>_scored_regions.npz")
+    run.add_argument("--export-regions", action="store_true",
+                     help="only write <run_dir>_regions.npz, the 121 x 121 regions of --mar-output-dir; "
+                          "needs no dataset or key (pilot, protocol B4)")
     a = ap.parse_args()
 
+    if a.export_regions:
+        if not a.mar_output_dir or a.npz:
+            ap.error("--export-regions needs --mar-output-dir")
+        target = a.regions_out or a.mar_output_dir.parent / f"{a.mar_output_dir.name}_regions.npz"
+        try:
+            np.savez_compressed(target, **score_v9.export_regions(a.mar_output_dir))
+        except ValueError as e:
+            raise SystemExit(str(e)) from e
+        print(f"Regions: {target}")
+        return
     if a.mar_output_dir or a.dataset_dir:
         if not (a.mar_output_dir and a.dataset_dir) or a.npz:
             ap.error("run directory scoring needs --dataset-dir and --mar-output-dir, and no npz")
