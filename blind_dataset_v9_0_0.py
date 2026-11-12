@@ -10,7 +10,7 @@ label-free files). Output:
                                      noMAR/<code>.dcm, byte-identical to the
                                      master files; dataset_record.json without
                                      per-realization entries; new checksums
-  <out>/FAMILIARIZATION              labeled copy, unchanged
+  <out>/NULL, FAMILIARIZATION        labeled copies, unchanged
   <key>                              blinding_key.json: random salt, code ->
                                      class, level, split, pool, index for
                                      every coded realization, and the
@@ -56,7 +56,7 @@ TOOL_VERSION = "v9.0.0"
 ASSIGNMENT_SEED = 20261103
 REPLICATES = tuple(f"REP{m:02d}" for m in range(1, 10))
 CODED = REPLICATES + ("CONTROL",)
-LABELED = ("FAMILIARIZATION",)
+LABELED = ("NULL", "FAMILIARIZATION")
 CODE_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 CODE_LEN = 8
 PER_LAB = 3
@@ -245,7 +245,7 @@ def blind(masters: Path, out: Path, key_path: Path, assignment: dict[str, list[s
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
-    ap.add_argument("--masters", type=Path, required=True, help="directory holding REP01..REP09, CONTROL, FAMILIARIZATION")
+    ap.add_argument("--masters", type=Path, required=True, help="directory holding REP01..REP09, CONTROL, NULL, FAMILIARIZATION")
     ap.add_argument("--out", type=Path, required=True, help="new, empty directory for the distribution copies")
     ap.add_argument("--key", type=Path, required=True, help="path of blinding_key.json, outside --out")
     src = ap.add_mutually_exclusive_group(required=True)

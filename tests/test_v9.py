@@ -312,7 +312,7 @@ class TestBlinding:
             b.blind(masters, dist, tmp_path / "k.json", design, "x", require_all=False)
 
 
-def _fake_master(root, name, n, signal_hu, seed):
+def _fake_master(root, name, n, signal_hu, seed, null=False):
     """A labeled master dataset of synthetic images (white noise plus a centered disk), no FBP."""
     import json
 
@@ -326,9 +326,9 @@ def _fake_master(root, name, n, signal_hu, seed):
     reals = []
     for split, pool in (("train", 0), ("test", 1)):
         for i in range(n):
-            for cls, lev in ((0, None), (1, 1.03)):
-                nm = f"{'absent' if cls == 0 else 'present1030'}_{split}_{i:04d}"
-                img = 20.0 * rng.standard_normal((512, 512)) + (signal_hu * disk if cls else 0.0)
+            for cls, lev in ((0, None), (1, None if null else 1.03)):
+                nm = f"{'absent' if cls == 0 else ('absent2' if null else 'present1030')}_{split}_{i:04d}"
+                img = 20.0 * rng.standard_normal((512, 512)) + (signal_hu * disk if cls and not null else 0.0)
                 dicom_v9.write_ct(img, root / name / "noMAR" / f"{nm}.dcm", mar_applied=False, **uids)
                 (root / name / "sinograms" / f"{nm}.h5").write_bytes(b"x")
                 reals.append({"name": nm, "cls": cls, "level": lev, "split": split, "pool": pool, "index": i})
@@ -413,3 +413,52 @@ class TestScoring:
         partial.mkdir()
         with pytest.raises(ValueError, match="missing"):
             score_v9.score_run(base / "dist" / "REP01", partial, key)
+
+
+class TestNullCheck:
+    """Null-check dataset (Rev 06 A1.7, review item 41): writer, blinding and scoring."""
+
+    def test_writer_null_dataset(self, tmp_path):
+        import csv
+
+        import write_dataset_v9_0_0 as w
+        specs = w.standard_specs(1)
+        assert specs["NULL"].pools == (72, 73) and 72 in w.STUDY_POOLS and 73 in w.STUDY_POOLS
+        spec = w.DatasetSpec("NULL", (6, 7), 1e6, (), 1, 1, null_check=True)
+        root = w.write_dataset(spec, tmp_path, workers=2)
+        names = sorted(p.stem for p in (root / "sinograms").glob("*.h5"))
+        assert names == ["absent2_test_0000", "absent2_train_0000", "absent_test_0000", "absent_train_0000"]
+        with open(root / "labels.csv") as f:
+            classes = {r["code"]: r["class"] for r in csv.DictReader(f)}
+        assert classes["absent2_test_0000"] == "absent2" and classes["absent_test_0000"] == "absent"
+        a = gen.realization(0, None, 1e6, w.LUMP_SCALE, 6, 0)[4]
+        b = gen.realization(1, None, 1e6, w.LUMP_SCALE, 6, 0)[4]
+        assert not np.array_equal(a, b)                 # the two absent sets are independent
+
+    def test_scoring_and_export(self, tmp_path):
+        import os
+
+        from mar_ils_core import score_v9
+        _fake_master(tmp_path, "NULL", 100, 0.0, 5, null=True)
+        run = tmp_path / "C1_NULL"
+        run.mkdir()
+        for p in (tmp_path / "NULL" / "noMAR").glob("*.dcm"):
+            os.link(p, run / p.name)
+        res, _ = score_v9.score_run(tmp_path / "NULL", run, None, n_reps=10)
+        r = res["levels"]["null"]
+        assert set(res["levels"]) == {"null"} and r["null_check"]["expected_AUC_inf"] == 0.533
+        assert 0.45 < r["MAR"]["AUC_inf"] < 0.62 and r["delta_AUC_inf"] == 0.0
+        npz = tmp_path / "C1_NULL_regions.npz"
+        np.savez_compressed(npz, **score_v9.export_regions(run))
+        res2, _ = score_v9.score_run(tmp_path / "NULL", npz, None, n_reps=10)
+        assert res2["levels"] == res["levels"]
+
+    def test_blinding_keeps_null_labeled(self, tmp_path):
+        import blind_dataset_v9_0_0 as b
+        _fake_master(tmp_path / "m", "REP01", 2, 2.0, 1)
+        _fake_master(tmp_path / "m", "NULL", 2, 0.0, 2, null=True)
+        design = {"L1": ["REP01", "REP02", "REP03"]}
+        b.blind(tmp_path / "m", tmp_path / "d", tmp_path / "k" / "key.json", design, "test", require_all=False)
+        assert (tmp_path / "d" / "NULL" / "noMAR" / "absent2_train_0000.dcm").exists()
+        import json
+        assert "NULL" not in json.loads((tmp_path / "k" / "key.json").read_text())["datasets"]
