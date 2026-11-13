@@ -1,9 +1,9 @@
 # Sinogram Ingestion and Reconstruction Output Specification
 
 **ASTM WK101378, draft Revision 06: MAR Interlaboratory Study**\
-**Version:** 2.2 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
-**Date:** 2026-11-11\
-**Status:** draft. The v9 dataset writer and the blinding tooling shall produce files in exactly this format; any difference found when they are built is resolved before distribution, and this document is reissued.
+**Version:** 2.3 (v9 design; replaces version 1.0 of 2026-07-13, which described the superseded v7 design)\
+**Date:** 2026-11-12\
+**Status:** draft. The v9 dataset writer and the control runner shall produce files in exactly this format; any difference found when they are built is resolved before distribution, and this document is reissued.
 
 ---
 
@@ -11,18 +11,18 @@
 
 This document describes how the files of the MAR ILS dataset are organized and how to read them, and the format in which laboratories return their reconstructions. It is language-independent: any environment that reads HDF5 and writes DICOM can be used.
 
-In the study's Condition 1 (protocol §A7), each laboratory reads the sinograms from this document, implements the improving control of draft standard §A1.9 and the reconstruction of §A1.1(g) from the text of the standard, and does not consult or reuse the reference software. This document is the only reading aid allowed for Condition 1. For that reason it describes the data and their coordinates only. It does not describe how to reconstruct or how to apply MAR 2; those are defined by the standard alone, and where this document and the standard differ, the standard governs.
+In the study, each laboratory processes the sinograms with the supplied software: the improving control of draft standard §A1.9, the reference reconstruction of §A1.1(g) and the reference observer (protocol §A7). The software reads and writes the files described here, so a laboratory in the study needs this document for reference only. It describes the data and their coordinates. It does not describe how to reconstruct or how to apply MAR 2; those are defined by the standard, and where this document and the standard differ, the standard governs.
 
 ---
 
 ## 2. Datasets
 
-| Dataset | Content | Labels |
-|---|---|---|
-| Replicate datasets `REP01` to `REP09` | 8,000 realizations each (draft standard §8.2.1). Each laboratory receives three (protocol §A6.3). | Coded |
-| Control dataset `CONTROL` | 4,000 realizations at level 1.030 and dose 4 × 10⁶, for the degrading control in the pilot | Coded |
-| Null-check dataset `NULL` | 4,000 lesion-absent realizations in two independent sets (`absent` and `absent2`), 1,000 training and 1,000 test each, for the null-signal check of draft standard §A1.7. Every laboratory receives it. | Labeled |
-| Familiarization dataset `FAMILIARIZATION` | A small set of realizations with the same configuration and different seeds, the reconstruction check of draft standard §12.2, and the noMAR images. No improving-control output (protocol §A6.4). | Labeled |
+| Dataset | Content |
+|---|---|
+| Replicate datasets, `REP01` and so on | 8,000 realizations each (draft standard §8.2.1). Each laboratory receives three (protocol §A6.3). |
+| Control dataset `CONTROL` | 4,000 realizations at level 1.030 and dose 4 × 10⁶, for the degrading control in the pilot |
+| Null-check dataset `NULL` | 4,000 lesion-absent realizations in two independent sets (`absent` and `absent2`), 1,000 training and 1,000 test each, for the null-signal check of draft standard §A1.7. Every laboratory receives it. |
+| Familiarization dataset `FAMILIARIZATION` | A small set of realizations with the same configuration and different seeds, the reconstruction check of draft standard §12.2, the noMAR images, and the images of the supplied improving control for every realization, against which a laboratory checks its installation (protocol §A6.4 and §A8.2, Step 2). |
 
 ---
 
@@ -33,36 +33,37 @@ Each dataset is distributed as one directory:
 ```
 REP01/
     sinograms/
-        <code>.h5          one file per realization
+        <name>.h5          one file per realization
     noMAR/
-        <code>.dcm         the noMAR reconstruction of the same realization
-    dataset_record.json    dataset-level parameters (§3.2)
+        <name>.dcm         the noMAR reconstruction of the same realization
+    dataset_record.json    dataset-level parameters and the label of every realization (§3.2)
     checksums_sha256.txt   SHA-256 of every other file in the directory
 ```
 
-The null-check and familiarization datasets are labeled: their files are named by label (for example `absent2_test_0000`), and each has `labels.csv`. The familiarization dataset also has the reconstruction check:
+The null-check and familiarization datasets also have `labels.csv`. The familiarization dataset has the reconstruction check and the expected images of the improving control:
 
 ```
 FAMILIARIZATION/
-    labels.csv             code, class, level, pool, index for each realization
+    labels.csv             name, class, level, pool, index for each realization
     recon_check/
         recon_check.h5     the reconstruction check sinogram and its reference image (§5)
+    expected_C1/
+        <name>.dcm         the image the supplied improving control gives for the realization (§6.4)
 ```
 
-### 3.1 Coded identifiers
+### 3.1 File names
 
-- In the replicate and control datasets, each realization is named by a code of eight characters from `0-9` and `A-Z` (for example `K7Q2M9XD`). Codes are unique across all datasets of the study.
-- The code says nothing about the realization's class (lesion present or absent), signal level, pool (training or test) or index. Files are listed in no meaningful order.
-- `<code>.h5` and `<code>.dcm` with the same code belong to the same realization.
-- The key that maps codes to labels is released after the manifest deadline (protocol §A6.3 and §A8.2, Step 5). No information in the distributed files is needed to read, process or reconstruct a realization.
+- All datasets are labeled. Each realization is named by its class, signal level, pool and index: `absent_train_0000`, `present1025_test_0412`, and, in the null-check dataset, `absent2_train_0000` for the second lesion-absent set. The level is given in thousandths, so `present1025` is level 1.025.
+- `<name>.h5` and `<name>.dcm` with the same name belong to the same realization.
+- The study does not conceal labels from the laboratories (protocol §A6.3). The result is computed by fixed supplied software, and the coordinator computes the same result independently.
 
 ### 3.2 `dataset_record.json`
 
-A JSON object with the dataset identifier, the generator version, the number of realizations, the parameters of draft standard §A1.1 and §A1.2 that are the same for every realization, the spectrum table of §A1.1(d), the MAR 2 threshold of §A1.9(f), and the SHA-256 of the blinding key as published in the study's Zenodo record. It contains no per-realization entries in the coded datasets.
+A JSON object with the dataset identifier, the generator version, the number of realizations, the parameters of draft standard §A1.1 and §A1.2 that are the same for every realization, the spectrum table of §A1.1(d), the thresholds of the control methods (§A1.9(f), §17.7(c)), and one entry per realization with its name, class, level, pool, index and inset angle.
 
 ---
 
-## 4. HDF5 Sinogram File (`<code>.h5`)
+## 4. HDF5 Sinogram File (`<name>.h5`)
 
 Each file holds one realization: one 2D fan-beam sinogram of one slice.
 
@@ -102,7 +103,7 @@ These attributes repeat the acquisition of draft standard §A1.1 for convenience
 | `electronic_variance_counts2` | float64 | 160.0 |
 | `log_floor_counts` | float64 | 1.0 |
 
-The coded files carry no other attributes. In particular, the lesion flag, signal level, seed and inset angle are not present. In the familiarization dataset they are given in `labels.csv`, not in the HDF5 files.
+The files carry no other attributes. The class, signal level, pool and index are given by the file name and the dataset record, not inside the HDF5 files.
 
 ### 4.3 Coordinates
 
@@ -146,7 +147,7 @@ The reference image is stored in floating point, not as DICOM, so that the compa
 
 ## 6. Images
 
-### 6.1 Supplied noMAR images (`noMAR/<code>.dcm`)
+### 6.1 Supplied noMAR images (`noMAR/<name>.dcm`)
 
 One single-frame DICOM CT image per realization: the reference reconstruction of the uncorrected sinogram. These images are the noMAR series of draft standard §14.2.
 
@@ -160,7 +161,7 @@ One single-frame DICOM CT image per realization: the reference reconstruction of
 | Modality (0008,0060) | CT |
 | Metal Artifact Reduction Sequence (0018,9390) | one item, with Metal Artifact Reduction Applied (0018,9391) = NO |
 
-Stored values are HU per §A1.1(h), rounded to the nearest integer; values beyond the signed 16-bit range are clipped. Series Description, Protocol Name and any other attribute that could reveal a label are blank in the coded datasets, and Content Date and Content Time have one value for all files.
+Stored values are HU per §A1.1(h), rounded to the nearest integer; values beyond the signed 16-bit range are clipped. Series Description and Protocol Name are absent, and Content Date and Content Time have one value for all files of a dataset.
 
 Because of the rounding and clipping, the noMAR DICOM images shall not be used for the MAR 2 segmentation (draft standard §A1.9(a)). MAR 2 starts from the sinogram.
 
@@ -170,16 +171,16 @@ Pixel (row r, column c) counts from zero. Its center is at x = (c − 256) Δ, y
 
 ### 6.3 Laboratory output
 
-Each run directory holds one image per coded realization of the replicate dataset (protocol §A8.3):
+Each run directory holds one image per realization of its dataset (protocol §A8.3). The control runner, `run_control_v9_0.py`, writes it in this format:
 
 ```
 C1_R1/
-    <code>.dcm
+    <name>.dcm
 ```
 
 | Requirement | Value |
 |---|---|
-| File name | the code of the realization, with extension `.dcm` |
+| File name | the name of the realization, with extension `.dcm` |
 | Matrix and pixel indexing | 512 × 512, pixel spacing 300/512 mm, pixel (256, 256) at the isocenter, indexed as in §6.2 |
 | Pixel values | HU per §A1.1(h), stored in 16 bits; any Rescale Slope and Rescale Intercept that represent them correctly |
 | Modality | CT |
@@ -196,20 +197,25 @@ item.add_new(0x00189391, "CS", "YES")
 ds.add_new(0x00189390, "SQ", [item])
 ```
 
+### 6.4 Expected images (`FAMILIARIZATION/expected_C1/<name>.dcm`)
+
+One image per realization of the familiarization dataset, in the format of §6.3: the output of the supplied improving control and reference reconstruction, as run by the coordinator. A laboratory processes the familiarization dataset and compares its images with these, pixel for pixel (`run_control_v9_0.py --compare`; protocol §A8.2, Step 2).
+
 ---
 
 ## 7. Checklist Before Submission
 
 - [ ] Every file of the assigned datasets matches `checksums_sha256.txt`.
 - [ ] The reconstruction check passed, and the largest difference is recorded on the return form.
-- [ ] Each run directory holds exactly one `<code>.dcm` for every `<code>.h5` of its replicate dataset, and nothing else.
+- [ ] The images of the familiarization run equal the expected images.
+- [ ] Each run directory holds exactly one `<name>.dcm` for every `<name>.h5` of its dataset, and nothing else.
 - [ ] Every image is 512 × 512, indexed as in §6.2, in HU, with (0018,9391) = YES.
-- [ ] The SHA-256 manifest of each run directory has been produced in the format of `checksums_sha256.txt`.
 
 ---
 
 ## Revision History
 
+- **2.3 (2026-11-12):** all datasets labeled, with files named by label; no codes and no key (protocol §A6.3). Laboratories run the supplied software. `expected_C1/` added to the familiarization dataset. The manifest of each run directory is no longer required. No change to the sinogram or image file format.
 - **2.2 (2026-11-11):** null-check dataset `NULL` added (draft standard §8.2.1 and §A1.7). No change to the file format.
 - **2.1 (2026-11-11):** `I0` and `scatter_counts` stated per dataset, since the control dataset is at 4 × 10⁶; found when the dataset writer was built. No change to the file format.
 - **2.0 (2026-11-11):** rewritten for the v9 design and draft Revision 06: single-slice 984 × 888 sinograms (SID 541 mm, SDD 949 mm), coded layout of protocol §A6.3, coordinates of §A1.1(i), reconstruction check file, laboratory output under coded names. The description of the reference reconstruction in version 1.0 is removed, because in Condition 1 the reconstruction is implemented from the standard's text.
