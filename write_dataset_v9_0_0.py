@@ -2,7 +2,7 @@
 """
 MAR ILS dataset writer v9.0.0: sinograms (HDF5) and noMAR images (DICOM) for
 ASTM WK101378 draft Rev 06 §8.2, in the master (labeled) layout of the
-sinogram ingestion specification (version 2.1).
+sinogram ingestion specification (version 2.3).
 
 Each realization is produced by generator_v9_0_0.realization(), the same
 function the validated ROI runs use, so a realization written here is the one
@@ -16,8 +16,10 @@ the CHO results describe. For each realization the writer stores:
 and, per dataset, dataset_record.json (parameters, spectrum, and the label of
 every realization) and checksums_sha256.txt. Labels appear only in the file
 names and the record, never inside a file, so the blinding tool only renames
-files and writes a stripped record. FAMILIARIZATION also gets labels.csv and
-recon_check/recon_check.h5.
+files and writes a stripped record. FAMILIARIZATION also gets labels.csv,
+recon_check/recon_check.h5 and expected_C1/<name>.dcm, the images the supplied
+improving control gives for each realization (review item 42), against which a
+laboratory checks its installation.
 
 Datasets and seed pools follow review item 37:
   REP01..REP09     pools 50+2(m-1) / 51+2(m-1), I0 1e6, levels 1.020 1.025 1.030
@@ -55,14 +57,14 @@ import h5py
 import numpy as np
 
 import generator_v9_0_0 as gen
-from mar_ils_core import dicom_v9
+from mar_ils_core import control_v9, dicom_v9
 from mar_ils_core import vaishnav_phantom as vp
 from mar_ils_core import vaishnav_sim as vs
 
 WRITER_VERSION = "v9.0.0"
 LUMP_SCALE = 0.0588                     # Rev 06 §A1.2(a)
-TAU_MU_CM = 1.9529025691374509          # Rev 06 §A1.9(b), private/ruggedness/data/meta.json
-TAU_COUNTS = 1124.2100350620863         # MAR 1 (degrading control), same source
+TAU_MU_CM = control_v9.TAU_MU_CM        # Rev 06 §A1.9(b), private/ruggedness/data/meta.json
+TAU_COUNTS = control_v9.TAU_COUNTS      # MAR 1 (degrading control), same source
 LEVELS = (1.020, 1.025, 1.030)
 STUDY_POOLS = range(50, 74)
 SPLITS = ("train", "test")
@@ -165,10 +167,16 @@ def nomar_hu(p32: np.ndarray) -> np.ndarray:
 
 
 def _write_one(args) -> dict:
-    job, root, dose, uids = args
+    job, root, dose, uids, expected = args
     h5_path = root / "sinograms" / f"{job.name}.h5"
     dcm_path = root / "noMAR" / f"{job.name}.dcm"
     p32, angle = stored_sinogram(job, dose)
+    exp_path = root / "expected_C1" / f"{job.name}.dcm"
+    if expected and not exp_path.exists():
+        tmp = _atomic(exp_path)
+        dicom_v9.write_ct(control_v9.improving_hu(p32), tmp, mar_applied=True,
+                          **{**uids, "series_uid": expected})
+        os.replace(tmp, exp_path)
     if not (h5_path.exists() and dcm_path.exists()):
         tmp = _atomic(h5_path)
         write_sinogram(tmp, p32, dose)
@@ -215,6 +223,7 @@ def load_state(root: Path) -> dict:
         return json.loads(state_path.read_text())
     t = time.gmtime()
     state = {"study_uid": dicom_v9.fixed_length_uid(), "series_uid": dicom_v9.fixed_length_uid(),
+             "expected_series_uid": dicom_v9.fixed_length_uid(),
              "content_date": time.strftime("%Y%m%d", t), "content_time": "000000"}
     state_path.write_text(json.dumps(state))
     return state
@@ -243,7 +252,7 @@ def dataset_record(spec: DatasetSpec, realizations: list[dict], state: dict, ext
         "generator_version": gen.DATASET_VERSION,
         "source_commit": git_commit(),
         "standard": "ASTM WK101378 draft Revision 06",
-        "ingestion_spec_version": "2.2",
+        "ingestion_spec_version": "2.3",
         "subset": not full,
         "base_seed": gen.BASE_SEED,
         "lump_seed": vp.LUMP_SEED,
@@ -280,6 +289,10 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     (root / "noMAR").mkdir(exist_ok=True)
     state = load_state(root)
     uids = {k: state[k] for k in ("study_uid", "series_uid", "content_date", "content_time")}
+    expected = None
+    if spec.familiarization:
+        (root / "expected_C1").mkdir(exist_ok=True)
+        expected = state.get("expected_series_uid") or dicom_v9.fixed_length_uid()
     jobs = jobs_for(spec)
     t0 = time.time()
     print(f"{spec.name}: {len(jobs)} realizations -> {root}", flush=True)
@@ -288,7 +301,7 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     # the parent kills the workers on Linux (macOS already defaults to spawn)
     ctx = multiprocessing.get_context("spawn")
     with ProcessPoolExecutor(workers, mp_context=ctx, initializer=_init_worker) as ex:
-        for n, rec in enumerate(ex.map(_write_one, [(j, root, spec.dose, uids) for j in jobs],
+        for n, rec in enumerate(ex.map(_write_one, [(j, root, spec.dose, uids, expected) for j in jobs],
                                        chunksize=2), 1):
             realizations.append(rec)
             if n % 200 == 0 or n == len(jobs):
@@ -299,6 +312,8 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
     extra = {}
     if spec.familiarization:
         extra["recon_check"] = write_recon_check(root, spec)
+        extra["expected_C1"] = ("images of the supplied improving control (run_control_v9_0.py) for every "
+                                "realization, for the installation check of protocol A8.2, Step 2")
     if spec.familiarization or spec.null_check:
         with open(root / "labels.csv", "w", newline="") as f:
             wr = csv.writer(f)

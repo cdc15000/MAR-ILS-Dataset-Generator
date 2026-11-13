@@ -5,5 +5,6 @@ h5py==3.15.1
 tqdm==4.67.3
 reportlab==4.4.10
 matplotlib==3.10.8
-# numba is optional (~24x speedup). Install separately: pip install numba
+# numba is required by the v9 software (reconstruction, control methods); optional for v7
+numba==0.68.0
 spekpy==2.0.13

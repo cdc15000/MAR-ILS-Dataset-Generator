@@ -462,3 +462,126 @@ class TestNullCheck:
         assert (tmp_path / "d" / "NULL" / "noMAR" / "absent2_train_0000.dcm").exists()
         import json
         assert "NULL" not in json.loads((tmp_path / "k" / "key.json").read_text())["datasets"]
+
+
+@pytest.fixture(scope="module")
+def familiarization(tmp_path_factory):
+    import write_dataset_v9_0_0 as w
+    spec = w.DatasetSpec("FAMILIARIZATION", (2, 3), 1e6, (1.03,), 1, 1, True)
+    return w, w.write_dataset(spec, tmp_path_factory.mktemp("fam"), workers=2)
+
+
+class TestControlRunner:
+    """run_control_v9_0: the supplied control and reference reconstruction over a dataset
+    (review item 42; protocol A8.2, Steps 2 and 3)."""
+
+    def test_improving_control_matches_generator(self, written):
+        import h5py
+
+        from mar_ils_core import control_v9
+        w, root = written
+        with h5py.File(root / "sinograms" / "present1030_test_0000.h5") as f:
+            p32 = f["line_integrals"][()]
+        hu = control_v9.improving_hu(p32)
+        ref = gen.simulate(1, 1.03, 1e6, w.LUMP_SCALE, 1, 0, ("fbp", "mar2"), w.TAU_COUNTS, w.TAU_MU_CM)
+        r0, r1, c0, c1 = vs.center_roi()
+        # the stored sinogram is float32; the generator works in float64
+        assert np.abs(hu[r0:r1, c0:c1] - vs.to_hu(ref["mar2"].astype(np.float64))).max() < 0.5
+        assert np.abs(hu[r0:r1, c0:c1] - vs.to_hu(ref["fbp"].astype(np.float64))).max() > 5.0
+
+    def test_degrading_control_matches_mar1(self):
+        from mar_ils_core import control_v9
+        counts, p = gen.realization(1, 1.03, 4e6, 0.0588, 1, 0)[3:5]
+        np.testing.assert_array_equal(control_v9.degrading_sinogram(p, 4e6),
+                                      mar_v9.mar1(counts, 4e6, control_v9.TAU_COUNTS))
+
+    def test_run_writes_one_mar_image_per_sinogram_and_resumes(self, written, tmp_path):
+        import json
+
+        import pydicom
+
+        import run_control_v9_0 as rc
+        from mar_ils_core import control_v9, dicom_v9
+        _w, root = written
+        run = tmp_path / "C1_R1"
+        assert rc.run(root, run, "improving", workers=2) == 0
+        names = sorted(p.stem for p in (root / "sinograms").glob("*.h5"))
+        assert sorted(p.name for p in run.iterdir()) == [f"{n}.dcm" for n in names]
+        ds = pydicom.dcmread(run / "absent_train_0000.dcm")
+        assert ds[0x00189390].value[0][0x00189391].value == "YES"
+        import h5py
+        with h5py.File(root / "sinograms" / "absent_train_0000.h5") as f:
+            expect = dicom_v9.hu_to_pixels(control_v9.improving_hu(f["line_integrals"][()]))
+        assert np.array_equal(ds.pixel_array, expect)
+        rec = json.loads((tmp_path / "C1_R1_run_record.json").read_text())
+        assert rec["dataset"] == "T" and rec["control"] == "improving" and rec["n_images"] == 4
+        assert rec["tau_mu_cm"] == control_v9.TAU_MU_CM and "numpy" in rec["versions"]
+
+        before = {p.name: p.stat().st_mtime_ns for p in run.iterdir()}
+        (run / "absent_train_0000.dcm").unlink()
+        assert rc.run(root, run, "improving", workers=1) == 0
+        after = {p.name: p.stat().st_mtime_ns for p in run.iterdir()}
+        assert set(after) == set(before)
+        assert {n for n in before if after[n] != before[n]} == {"absent_train_0000.dcm"}
+        assert rc.compare(run, run) == 0
+
+    def test_compare_detects_a_changed_or_missing_image(self, written, tmp_path):
+        import shutil
+
+        import run_control_v9_0 as rc
+        from mar_ils_core import dicom_v9
+        _w, root = written
+        a, b = tmp_path / "a", tmp_path / "b"
+        shutil.copytree(root / "noMAR", a)
+        shutil.copytree(root / "noMAR", b)
+        assert rc.compare(a, b) == 0
+        hu = dicom_v9.read_hu(b / "absent_train_0000.dcm")
+        hu[10, 10] += 1.0
+        dicom_v9.write_ct(hu, b / "absent_train_0000.dcm", study_uid="2.25.1", series_uid="2.25.2",
+                          content_date="20261112", content_time="000000", mar_applied=True)
+        assert rc.compare(a, b) == 1
+        (a / "absent_test_0000.dcm").unlink()
+        assert rc.compare(a, b) == 1
+
+    def test_refuses_a_changed_threshold(self, written, tmp_path):
+        import json
+        import shutil
+
+        import run_control_v9_0 as rc
+        _w, root = written
+        bad = tmp_path / "T"
+        bad.mkdir()
+        shutil.copytree(root / "sinograms", bad / "sinograms")
+        rec = json.loads((root / "dataset_record.json").read_text())
+        rec["mar2_tau_mu_cm"] = 1.9
+        (bad / "dataset_record.json").write_text(json.dumps(rec))
+        with pytest.raises(ValueError, match="threshold"):
+            rc.run(bad, tmp_path / "C1_R1", "improving", workers=1)
+        assert not (tmp_path / "C1_R1").exists()
+
+    def test_familiarization_carries_expected_images_and_checks_pass(self, familiarization, tmp_path):
+        import run_control_v9_0 as rc
+        _w, root = familiarization
+        assert rc.recon_check(root / "recon_check" / "recon_check.h5") == 0
+        expected = root / "expected_C1"
+        assert len(list(expected.glob("*.dcm"))) == len(list((root / "sinograms").glob("*.h5"))) == 4
+        listed = (root / "checksums_sha256.txt").read_text()
+        assert "expected_C1/absent_train_0000.dcm" in listed
+        run = tmp_path / "C1_FAM"
+        assert rc.run(root, run, "improving", workers=2) == 0
+        assert rc.compare(run, expected) == 0
+
+    def test_verify_checksums(self, written, tmp_path):
+        import shutil
+
+        import run_control_v9_0 as rc
+        _w, root = written
+        assert rc.verify(root) == 0
+        copy = tmp_path / "T"
+        shutil.copytree(root, copy)
+        with open(copy / "noMAR" / "absent_train_0000.dcm", "r+b") as f:
+            f.seek(2000)
+            f.write(b"\x01\x02")
+        assert rc.verify(copy) == 1
+        (copy / "sinograms" / "absent_test_0000.h5").unlink()
+        assert rc.verify(copy) == 1

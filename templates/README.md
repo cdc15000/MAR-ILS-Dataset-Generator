@@ -1,5 +1,7 @@
 # MAR ILS Laboratory Harness Templates (v9 dataset)
 
+> **Not used in the interlaboratory study (2026-11-12).** The study now has one condition, in which every laboratory runs the supplied software (`run_control_v9_0.py`; see `docs_and_references/ILS_Lab_Instructions.md`). These templates remain for a laboratory that wishes to measure its own MAR method with the test method, outside the study. References below to Condition 1, Condition 2 and coded names describe the earlier design.
+
 Harnesses for laboratories in the ASTM WK101378 interlaboratory study (draft Revision 06). Each one reads the coded sinograms of a replicate dataset in the format of the [sinogram ingestion specification](../docs_and_references/sinogram_ingestion_spec.md) (version 2.0), calls the laboratory's `apply_mar()` for each realization, and writes one DICOM CT image per realization, named by its code, with the CP-2575 Metal Artifact Reduction Macro (protocol §A8.3).
 
 **Use these templates for Condition 2 (the laboratory's own MAR) only.** In Condition 1, each laboratory implements the improving control (draft standard §A1.9) and the reconstruction (§A1.1(g)) from the text of the standard, reading the data with the ingestion specification alone, and does not consult or reuse these templates or the reference reconstruction in them (protocol §A7).
