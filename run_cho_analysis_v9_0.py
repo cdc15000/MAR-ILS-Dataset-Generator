@@ -5,8 +5,8 @@ CHO analysis v9.0: D-DOG channels, pooled covariance, antler-plot AUC∞
 AUC∞ per method and ΔAUC∞ = AUC∞(method) − AUC∞(fbp).
 
 Usage: python run_cho_analysis_v9_0.py roi.npz --out cho.json [--internal-noise-c 2.5]
-       python run_cho_analysis_v9_0.py --dataset-dir REP04 --mar-output-dir C1_R1 \\
-           --blinding-key blinding_key.json
+       python run_cho_analysis_v9_0.py --dataset-dir REP04 --mar-output-dir C1_R1
+       python run_cho_analysis_v9_0.py --dataset-dir REP04 --record-reference   (coordinator)
 """
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def score_run_dir(dataset_dir: Path, run_dir: Path, key: Path | None, out: Path 
         chk = r.get("reference_check")
         if chk and not chk["within_0.005"]:
             print(f"  WARNING: AUC_inf noMAR differs from the reference {chk['reference_AUC_inf_noMAR']:.4f} "
-                  "by more than 0.005; contact the coordinator (protocol Step 5.4)")
+                  "by more than 0.005; contact the coordinator (protocol Step 4.2)")
     print(f"Results: {out}\nScored regions: {regions_out}")
 
 
@@ -79,6 +79,9 @@ def main() -> None:
     run.add_argument("--mar-output-dir", type=Path, help="the run directory, e.g. C1_R1")
     run.add_argument("--blinding-key", type=Path, help="released key; not needed for labeled datasets")
     run.add_argument("--regions-out", type=Path, help="default <run_dir>_scored_regions.npz")
+    run.add_argument("--record-reference", action="store_true",
+                     help="coordinator only: write the reference AUC_inf of the noMAR series of "
+                          "--dataset-dir to its dataset record, and exit")
     run.add_argument("--export-regions", action="store_true",
                      help="only write <run_dir>_regions.npz, the 121 x 121 regions of --mar-output-dir; "
                           "needs no dataset or key (pilot, protocol B4)")
@@ -93,6 +96,19 @@ def main() -> None:
         except ValueError as e:
             raise SystemExit(str(e)) from e
         print(f"Regions: {target}")
+        return
+    if a.record_reference:
+        if not a.dataset_dir or a.mar_output_dir or a.npz:
+            ap.error("--record-reference needs --dataset-dir only")
+        try:
+            refs = score_v9.record_reference(a.dataset_dir, a.reps)
+        except ValueError as e:
+            raise SystemExit(str(e)) from e
+        if not refs:
+            raise SystemExit(f"{a.dataset_dir}: too few training realizations per class; nothing recorded")
+        for lev, v in refs.items():
+            print(f"  level {lev}: reference AUC_inf noMAR {v:.4f}")
+        print(f"Recorded in {a.dataset_dir / 'dataset_record.json'}")
         return
     if a.mar_output_dir or a.dataset_dir:
         if not (a.mar_output_dir and a.dataset_dir) or a.npz:

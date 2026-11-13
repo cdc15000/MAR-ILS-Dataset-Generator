@@ -35,6 +35,7 @@ CENTER = vp.IMAGE_PX // 2                   # pixel (256, 256), counted from zer
 ANTLER_SEED = 0                             # §A1.6(f): stated in the dataset record
 NULL_AUC_INF = 0.533                        # §A1.7: the estimator's value with no signal
 NULL_TOLERANCE = 0.02                       # §17.6(c)
+MIN_TRAIN_FOR_REFERENCE = cho_v9.DEFAULT_NT[1]     # the antler fit needs two training-set sizes
 
 
 @dataclass(frozen=True)
@@ -129,6 +130,79 @@ def _summary(r: cho_v9.AntlerResult) -> dict:
             "intercept_resub": float(r.int_resub.mean()), "intercept_holdout": float(r.int_holdout.mean())}
 
 
+def _levels(labels: dict[str, Label]) -> list[float | None]:
+    return sorted({lab.level for lab in labels.values() if lab.cls == "present"},
+                  key=lambda v: -1.0 if v is None else v)
+
+
+def _level_name(level: float | None) -> str:
+    return "null" if level is None else f"{level:.3f}"
+
+
+def _indices(labels: dict[str, Label], names: list[str], level: float | None) -> dict:
+    """Rows of names for each class and split at one level, in the order of the realization index."""
+    pos = {n: i for i, n in enumerate(names)}
+
+    def rows(cls, split):
+        sel = [n for n in names if labels[n].cls == cls and labels[n].split == split
+               and (cls == "absent" or labels[n].level == level)]
+        return np.array([pos[n] for n in sorted(sel, key=lambda n: labels[n].index)], dtype=np.intp)
+
+    return {(c, s): rows(c, s) for c in ("absent", "present") for s in ("train", "test")}
+
+
+def _antler(v: np.ndarray, idx: dict, n_reps: int, seed: int) -> cho_v9.AntlerResult:
+    return cho_v9.antler(v[idx[("absent", "train")]], v[idx[("present", "train")]],
+                         v[idx[("absent", "test")]], v[idx[("present", "test")]],
+                         n_reps=n_reps, seed=seed)
+
+
+def nomar_reference(dataset_dir: Path, n_reps: int = cho_v9.DEFAULT_REPS, seed: int = ANTLER_SEED) -> dict[str, float]:
+    """AUC∞ of the noMAR series of a labeled dataset at each level, as score_run computes it.
+
+    Empty when the dataset has fewer training realizations per class than the antler
+    fit needs (two training-set sizes), as a small familiarization dataset has.
+    """
+    record = json.loads((dataset_dir / "dataset_record.json").read_text())
+    labels = labels_from_record(dataset_dir, record)
+    names = sorted(labels)
+    per_level = {lev: _indices(labels, names, lev) for lev in _levels(labels)}
+    smallest = min((i.size for idx in per_level.values() for (_c, s), i in idx.items() if s == "train"), default=0)
+    if smallest < MIN_TRAIN_FOR_REFERENCE:
+        return {}
+    v = cho_v9.channel_outputs(load_rois(dataset_dir / "noMAR", names).astype(np.float64), ddog_channels(ROI_PX))
+    return {_level_name(lev): _antler(v, idx, n_reps, seed).auc_inf for lev, idx in per_level.items()}
+
+
+def record_reference(dataset_dir: Path, n_reps: int = cho_v9.DEFAULT_REPS, seed: int = ANTLER_SEED) -> dict[str, float]:
+    """Coordinator step: write the reference noMAR AUC∞ of each level to the dataset record.
+
+    The values are the ones a laboratory's scoring is compared with (protocol A8.2, Step 4;
+    Rev 06 8.4). The line of dataset_record.json in checksums_sha256.txt, if the file
+    exists, is updated. Returns the values; {} when the dataset is too small, and the
+    record is then left as it is.
+    """
+    refs = nomar_reference(dataset_dir, n_reps, seed)
+    if not refs:
+        return refs
+    record_path = dataset_dir / "dataset_record.json"
+    record = json.loads(record_path.read_text())
+    realizations = record.pop("realizations", None)
+    record["reference_auc_inf_nomar"] = refs
+    record["reference_antler"] = {"seed": seed, "n_reps": n_reps}
+    if realizations is not None:
+        record["realizations"] = realizations
+    record_path.write_text(json.dumps(record, indent=1))
+    listing = dataset_dir / "checksums_sha256.txt"
+    if listing.exists():
+        lines = listing.read_text().splitlines()
+        digest = sha256_file(record_path)
+        lines = [f"{digest}  dataset_record.json" if ln.split("  ", 1)[1] == "dataset_record.json" else ln
+                 for ln in lines]
+        listing.write_text("\n".join(lines) + "\n")
+    return refs
+
+
 def score_run(dataset_dir: Path, run_dir: Path, key_path: Path | None = None,
               n_reps: int = cho_v9.DEFAULT_REPS, seed: int = ANTLER_SEED) -> tuple[dict, dict]:
     """Returns (results for cho_results.json, scored regions for the .npz)."""
@@ -151,30 +225,20 @@ def score_run(dataset_dir: Path, run_dir: Path, key_path: Path | None = None,
     channels = ddog_channels(ROI_PX)
     v_nomar = cho_v9.channel_outputs(nomar.astype(np.float64), channels)
     v_mar = cho_v9.channel_outputs(mar.astype(np.float64), channels)
-    pos = {n: i for i, n in enumerate(names)}
-
-    def rows(cls, level, split):
-        sel = [n for n in names if labels[n].cls == cls and labels[n].split == split
-               and (cls == "absent" or labels[n].level == level)]
-        return np.array([pos[n] for n in sorted(sel, key=lambda n: labels[n].index)], dtype=np.intp)
-
-    levels = sorted({lab.level for lab in labels.values() if lab.cls == "present"},
-                    key=lambda v: -1.0 if v is None else v)
-    refs = record.get("reference_auc_inf_nomar", {})
+    levels = _levels(labels)
+    refs = record.get("reference_auc_inf_nomar") or {}
     out_levels = {}
     for lev in levels:
-        idx = {(c, s): rows(c, lev, s) for c in ("absent", "present") for s in ("train", "test")}
+        idx = _indices(labels, names, lev)
 
         def antler(v, idx=idx):
-            return cho_v9.antler(v[idx[("absent", "train")]], v[idx[("present", "train")]],
-                                 v[idx[("absent", "test")]], v[idx[("present", "test")]],
-                                 n_reps=n_reps, seed=seed)
+            return _antler(v, idx, n_reps, seed)
 
         r_n, r_m = antler(v_nomar), antler(v_mar)
         entry = {"n_per_class": {f"{c}_{s}": int(i.size) for (c, s), i in idx.items()},
                  "noMAR": _summary(r_n), "MAR": _summary(r_m),
                  "delta_AUC_inf": r_m.auc_inf - r_n.auc_inf, "delta_error": delta_error(r_m, r_n)}
-        name = "null" if lev is None else f"{lev:.3f}"
+        name = _level_name(lev)
         if lev is None:
             entry["null_check"] = {"expected_AUC_inf": NULL_AUC_INF, "tolerance": NULL_TOLERANCE,
                                    "noMAR_within_tolerance": abs(r_n.auc_inf - NULL_AUC_INF) <= NULL_TOLERANCE,

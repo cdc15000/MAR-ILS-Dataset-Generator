@@ -57,7 +57,7 @@ import h5py
 import numpy as np
 
 import generator_v9_0_0 as gen
-from mar_ils_core import control_v9, dicom_v9
+from mar_ils_core import control_v9, dicom_v9, score_v9
 from mar_ils_core import vaishnav_phantom as vp
 from mar_ils_core import vaishnav_sim as vs
 
@@ -325,6 +325,11 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
 
     record = dataset_record(spec, realizations, state, {**extra, "seconds": round(time.time() - t0, 1)})
     (root / "dataset_record.json").write_text(json.dumps(record, indent=1))
+    refs = score_v9.record_reference(root)      # before the checksums: it rewrites the record
+    if refs:
+        print("  reference AUC_inf noMAR: " + ", ".join(f"{k} {v:.4f}" for k, v in refs.items()), flush=True)
+    else:
+        print("  no reference AUC_inf noMAR recorded: too few training realizations per class", flush=True)
 
     files = sorted(p for p in root.rglob("*") if p.is_file() and p.name not in
                    ("checksums_sha256.txt", ".writer_state.json") and not p.name.endswith(".partial"))

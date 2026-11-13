@@ -585,3 +585,53 @@ class TestControlRunner:
         assert rc.verify(copy) == 1
         (copy / "sinograms" / "absent_test_0000.h5").unlink()
         assert rc.verify(copy) == 1
+
+
+class TestReferenceValues:
+    """Coordinator step: the noMAR AUC∞ of each level is written to the dataset record (protocol Step 4)."""
+
+    def test_recorded_value_is_what_the_scorer_finds(self, tmp_path):
+        import json
+        import os
+
+        import run_control_v9_0 as rc
+        from mar_ils_core import score_v9
+        _fake_master(tmp_path, "REP01", 100, 2.0, 1)
+        root = tmp_path / "REP01"
+        refs = score_v9.record_reference(root, n_reps=10)
+        record = json.loads((root / "dataset_record.json").read_text())
+        assert set(refs) == {"1.030"} and record["reference_auc_inf_nomar"] == refs
+        assert record["reference_antler"] == {"seed": 0, "n_reps": 10}
+        assert list(record)[-1] == "realizations"       # the long list stays last
+        assert rc.verify(root) == 0                     # the checksum of the record was updated
+        run = tmp_path / "C1_R1"
+        run.mkdir()
+        for p in (root / "noMAR").glob("*.dcm"):
+            os.link(p, run / p.name)
+        chk = score_v9.score_run(root, run, None, n_reps=10)[0]["levels"]["1.030"]["reference_check"]
+        assert chk["difference"] == 0.0 and chk["within_0.005"]
+        assert score_v9.record_reference(root, n_reps=10) == refs       # repeating changes nothing
+        assert rc.verify(root) == 0
+
+    def test_null_dataset_and_too_small_dataset(self, tmp_path):
+        import json
+
+        from mar_ils_core import score_v9
+        _fake_master(tmp_path, "NULL", 100, 0.0, 5, null=True)
+        assert set(score_v9.record_reference(tmp_path / "NULL", n_reps=10)) == {"null"}
+        _fake_master(tmp_path, "FAMILIARIZATION", 2, 6.0, 2)
+        before = (tmp_path / "FAMILIARIZATION" / "dataset_record.json").read_text()
+        assert score_v9.record_reference(tmp_path / "FAMILIARIZATION") == {}
+        assert (tmp_path / "FAMILIARIZATION" / "dataset_record.json").read_text() == before
+        assert "reference_auc_inf_nomar" not in json.loads(before)
+
+    def test_writer_records_reference(self, tmp_path, monkeypatch):
+        import json
+
+        import run_control_v9_0 as rc
+        import write_dataset_v9_0_0 as w
+        from mar_ils_core import score_v9
+        monkeypatch.setattr(score_v9, "nomar_reference", lambda *a, **k: {"1.030": 0.75})
+        root = w.write_dataset(w.DatasetSpec("T", (2, 3), 1e6, (1.03,), 1, 1), tmp_path, workers=2)
+        assert json.loads((root / "dataset_record.json").read_text())["reference_auc_inf_nomar"] == {"1.030": 0.75}
+        assert rc.verify(root) == 0
