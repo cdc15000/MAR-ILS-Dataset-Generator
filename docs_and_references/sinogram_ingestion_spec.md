@@ -59,7 +59,7 @@ FAMILIARIZATION/
 
 ### 3.2 `dataset_record.json`
 
-A JSON object with the dataset identifier, the generator version, the number of realizations, the parameters of draft standard §A1.1 and §A1.2 that are the same for every realization, the spectrum table of §A1.1(d), the thresholds of the control methods (§A1.9(f), §17.7(c)), and one entry per realization with its name, class, level, pool, index and inset angle.
+A JSON object with the dataset identifier, the generator version, the number of realizations, the parameters of draft standard §A1.1 and §A1.2 that are the same for every realization, the spectrum table of §A1.1(d), the thresholds of the control methods (§A1.9(f), §17.7(c)), and one entry per realization with its name, class, level, pool, index and inset angle. The field `reference_auc_inf_nomar` gives, for each signal level, AUC∞ of the noMAR series as computed by the coordinator with the reference observer; the scoring of protocol §A8.2, Step 4 compares its own value with it. A dataset with fewer than 50 training realizations per class, such as the familiarization dataset, has no such field.
 
 ---
 
