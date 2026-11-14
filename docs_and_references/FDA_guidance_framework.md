@@ -138,7 +138,7 @@ other. The same principle applies here: ASTM WK101378 defines how to measure
 |-------------|--------|--------|
 | ASTM WK101378 ballot | Pending | Must be balloted before FDA can reference |
 | ASTM ILS precision study (≥3 labs) | Not started | Required to establish S_r, S_R, T_r |
-| IEC 60601-2-44 Ed. 4 publication | ~Q1 2027 | FDA recognition of IEC standard |
+| IEC 60601-2-44 Ed. 4 publication | Approved for publication; planned 2026-11-20 | FDA recognition of IEC standard |
 | Clause 203.6.7.101.1 binding Amendment (post-ASTM-FXXXX-publication) | Pending ASTM publication | Optional — FDA can act independently |
 
 FDA can issue draft guidance referencing the ASTM draft standard before the
