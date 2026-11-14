@@ -39,7 +39,6 @@ import json
 import multiprocessing
 import os
 import platform
-import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -48,7 +47,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 
-from mar_ils_core import control_v9, dicom_v9
+from mar_ils_core import control_v9, dicom_v9, release
 from mar_ils_core import vaishnav_sim as vs
 
 RUNNER_VERSION = "v9.0.0"
@@ -68,12 +67,8 @@ def versions() -> dict:
 
 
 def source_commit() -> str:
-    try:
-        here = Path(__file__).resolve().parent
-        rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here, capture_output=True, text=True, check=False)
-        return rev.stdout.strip() or "unknown"
-    except OSError:
-        return "unknown"
+    """Commit of this release: from git in a checkout, from RELEASE_COMMIT in a release archive."""
+    return release.source_commit()
 
 
 def read_line_integrals(path: Path) -> np.ndarray:
