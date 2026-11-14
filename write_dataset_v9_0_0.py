@@ -46,7 +46,6 @@ import importlib.metadata
 import json
 import multiprocessing
 import os
-import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -57,7 +56,7 @@ import h5py
 import numpy as np
 
 import generator_v9_0_0 as gen
-from mar_ils_core import control_v9, dicom_v9, score_v9
+from mar_ils_core import control_v9, dicom_v9, release, score_v9
 from mar_ils_core import vaishnav_phantom as vp
 from mar_ils_core import vaishnav_sim as vs
 
@@ -206,14 +205,8 @@ def sha256_file(path: Path) -> str:
 
 
 def git_commit() -> str:
-    try:
-        here = Path(__file__).resolve().parent
-        rev = subprocess.run(["git", "rev-parse", "HEAD"], cwd=here, capture_output=True, text=True, check=False)
-        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=here,
-                               capture_output=True, text=True, check=False).stdout.strip()
-        return rev.stdout.strip() + ("-dirty" if dirty else "")
-    except OSError:
-        return "unknown"
+    """Commit of this release: from git in a checkout, from RELEASE_COMMIT in a release archive."""
+    return release.source_commit()
 
 
 def load_state(root: Path) -> dict:

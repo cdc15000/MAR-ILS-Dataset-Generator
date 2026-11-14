@@ -18,7 +18,7 @@ You run the supplied software as it is. Do not modify the software, its settings
 |---|---|
 | Computer | Any 64-bit computer running Linux, macOS or Windows |
 | Memory | 16 GB recommended |
-| Disk | About 150 GB free, for the datasets and the output |
+| Disk | About 150 GB free, for the datasets and the output; about 175 GB for a pilot laboratory |
 | Python | 3.11 or later |
 | Packages | Those listed in `requirements.txt` |
 

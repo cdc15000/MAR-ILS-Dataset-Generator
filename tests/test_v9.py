@@ -635,3 +635,76 @@ class TestReferenceValues:
         root = w.write_dataset(w.DatasetSpec("T", (2, 3), 1e6, (1.03,), 1, 1), tmp_path, workers=2)
         assert json.loads((root / "dataset_record.json").read_text())["reference_auc_inf_nomar"] == {"1.030": 0.75}
         assert rc.verify(root) == 0
+
+
+class TestReleaseCommit:
+    """mar_ils_core.release: the commit recorded in run records and dataset records
+    (ILS protocol §A6.5), from git in a checkout and from RELEASE_COMMIT in a release archive."""
+
+    H = "0123456789abcdef0123456789abcdef01234567"
+
+    def test_release_file_outside_git(self, tmp_path):
+        from mar_ils_core import release
+        (tmp_path / release.RELEASE_FILE).write_text(self.H + "\n")
+        assert release.source_commit(tmp_path) == self.H
+
+    def test_unsubstituted_placeholder_is_unknown(self, tmp_path):
+        from mar_ils_core import release
+        (tmp_path / release.RELEASE_FILE).write_text("$Format:%H$\n")
+        assert release.source_commit(tmp_path) == "unknown"
+
+    def test_missing_file_is_unknown(self, tmp_path):
+        from mar_ils_core import release
+        assert release.source_commit(tmp_path) == "unknown"
+
+    def test_folder_inside_another_repository_uses_its_own_file(self, tmp_path):
+        import shutil
+        import subprocess
+
+        from mar_ils_core import release
+        if shutil.which("git") is None:
+            pytest.skip("git not installed")
+        subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+        sub = tmp_path / "unpacked"
+        sub.mkdir()
+        (sub / release.RELEASE_FILE).write_text(self.H + "\n")
+        assert release.source_commit(sub) == self.H
+
+    def test_git_archive_stamps_the_commit(self, tmp_path):
+        import io
+        import shutil
+        import subprocess
+        import tarfile
+        from pathlib import Path
+
+        from mar_ils_core import release
+        if shutil.which("git") is None:
+            pytest.skip("git not installed")
+        repo_root = Path(release.__file__).resolve().parent.parent
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        shutil.copy(repo_root / ".gitattributes", repo / ".gitattributes")
+        shutil.copy(repo_root / release.RELEASE_FILE, repo / release.RELEASE_FILE)
+        env = ["-c", "user.name=t", "-c", "user.email=t@example.org", "-c", "commit.gpgsign=false"]
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "add", "."], cwd=repo, check=True)
+        subprocess.run(["git", *env, "commit", "-q", "-m", "t"], cwd=repo, check=True)
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True,
+                              check=True).stdout.strip()
+        tar = subprocess.run(["git", "archive", "--format=tar", "HEAD"], cwd=repo, capture_output=True,
+                             check=True).stdout
+        out = tmp_path / "unpacked"
+        with tarfile.open(fileobj=io.BytesIO(tar)) as t:
+            t.extractall(out, filter="data")
+        assert release.source_commit(out) == head
+
+    def test_checkout_reports_git_head(self):
+        import shutil
+        import subprocess
+
+        from mar_ils_core import release
+        if shutil.which("git") is None or not release._is_repo_root(release.REPO_ROOT):
+            pytest.skip("not a git checkout")
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=release.REPO_ROOT, capture_output=True,
+                              text=True, check=True).stdout.strip()
+        assert release.source_commit().removesuffix("-dirty") == head
