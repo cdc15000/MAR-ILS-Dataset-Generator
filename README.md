@@ -55,9 +55,8 @@ The ∞ means the AUC is extrapolated to an unlimited number of training images,
 
 1. **Download the datasets** and verify the SHA-256 checksums.
 2. **Apply the MAR method under test** to every sinogram. If the method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
-3. **Reconstruct** the corrected sinograms with the supplied reference reconstruction.
-4. **Write each image as DICOM**, 512 × 512 pixels, with Metal Artifact Reduction Applied (0018,9391) set to YES.
-5. **Score** the images with the reference observer software and report ΔAUC∞ at each level.
+3. **Reconstruct** the corrected sinograms with the supplied reference reconstruction, and **write each image as DICOM**, 512 × 512 pixels, with Metal Artifact Reduction Applied (0018,9391) set to YES. Save the corrected sinograms with the dataset's file names (HDF5, dataset `line_integrals`) and run `python run_control_v9_0.py REP01 MY_R1 --sinograms my_corrected/REP01`, which does both.
+4. **Score** the images with the reference observer software and report ΔAUC∞ at each level.
 
 No CT scanner is needed; the test is entirely computational. The datasets will be published under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
 
@@ -161,6 +160,7 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 | `generator_v9_0_0.py` | Dataset simulation (scored region only, for quick runs) |
 | `write_dataset_v9_0_0.py` | Full datasets: sinograms, reference DICOM images, checksums and dataset records |
 | `run_control_v9_0.py` | Laboratory runner: checksum verification, installation checks, the supplied controls over a dataset |
+| `allocate_v9_0_0.py` | Random allocation of the full study's replicate datasets to laboratories |
 | `run_cho_analysis_v9_0.py` | Observer scoring, of a quick run or of a laboratory's run directory |
 | `mar_ils_core/vaishnav_phantom.py` | Phantom definition |
 | `mar_ils_core/vaishnav_sim.py` | Scan simulation and reference reconstruction |

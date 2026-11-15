@@ -27,8 +27,10 @@ Datasets and seed pools follow review item 37:
   FAMILIARIZATION  pools 70 / 71, I0 1e6, levels 1.020 1.025 1.030, small and labeled
   NULL             pools 72 / 73, I0 1e6, lesion-absent plus an independent second
                    lesion-absent set (Rev 06 A1.7; review item 41), labeled
+  ILS001..ILSnnn   the full study's pool, three per laboratory (protocol A6.3;
+                   issue #18): pools 100+2(m-1) / 101+2(m-1), as REP01
 
-Pools 50 to 73 belong to the study material: writing them needs --production
+Pools 50 to 73 and 100 upward belong to the study material: writing them needs --production
 (review item 37: generated under issue #11). For validation, --custom NAME
 --pools TR TE writes any other pools.
 
@@ -46,6 +48,7 @@ import importlib.metadata
 import json
 import multiprocessing
 import os
+import re
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -66,6 +69,7 @@ TAU_MU_CM = control_v9.TAU_MU_CM        # Rev 06 §A1.9(b), private/ruggedness/d
 TAU_COUNTS = control_v9.TAU_COUNTS      # MAR 1 (degrading control), same source
 LEVELS = (1.020, 1.025, 1.030)
 STUDY_POOLS = range(50, 74)
+FULL_STUDY_FIRST_POOL = 100      # ILS001 onward (issue #18)
 SPLITS = ("train", "test")
 
 
@@ -89,6 +93,19 @@ def standard_specs(n_familiarization: int) -> dict[str, DatasetSpec]:
                                            n_familiarization, n_familiarization, True)
     specs["NULL"] = DatasetSpec("NULL", (72, 73), 1e6, (), 1000, 1000, null_check=True)
     return specs
+
+
+def full_study_spec(m: int) -> DatasetSpec:
+    """ILSmmm, the m-th replicate dataset of the full study's pool (m from 1)."""
+    if m < 1:
+        raise ValueError("full-study datasets are numbered from 1")
+    first = FULL_STUDY_FIRST_POOL + 2 * (m - 1)
+    return DatasetSpec(f"ILS{m:03d}", (first, first + 1), 1e6, LEVELS, 1000, 1000)
+
+
+def needs_production(pools: tuple[int, int]) -> bool:
+    """True for seed pools that belong to the study material."""
+    return any(p in STUDY_POOLS or p >= FULL_STUDY_FIRST_POOL for p in pools)
 
 
 @dataclass(frozen=True)
@@ -335,7 +352,7 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     which = ap.add_mutually_exclusive_group(required=True)
-    which.add_argument("--dataset", help="REP01..REP09, CONTROL, NULL or FAMILIARIZATION")
+    which.add_argument("--dataset", help="REP01..REP09, CONTROL, NULL, FAMILIARIZATION, or ILS001 upward (full study)")
     which.add_argument("--custom", metavar="NAME", help="a validation dataset with the pools given")
     ap.add_argument("--out-root", type=Path, required=True)
     ap.add_argument("--pools", type=int, nargs=2, metavar=("TRAIN", "TEST"))
@@ -352,9 +369,13 @@ def main() -> None:
 
     if a.dataset:
         specs = standard_specs(a.n_familiarization)
-        if a.dataset not in specs:
-            ap.error(f"unknown dataset {a.dataset}; choose from {', '.join(specs)}")
-        spec = specs[a.dataset]
+        full = re.fullmatch(r"ILS(\d{3})", a.dataset)
+        if full and int(full.group(1)) >= 1:
+            spec = full_study_spec(int(full.group(1)))
+        elif a.dataset in specs:
+            spec = specs[a.dataset]
+        else:
+            ap.error(f"unknown dataset {a.dataset}; choose from {', '.join(specs)} or ILS001 upward")
         if a.n_train or a.n_test:
             spec = DatasetSpec(spec.name, spec.pools, spec.dose, spec.levels,
                                a.n_train or spec.n_train, a.n_test or spec.n_test, spec.familiarization,
@@ -365,8 +386,8 @@ def main() -> None:
         spec = DatasetSpec(a.custom, tuple(a.pools), a.dose, tuple(a.levels),
                            a.n_train or 1000, a.n_test or 1000)
 
-    if any(p in STUDY_POOLS for p in spec.pools) and not a.production:
-        sys.exit(f"pools {spec.pools} are study material (50 to 73); generating them needs --production")
+    if needs_production(spec.pools) and not a.production:
+        sys.exit(f"pools {spec.pools} are study material (50 to 73, 100 upward); generating them needs --production")
     write_dataset(spec, a.out_root, a.workers)
 
 

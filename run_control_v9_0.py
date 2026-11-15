@@ -26,6 +26,10 @@ Usage:
   # Pilot only: the degrading control on the control dataset
   python run_control_v9_0.py CONTROL C1_CONTROL --control degrading
 
+  # Testing your own MAR method: reconstruct your corrected sinograms
+  # (one HDF5 file per sinogram, same names, dataset "line_integrals")
+  python run_control_v9_0.py REP01 MY_R1 --sinograms my_corrected/REP01
+
 A run that is interrupted can be started again with the same command; images
 already written are kept. Each run writes <run directory>_run_record.json
 beside the run directory, with the software and package versions.
@@ -52,6 +56,7 @@ from mar_ils_core import vaishnav_sim as vs
 
 RUNNER_VERSION = "v9.0.0"
 RECON_CHECK_TOL_HU = 1.0                # Rev 06 §12.2
+EXTERNAL = "none (external corrected sinograms)"   # --sinograms: the MAR method under test
 PACKAGES = ("numpy", "scipy", "numba", "h5py", "pydicom")
 
 
@@ -90,7 +95,8 @@ def _init_worker():
 def _one(args) -> str:
     h5_path, dcm_path, control, i0, uids = args
     if not dcm_path.exists():
-        hu = control_v9.control_hu(read_line_integrals(h5_path), control, i0)
+        p = read_line_integrals(h5_path)
+        hu = vs.to_hu(vs.fbp(p)) if control == EXTERNAL else control_v9.control_hu(p, control, i0)
         tmp = dcm_path.with_name(dcm_path.name + ".partial")
         dicom_v9.write_ct(hu, tmp, mar_applied=True, **uids)
         os.replace(tmp, dcm_path)
@@ -118,13 +124,25 @@ def _run_state(record_path: Path) -> dict:
             "content_date": time.strftime("%Y%m%d", t), "content_time": time.strftime("%H%M%S", t)}
 
 
-def run(dataset_dir: Path, run_dir: Path, control: str = "improving", workers: int | None = None) -> int:
-    if control not in control_v9.CONTROLS:
+def run(dataset_dir: Path, run_dir: Path, control: str = "improving", workers: int | None = None,
+        sinograms_dir: Path | None = None) -> int:
+    """Apply a supplied control to every sinogram of the dataset, or, with sinograms_dir, reconstruct
+    the corrected sinograms of the MAR method under test (same file names) with the reference
+    reconstruction (issue #9)."""
+    if sinograms_dir is not None:
+        control = EXTERNAL
+    elif control not in control_v9.CONTROLS:
         raise ValueError(f"unknown control {control!r}; choose from {', '.join(control_v9.CONTROLS)}")
     record = _check_record(dataset_dir)
     sinograms = sorted((dataset_dir / "sinograms").glob("*.h5"))
     if not sinograms:
         raise ValueError(f"no sinograms in {dataset_dir / 'sinograms'}")
+    if sinograms_dir is not None:
+        missing = [p.name for p in sinograms if not (sinograms_dir / p.name).exists()]
+        if missing:
+            raise ValueError(f"{sinograms_dir}: {len(missing)} corrected sinograms missing "
+                             f"(first {missing[:3]}); one file per sinogram of the dataset, same names")
+        sinograms = [sinograms_dir / p.name for p in sinograms]
     i0 = float(record["I0"])
     workers = workers or max(1, (os.cpu_count() or 2) - 1)
     record_path = run_dir.parent / f"{run_dir.name}_run_record.json"
@@ -138,11 +156,14 @@ def run(dataset_dir: Path, run_dir: Path, control: str = "improving", workers: i
                   "dataset": record["dataset"], "run_dir": run_dir.name, "control": control,
                   "tau_mu_cm": control_v9.TAU_MU_CM, "tau_counts": control_v9.TAU_COUNTS, "I0": i0,
                   "versions": versions(), "dicom": state, "complete": False}
+    if sinograms_dir is not None:
+        run_record["sinograms_dir"] = str(sinograms_dir)
     record_path.write_text(json.dumps(run_record, indent=1))
 
     todo = [(p, run_dir / f"{p.stem}.dcm", control, i0, state) for p in sinograms]
     done_before = sum(job[1].exists() for job in todo)
-    print(f"{record['dataset']} -> {run_dir} ({control} control): {len(todo)} realizations, "
+    what = "reference reconstruction of corrected sinograms" if control == EXTERNAL else f"{control} control"
+    print(f"{record['dataset']} -> {run_dir} ({what}): {len(todo)} realizations, "
           f"{done_before} already written, {workers} workers", flush=True)
     t0 = time.time()
     ctx = multiprocessing.get_context("spawn")
@@ -241,6 +262,10 @@ def main() -> None:
     ap.add_argument("dataset_dir", nargs="?", type=Path, help="dataset directory, e.g. REP01")
     ap.add_argument("run_dir", nargs="?", type=Path, help="run directory to write, e.g. C1_R1")
     ap.add_argument("--control", choices=control_v9.CONTROLS, default="improving")
+    ap.add_argument("--sinograms", type=Path, metavar="CORRECTED_DIR",
+                    help="reconstruct these corrected sinograms (one HDF5 file per sinogram of the dataset, "
+                         "same names, dataset line_integrals) with the reference reconstruction, "
+                         "instead of applying a supplied control")
     ap.add_argument("--workers", type=int, help="default: one fewer than the number of processors")
     ap.add_argument("--recon-check", type=Path, metavar="RECON_CHECK_H5",
                     help="run the reconstruction check of draft standard 12.2 and exit")
@@ -262,7 +287,7 @@ def main() -> None:
     if a.dataset_dir is None or a.run_dir is None:
         ap.error("give dataset_dir and run_dir, or --verify, --recon-check, --compare or --versions")
     try:
-        sys.exit(run(a.dataset_dir, a.run_dir, a.control, a.workers))
+        sys.exit(run(a.dataset_dir, a.run_dir, a.control, a.workers, a.sinograms))
     except ValueError as e:
         raise SystemExit(str(e)) from e
 
