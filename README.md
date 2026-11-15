@@ -81,7 +81,7 @@ Under ASTM's provision for delaying an interlaboratory study, the standard goes 
 * Numba, which the reconstruction requires; `requirements.txt` installs it
 * About 150 GB of free disk for a laboratory's ILS datasets and output (about 175 GB for a pilot laboratory)
 * 16 GB of RAM recommended; at least 4 GB for the Try It example
-* A 64-bit operating system: macOS, Linux, or Windows 10 or 11. The automated tests run on Linux and Windows on every change; the software is developed on macOS. 32-bit systems are not supported, because Numba and SciPy are not published for them
+* A 64-bit operating system: macOS, Linux, or Windows 10 or 11. The automated tests run on Linux, macOS and Windows on every change. 32-bit systems are not supported, because Numba and SciPy are not published for them
 
 ### Installation
 
