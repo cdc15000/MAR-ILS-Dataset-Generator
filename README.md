@@ -47,18 +47,23 @@ A channelized Hotelling observer, a mathematical model of a reader, scores lesio
 * **ΔAUC∞ > 0:** the MAR method made the lesion easier to detect.
 * **ΔAUC∞ < 0:** it made the lesion harder to detect.
 
-The ∞ means the AUC is extrapolated to an unlimited number of training images, so the result does not depend on how many images were used. The result is reported at three lesion contrasts.
+The ∞ means the AUC is extrapolated to an unlimited number of training images, so the result does not depend on how many images were used. The result is reported at three lesion contrasts, on each of three independent replicate datasets.
 
-### What a Laboratory Does
+### Using the Test Method
 
-1. **Download the dataset** from Zenodo and verify the SHA-256 checksums.
-2. **Apply your MAR method** to every sinogram in the dataset. If your method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
+1. **Download the datasets** and verify the SHA-256 checksums.
+2. **Apply the MAR method under test** to every sinogram. If the method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
 3. **Reconstruct** the corrected sinograms with the supplied reference reconstruction.
 4. **Write each image as DICOM**, 512 × 512 pixels, with Metal Artifact Reduction Applied (0018,9391) set to YES.
-5. **Score** your images with the reference observer software.
-6. **Report** ΔAUC∞ at each contrast level on the ILS return form.
+5. **Score** the images with the reference observer software and report ΔAUC∞ at each level.
 
-No CT scanner is needed; the test is entirely computational. The ILS protocol, the return form and the dataset will be sent to participating laboratories by the ILS coordinator. The dataset will be published under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
+No CT scanner is needed; the test is entirely computational. The datasets will be published under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
+
+### The Interlaboratory Study
+
+The study measures the precision of the method itself, so every laboratory runs the same supplied improving control and reference reconstruction, not its own MAR method. Each laboratory processes three replicate datasets that no other laboratory receives, plus a shared null-check dataset, scores them, and reports the results to ASTM. The study is registered with the ASTM Interlaboratory Study Program as ILS 2165.
+
+Under ASTM's provision for delaying an interlaboratory study, the standard goes to its first ballot with a single-operator repeatability statement, and the full study follows approval. A three-laboratory pilot is planned for March to April 2027. The step-by-step procedure for laboratories is in [`docs_and_references/ILS_Lab_Instructions.md`](docs_and_references/ILS_Lab_Instructions.md); the protocol and datasets are sent to participating laboratories by the ILS coordinator.
 
 ---
 
@@ -68,7 +73,7 @@ No CT scanner is needed; the test is entirely computational. The ILS protocol, t
 
 * Python 3.11 or newer
 * Numba, which the reconstruction requires
-* About 50 GB of free disk for the full ILS dataset
+* About 150 GB of free disk for a laboratory's ILS datasets and output (about 175 GB for a pilot laboratory)
 * 16 GB of RAM recommended
 * macOS, Linux or Windows
 
@@ -139,7 +144,7 @@ mar2  AUC_inf 0.8724 ± 0.0154  (resub 0.8571, holdout 0.8877)
 | Improving control | MAR 2: metal found in the image, then the affected sinogram data interpolated |
 | Degrading control | MAR 1: metal found by a fixed sinogram threshold, run at a dose where it fails |
 
-In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ of +0.215, +0.238 and +0.254 at the three levels, and MAR 1 at its failing dose gave −0.061. ΔAUC∞ varied by 0.004 to 0.008 (standard deviation) from dataset to dataset.
+In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ of +0.215, +0.238 and +0.254 at the three levels, and MAR 1 at its failing dose gave −0.061. In a later single-operator repeatability study on 30 independent datasets, the standard deviation of ΔAUC∞ for MAR 2 was 0.0087 to 0.0119 at the three levels.
 
 ---
 
@@ -147,12 +152,17 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 
 | Path | Contents |
 |---|---|
-| `generator_v9_0_0.py` | Dataset simulation |
-| `run_cho_analysis_v9_0.py` | Observer scoring |
+| `generator_v9_0_0.py` | Dataset simulation (scored region only, for quick runs) |
+| `write_dataset_v9_0_0.py` | Full datasets: sinograms, reference DICOM images, checksums and dataset records |
+| `run_control_v9_0.py` | Laboratory runner: checksum verification, installation checks, the supplied controls over a dataset |
+| `run_cho_analysis_v9_0.py` | Observer scoring, of a quick run or of a laboratory's run directory |
 | `mar_ils_core/vaishnav_phantom.py` | Phantom definition |
 | `mar_ils_core/vaishnav_sim.py` | Scan simulation and reference reconstruction |
-| `mar_ils_core/ddog.py`, `cho_v9.py` | Observer channels and AUC∞ |
-| `mar_ils_core/mar_v9.py` | Reference MAR methods |
+| `mar_ils_core/ddog.py`, `cho_v9.py`, `score_v9.py` | Observer channels, AUC∞ and run-directory scoring |
+| `mar_ils_core/mar_v9.py`, `control_v9.py` | Reference MAR methods and the supplied controls |
+| `mar_ils_core/dicom_v9.py` | DICOM output, including the Metal Artifact Reduction macro |
+| `mar_ils_core/release.py`, `RELEASE_COMMIT` | Records the software release in every run and dataset record |
+| `docs_and_references/ILS_Lab_Instructions.md` | Procedure for ILS laboratories |
 | `tests/` | Automated tests |
 | `legacy/`, `*_v7_*`, `*_v8_*` | Earlier, superseded versions, kept for the record |
 
@@ -190,6 +200,6 @@ Change control for normative parameters is described in [`GOVERNANCE.md`](GOVERN
 
 ## Contact
 
-**Christopher D. Cocchiaraley**, Consumer Member, ASTM International Committee F04  
+**Christopher D. Cocchiaraley**, Chair, ASTM Task Group F04.15.24 (CT-MAR Test Method); Consumer Member, ASTM International Committee F04  
 Executor of the Estate of Veronica M. Cocchiaraley  
 ORCID: [0009-0006-4995-566X](https://orcid.org/0009-0006-4995-566X)
