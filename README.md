@@ -136,11 +136,11 @@ mar2  AUC_inf 0.8724 ± 0.0154  (resub 0.8571, holdout 0.8877)
 | Lesion | 10 mm disk at the phantom center |
 | Contrast levels | 1.020, 1.025 and 1.030 times the background |
 | Scan | Fan beam, 120 kV, 984 views, 888 detector channels |
-| Dose | 1 × 10⁶ photons per detector channel per view |
+| Dose | 1 × 10⁶ counts per detector bin per view |
 | Image | 512 × 512 pixels over a 30 cm field of view |
 | Scored region | 121 × 121 pixels at the image center |
 | Observer | Channelized Hotelling observer, 10 dense difference-of-Gaussians channels |
-| Images | 1000 training and 1000 test images per class and level |
+| Images | 1000 training and 1000 test images per class at each level; the lesion-absent images are shared by the three levels, so a replicate dataset holds 8,000 |
 | Improving control | MAR 2: metal found in the image, then the affected sinogram data interpolated |
 | Degrading control | MAR 1: metal found by a fixed sinogram threshold, run at a dose where it fails |
 
