@@ -36,7 +36,9 @@ The method follows the framework published by FDA researchers in Vaishnav et al.
 3. a model observer that scores how well a faint lesion can be detected;
 4. two reference MAR methods with known effects, used as controls.
 
-### What the Test Measures
+### The Test Method
+
+#### What the Test Measures
 
 The test asks one question: **does the MAR method make a faint lesion near metal easier or harder to detect?**
 
@@ -49,7 +51,7 @@ A channelized Hotelling observer, a mathematical model of a reader, scores lesio
 
 The ∞ means the AUC is extrapolated to an unlimited number of training images, so the result does not depend on how many images were used. The result is reported at three lesion contrasts, on each of three independent replicate datasets.
 
-### Using the Test Method
+#### Using the Test Method
 
 1. **Download the datasets** and verify the SHA-256 checksums.
 2. **Apply the MAR method under test** to every sinogram. If the method works on images rather than sinograms, apply it to the supplied no-MAR images instead.
