@@ -80,8 +80,8 @@ Under ASTM's provision for delaying an interlaboratory study, the standard goes 
 * Python 3.11, the version the automated tests run on
 * Numba, which the reconstruction requires; `requirements.txt` installs it
 * About 150 GB of free disk for a laboratory's ILS datasets and output (about 175 GB for a pilot laboratory)
-* 16 GB of RAM recommended
-* macOS, Linux or Windows
+* 16 GB of RAM recommended; at least 4 GB for the Try It example
+* A 64-bit operating system: macOS, Linux, or Windows 10 or 11. 32-bit systems are not supported, because Numba and SciPy are not published for them
 
 ### Installation
 
