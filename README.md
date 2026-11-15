@@ -63,14 +63,14 @@ No CT scanner is needed; the test is entirely computational. The datasets will b
 
 ### The Interlaboratory Study
 
-The study measures the precision of the method itself, so every laboratory runs the same MAR algorithm, not its own. This repository supplies two reference MAR algorithms with known effects, the controls of the test method:
+The study has two stages: a pilot with three laboratories, which verifies the procedure and the software, and the full study, which measures the precision of the method itself. In both, every laboratory runs the same supplied MAR algorithms, not its own. This repository supplies two reference MAR algorithms with known effects, the controls of the test method:
 
 * **Improving control (MAR 2):** finds the metal in the image and interpolates the affected sinogram data; it raises lesion detectability. Every laboratory runs it, with the supplied reference reconstruction.
 * **Degrading control (MAR 1):** finds the metal with a fixed sinogram threshold and, at the dose used, lowers lesion detectability. Only the pilot laboratories run it, on a separate control dataset, to confirm that the method detects a harmful MAR.
 
-In the full study, each laboratory processes three replicate datasets that no other laboratory receives, plus a shared null-check dataset, scores them, and reports the results to ASTM. The study is registered with the ASTM Interlaboratory Study Program as ILS 2165.
+In the full study, each laboratory uses MAR 2 to process three replicate datasets that no other laboratory receives, plus a shared null-check dataset, scores the results with the reference observer, and reports them to ASTM. The study is registered with the ASTM Interlaboratory Study Program as ILS 2165.
 
-Under ASTM's provision for delaying an interlaboratory study, the standard goes to its first ballot with a single-operator repeatability statement, and the full study follows approval. A three-laboratory pilot is planned for March to April 2027. The step-by-step procedure for laboratories is in [`docs_and_references/ILS_Lab_Instructions.md`](docs_and_references/ILS_Lab_Instructions.md); the protocol and datasets are sent to participating laboratories by the ILS coordinator.
+Under ASTM's provision for delaying an interlaboratory study, the standard goes to its first ballot with a single-operator repeatability statement, and the full study follows approval. The pilot is planned for March to April 2027. The step-by-step procedure for laboratories is in [`docs_and_references/ILS_Lab_Instructions.md`](docs_and_references/ILS_Lab_Instructions.md); the protocol and datasets are sent to participating laboratories by the ILS coordinator.
 
 ---
 
