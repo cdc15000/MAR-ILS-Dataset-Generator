@@ -1,4 +1,4 @@
-# MAR ILS laboratory harness, C (ASTM WK101378 draft Rev 06, v9 dataset)
+# MAR test-method harness, C (ASTM WK101378 draft Rev 06, v9 dataset)
 #
 # Prerequisite: libhdf5 (macOS: brew install hdf5; Debian/Ubuntu: apt install libhdf5-dev)
 #

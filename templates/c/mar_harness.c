@@ -1,17 +1,20 @@
 /*
- * MAR ILS laboratory harness, C (ASTM WK101378 draft Rev 06, v9 dataset).
+ * MAR test-method harness, C (ASTM WK101378 draft Rev 06, v9 dataset).
  *
- * Reads the coded sinograms of one replicate dataset in the format of the
- * sinogram ingestion specification (version 2.0), calls apply_mar() for
- * each, and writes one DICOM CT image per realization, named by its code,
- * with the CP-2575 MAR Macro (protocol §A8.3).
+ * Reads the sinograms of one dataset in the format of the sinogram ingestion
+ * specification (version 2.3), calls apply_mar() for each, and writes one
+ * DICOM CT image per realization, with the sinogram's name and the CP-2575
+ * MAR Macro set to YES.
+ * For measuring your own MAR method with the test method. The interlaboratory
+ * study does not use these templates; there every laboratory runs
+ * run_control_v9_0.py (see docs_and_references/ILS_Lab_Instructions.md).
  *
  * Usage:
  *   ./mar_harness --recon-check FAMILIARIZATION/recon_check/recon_check.h5
- *   ./mar_harness REP04 C2_R1
+ *   ./mar_harness REP01 MY_R1
  *
- * Then produce the run directory's manifest (protocol §A8.2), for example:
- *   (cd C2_R1 && shasum -a 256 *.dcm) > C2_R1_checksums_sha256.txt
+ * Then produce the run directory's manifest, for example:
+ *   (cd MY_R1 && shasum -a 256 *.dcm) > MY_R1_checksums_sha256.txt
  *
  * Dependencies: libhdf5. DICOM output uses a minimal Part 10 writer.
  */
@@ -336,6 +339,6 @@ int main(int argc, char **argv)
     fprintf(stderr,
             "Usage:\n"
             "  %s --recon-check <recon_check.h5>   reconstruction check, draft standard 12.2\n"
-            "  %s <dataset_dir> <run_dir>          e.g. REP04 C2_R1\n", argv[0], argv[0]);
+            "  %s <dataset_dir> <run_dir>          e.g. REP01 MY_R1\n", argv[0], argv[0]);
     return 2;
 }

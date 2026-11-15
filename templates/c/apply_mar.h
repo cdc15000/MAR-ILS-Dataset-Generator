@@ -1,12 +1,13 @@
 /*
- * MAR ILS laboratory interface, C (ASTM WK101378 draft Rev 06, v9 dataset).
+ * MAR test-method interface, C (ASTM WK101378 draft Rev 06, v9 dataset).
  *
- * The laboratory implements apply_mar() and reconstruct() in its own source
+ * You implement apply_mar() and reconstruct() in your own source
  * file (see apply_mar_example.c). The harness calls apply_mar() once per
  * realization and reconstruct() for the reconstruction check (§12.2).
  *
- * For Condition 2 (the laboratory's own MAR). Under Condition 1 the harness
- * and the reference reconstruction are not used (protocol §A7).
+ * For measuring your own MAR method with the test method. The interlaboratory
+ * study does not use these templates; there every laboratory runs
+ * run_control_v9_0.py (see docs_and_references/ILS_Lab_Instructions.md).
  */
 #ifndef APPLY_MAR_H
 #define APPLY_MAR_H
