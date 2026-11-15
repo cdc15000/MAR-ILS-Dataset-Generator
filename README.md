@@ -40,7 +40,7 @@ The method follows the framework published by FDA researchers in Vaishnav et al.
 
 The test asks one question: **does the MAR method make a faint lesion near metal easier or harder to detect?**
 
-A channelized Hotelling observer, a mathematical model of a reader, scores lesion detectability as an area under the ROC curve (AUC). It does so on images without MAR and on images with the laboratory's MAR. The result is
+A channelized Hotelling observer, a mathematical model of a reader, scores lesion detectability as an area under the ROC curve (AUC). It does so on images without MAR and on images with the MAR method under test. The result is
 
 **ΔAUC∞ = AUC∞ with MAR − AUC∞ without MAR**
 
