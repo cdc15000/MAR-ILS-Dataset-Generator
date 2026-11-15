@@ -708,3 +708,101 @@ class TestReleaseCommit:
         head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=release.REPO_ROOT, capture_output=True,
                               text=True, check=True).stdout.strip()
         assert release.source_commit().removesuffix("-dirty") == head
+
+
+class TestAllocation:
+    """allocate_v9_0_0: the full study's replicate datasets to laboratories (ILS protocol
+    §A6.3; issue #18), and the writer's full-study pools."""
+
+    def test_each_dataset_once_and_three_per_lab(self):
+        import allocate_v9_0_0 as al
+        codes = [f"L{i:02d}" for i in range(1, 13)]
+        alloc = al.allocate(codes)
+        assert al.check_allocation(alloc, al.full_study_names(12)) == []
+        assert all(len(g) == 3 for g in alloc.values())
+
+    def test_reproducible_and_independent_of_input_order(self):
+        import allocate_v9_0_0 as al
+        codes = ["L03", "L01", "L04", "L02"]
+        assert al.allocate(codes) == al.allocate(sorted(codes)) == al.allocate(codes)
+
+    def test_fixed_result_for_the_protocol_seed(self):
+        """Guards the method: SHA-256 order with seed 20261103, groups of three."""
+        import allocate_v9_0_0 as al
+        assert al.allocate(["L01", "L02", "L03", "L04"]) == {
+            "L01": ["ILS012", "ILS002", "ILS003"], "L02": ["ILS005", "ILS006", "ILS001"],
+            "L03": ["ILS009", "ILS010", "ILS004"], "L04": ["ILS007", "ILS008", "ILS011"]}
+
+    def test_another_seed_gives_another_order(self):
+        import allocate_v9_0_0 as al
+        codes = [f"L{i}" for i in range(1, 7)]
+        assert al.allocate(codes) != al.allocate(codes, seed=1)
+
+    def test_codes_in_natural_order(self):
+        import allocate_v9_0_0 as al
+        assert list(al.allocate(["10", "2", "1"])) == ["1", "2", "10"]
+
+    def test_bad_input_is_refused(self):
+        import allocate_v9_0_0 as al
+        with pytest.raises(ValueError):
+            al.allocate(["L1", "L1"])
+        with pytest.raises(ValueError):
+            al.allocate(["L1", "L2"], datasets=["A", "B", "C"])
+        with pytest.raises(ValueError):
+            al.allocate([])
+
+    def test_check_finds_double_use_and_gaps(self):
+        import allocate_v9_0_0 as al
+        bad = {"L1": ["ILS001", "ILS002", "ILS002"], "L2": ["ILS004", "ILS005", "ILS006"]}
+        problems = al.check_allocation(bad, al.full_study_names(2))
+        assert any("ILS002 assigned 2 times" in p for p in problems)
+        assert any("not assigned: ILS003" in p for p in problems)
+
+    def test_writer_full_study_pools(self):
+        import write_dataset_v9_0_0 as w
+        s1, s5 = w.full_study_spec(1), w.full_study_spec(5)
+        assert (s1.name, s1.pools, s1.dose, s1.levels) == ("ILS001", (100, 101), 1e6, w.LEVELS)
+        assert s5.pools == (108, 109)
+        used = {p for m in range(1, 40) for p in w.full_study_spec(m).pools}
+        assert not used & set(w.STUDY_POOLS) and len(used) == 78
+        assert w.needs_production((100, 101)) and w.needs_production((68, 69))
+        assert not w.needs_production((40, 41))
+
+
+class TestExternalSinograms:
+    """run_control_v9_0 --sinograms: the reference reconstruction of a user's corrected
+    sinograms (issue #9)."""
+
+    def test_matches_the_improving_control_run(self, written, tmp_path):
+        import json
+
+        import h5py
+        import pydicom
+
+        import run_control_v9_0 as rc
+        from mar_ils_core import control_v9
+        _w, root = written
+        corrected = tmp_path / "corrected"
+        corrected.mkdir()
+        for src in (root / "sinograms").glob("*.h5"):
+            with h5py.File(src) as f:
+                p = f["line_integrals"][()]
+            with h5py.File(corrected / src.name, "w") as g:
+                g["line_integrals"] = control_v9.improving_sinogram(p).astype(np.float32)
+        assert rc.run(root, tmp_path / "EXT", workers=2, sinograms_dir=corrected) == 0
+        assert rc.run(root, tmp_path / "C1", "improving", workers=2) == 0
+        for dcm in (tmp_path / "C1").glob("*.dcm"):
+            a = pydicom.dcmread(dcm).pixel_array
+            b = pydicom.dcmread(tmp_path / "EXT" / dcm.name).pixel_array
+            assert np.abs(a.astype(int) - b.astype(int)).max() <= 1   # float32 storage of the input
+        rec = json.loads((tmp_path / "EXT_run_record.json").read_text())
+        assert rec["control"] == rc.EXTERNAL and rec["sinograms_dir"] == str(corrected)
+        ds = pydicom.dcmread(next((tmp_path / "EXT").glob("*.dcm")))
+        assert ds[0x00189390].value[0][0x00189391].value == "YES"
+
+    def test_missing_corrected_sinogram_is_refused(self, written, tmp_path):
+        import run_control_v9_0 as rc
+        _w, root = written
+        (tmp_path / "corrected").mkdir()
+        with pytest.raises(ValueError, match="corrected sinograms missing"):
+            rc.run(root, tmp_path / "EXT", sinograms_dir=tmp_path / "corrected")
