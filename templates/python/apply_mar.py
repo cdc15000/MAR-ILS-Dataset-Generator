@@ -1,5 +1,5 @@
 """
-Laboratory MAR implementation: REPLACE THE BODIES OF THESE TWO FUNCTIONS.
+Your MAR implementation: REPLACE THE BODIES OF THESE TWO FUNCTIONS.
 
 The harness calls apply_mar() once per realization, and calls reconstruct()
 for the reconstruction check (draft standard §12.2).
@@ -9,9 +9,8 @@ the reference reconstruction, so its output matches the supplied noMAR image
 of the same realization to within DICOM rounding. Run it once that way to
 check the harness before plugging in your method.
 
-These templates serve Condition 2 (the laboratory's own MAR). Under
-Condition 1 the laboratory works from the text of the standard and the
-ingestion specification only (protocol §A7).
+These templates are for measuring your own MAR method with the test method;
+the interlaboratory study uses run_control_v9_0.py instead.
 """
 from __future__ import annotations
 

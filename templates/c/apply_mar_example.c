@@ -1,5 +1,5 @@
 /*
- * Laboratory MAR implementation: COPY THIS FILE AND REPLACE THE BODIES.
+ * Your MAR implementation: COPY THIS FILE AND REPLACE THE BODIES.
  *
  * As supplied, apply_mar() applies no MAR: it reconstructs the sinogram with
  * the reference reconstruction, so its output matches the supplied noMAR

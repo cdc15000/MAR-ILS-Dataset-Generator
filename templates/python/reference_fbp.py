@@ -7,10 +7,7 @@ spacing, zero-padded linear convolution, and 1/L^2 weighted pixel-driven
 backprojection with linear interpolation between adjacent channels.
 Coordinates follow §A1.1(i). Lengths are in cm, so mu comes out in cm^-1.
 
-For use with the harness under Condition 2 (the laboratory's own MAR), where
-draft standard §14.3 allows the supplied reference reconstruction. Under
-Condition 1 of the ILS, laboratories do not consult or reuse this file
-(protocol §A7).
+Draft standard §14.3 allows this supplied reference reconstruction.
 """
 from __future__ import annotations
 

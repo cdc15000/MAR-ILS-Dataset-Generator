@@ -8,8 +8,7 @@
  * between adjacent channels. Coordinates follow §A1.1(i). Lengths are in cm,
  * so mu comes out in cm^-1.
  *
- * For Condition 2 of the ILS. Under Condition 1 laboratories do not consult
- * or reuse this file (protocol §A7).
+ * Draft standard §14.3 allows this supplied reference reconstruction.
  *
  * Build with -fopenmp to parallelize the backprojection over rows.
  */

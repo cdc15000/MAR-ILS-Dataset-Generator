@@ -1,23 +1,23 @@
 function status = run_mar_harness(varargin)
-% RUN_MAR_HARNESS  MAR ILS laboratory harness, MATLAB (ASTM WK101378 draft Rev 06, v9 dataset).
+% RUN_MAR_HARNESS  MAR test-method harness, MATLAB (ASTM WK101378 draft Rev 06, v9 dataset).
 %
-%   Reads the coded sinograms of one replicate dataset in the format of the
-%   sinogram ingestion specification (version 2.0), calls apply_mar() for
-%   each, and writes one DICOM CT image per realization, named by its code,
-%   with the CP-2575 MAR Macro (protocol §A8.3). Base MATLAB only (R2016b+);
+%   Reads the sinograms of one dataset in the format of the sinogram
+%   ingestion specification (version 2.3), calls apply_mar() for each, and
+%   writes one DICOM CT image per realization, with the sinogram's name and
+%   the CP-2575 MAR Macro set to YES. Base MATLAB only (R2016b+);
 %   no toolbox is needed, and the DICOM file is written byte by byte.
 %
-%   Reconstruction check, draft standard §12.2 (protocol Step 2.1):
+%   Reconstruction check, draft standard §12.2:
 %       run_mar_harness('--recon-check', 'FAMILIARIZATION/recon_check/recon_check.h5')
 %
 %   One run directory per assigned replicate dataset:
-%       run_mar_harness('REP04', 'C2_R1')
+%       run_mar_harness('REP01', 'MY_R1')
 %
-%   Then produce the run directory's manifest (protocol §A8.2), for example
-%   in a shell:  (cd C2_R1 && shasum -a 256 *.dcm) > C2_R1_checksums_sha256.txt
+%   Then produce the run directory's manifest, for example
+%   in a shell:  (cd MY_R1 && shasum -a 256 *.dcm) > MY_R1_checksums_sha256.txt
 %
-%   For Condition 2 (the laboratory's own MAR). Under Condition 1 the
-%   harness is not used (protocol §A7).
+%   For measuring your own MAR method with the test method; the
+%   interlaboratory study uses run_control_v9_0.py instead.
 
 if nargin == 2 && strcmp(varargin{1}, '--recon-check')
     status = recon_check(varargin{2});
@@ -184,7 +184,7 @@ end
 function uid = make_uid()
 % 2.25 UID: a random integer below 2^128 (38 digits, first digit nonzero).
 % Uses its own clock-seeded stream, so the global random state of the
-% laboratory's code is left alone and UIDs differ between sessions.
+% your code is left alone and UIDs differ between sessions.
 persistent rs
 if isempty(rs), rs = RandStream('mt19937ar', 'Seed', 'shuffle'); end
 d = [randi(rs, [1 9]), randi(rs, [0 9], 1, 37)];

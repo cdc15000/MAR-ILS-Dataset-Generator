@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-MAR ILS laboratory harness, Python (ASTM WK101378 draft Rev 06, v9 dataset).
+MAR test-method harness, Python (ASTM WK101378 draft Rev 06, v9 dataset).
 
-Reads the coded sinograms of one replicate dataset in the format of the
-sinogram ingestion specification (version 2.0), calls apply_mar() from
-apply_mar.py for each, and writes one DICOM CT image per realization, named
-by its code, with the CP-2575 MAR Macro (protocol §A8.3). It then writes the
-SHA-256 manifest of the run directory (protocol §A8.2).
+Reads the sinograms of one dataset in the format of the sinogram ingestion
+specification (version 2.3), calls apply_mar() from apply_mar.py for each,
+and writes one DICOM CT image per realization, with the sinogram's name and
+the CP-2575 MAR Macro set to YES. It then writes the SHA-256 manifest of the
+run directory.
 
-For Condition 2 (the laboratory's own MAR). Under Condition 1 the harness is
-not used (protocol §A7).
+For measuring your own MAR method with the test method; the interlaboratory
+study uses run_control_v9_0.py instead.
 
 Usage:
-    # Reconstruction check, draft standard §12.2 (protocol Step 2.1):
+    # Reconstruction check, draft standard §12.2:
     python run_mar_harness.py --recon-check FAMILIARIZATION/recon_check/recon_check.h5
 
     # One run directory per assigned replicate dataset:
-    python run_mar_harness.py REP04 C2_R1
+    python run_mar_harness.py REP01 MY_R1
 """
 from __future__ import annotations
 
@@ -167,9 +167,9 @@ def run(dataset_dir: Path, run_dir: Path) -> int:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="MAR ILS laboratory harness (v9 dataset)")
-    ap.add_argument("dataset_dir", nargs="?", type=Path, help="replicate dataset directory, e.g. REP04")
-    ap.add_argument("run_dir", nargs="?", type=Path, help="run directory to write, e.g. C2_R1")
+    ap = argparse.ArgumentParser(description="MAR test-method harness (v9 dataset)")
+    ap.add_argument("dataset_dir", nargs="?", type=Path, help="dataset directory, e.g. REP01")
+    ap.add_argument("run_dir", nargs="?", type=Path, help="run directory to write, e.g. MY_R1")
     ap.add_argument("--recon-check", type=Path, metavar="RECON_CHECK_H5",
                     help="run the reconstruction check of draft standard §12.2 and exit")
     a = ap.parse_args()
