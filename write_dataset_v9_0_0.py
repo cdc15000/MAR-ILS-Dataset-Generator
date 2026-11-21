@@ -22,7 +22,9 @@ improving control gives for each realization (review item 42), against which a
 laboratory checks its installation.
 
 Datasets and seed pools follow review item 37:
-  REP01..REP09     pools 50+2(m-1) / 51+2(m-1), I0 1e6, levels 1.020 1.025 1.030
+  REP01..REP03     pools 50+2(m-1) / 51+2(m-1), I0 1e6, levels 1.020 1.025 1.030
+                   (Rev 06 §8.2.1; pools 56 to 67, REP04..REP09 of the superseded
+                   nine-dataset design, stay reserved and are not written)
   CONTROL          pools 68 / 69, I0 4e6, level 1.030
   FAMILIARIZATION  pools 70 / 71, I0 1e6, levels 1.020 1.025 1.030, small and labeled
   NULL             pools 72 / 73, I0 1e6, lesion-absent plus an independent second
@@ -85,9 +87,14 @@ class DatasetSpec:
     null_check: bool = False      # second, independent lesion-absent set in place of the present class
 
 
+N_REPLICATES = 3                  # Rev 06 §8.2, §8.2.1: three replicate datasets
+
+
 def standard_specs(n_familiarization: int) -> dict[str, DatasetSpec]:
+    """The datasets distributed with the standard. Pools 56 to 67 (REP04 to REP09 of the
+    superseded nine-dataset design) stay reserved in STUDY_POOLS and are not written."""
     specs = {f"REP{m:02d}": DatasetSpec(f"REP{m:02d}", (50 + 2 * (m - 1), 51 + 2 * (m - 1)),
-                                        1e6, LEVELS, 1000, 1000) for m in range(1, 10)}
+                                        1e6, LEVELS, 1000, 1000) for m in range(1, N_REPLICATES + 1)}
     specs["CONTROL"] = DatasetSpec("CONTROL", (68, 69), 4e6, (1.030,), 1000, 1000)
     specs["FAMILIARIZATION"] = DatasetSpec("FAMILIARIZATION", (70, 71), 1e6, LEVELS,
                                            n_familiarization, n_familiarization, True)
@@ -352,7 +359,7 @@ def write_dataset(spec: DatasetSpec, out_root: Path, workers: int) -> Path:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     which = ap.add_mutually_exclusive_group(required=True)
-    which.add_argument("--dataset", help="REP01..REP09, CONTROL, NULL, FAMILIARIZATION, or ILS001 upward (full study)")
+    which.add_argument("--dataset", help="REP01..REP03, CONTROL, NULL, FAMILIARIZATION, or ILS001 upward (full study)")
     which.add_argument("--custom", metavar="NAME", help="a validation dataset with the pools given")
     ap.add_argument("--out-root", type=Path, required=True)
     ap.add_argument("--pools", type=int, nargs=2, metavar=("TRAIN", "TEST"))

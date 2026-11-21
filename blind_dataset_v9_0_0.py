@@ -3,6 +3,11 @@
 MAR ILS blinding tool v9.0.0: distribution copies, blinding key and the
 laboratory assignment (ILS protocol §A6.3; design spec, Blinded Distribution).
 
+SUPERSEDED (2026-11-12): blinding was dropped; datasets are distributed labeled,
+and the standard now has three replicate datasets (REP01..REP03, Rev 06 §8.2.1).
+This tool still implements the earlier nine-dataset shared design (REP01..REP09,
+three per laboratory) and is kept, with its tests, for reference only.
+
 Input: the master datasets written by write_dataset_v9_0_0.py (labeled names,
 label-free files). Output:
 

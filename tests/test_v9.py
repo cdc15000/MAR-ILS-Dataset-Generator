@@ -424,6 +424,9 @@ class TestNullCheck:
         import write_dataset_v9_0_0 as w
         specs = w.standard_specs(1)
         assert specs["NULL"].pools == (72, 73) and 72 in w.STUDY_POOLS and 73 in w.STUDY_POOLS
+        assert set(specs) == {"REP01", "REP02", "REP03", "CONTROL", "FAMILIARIZATION", "NULL"}
+        assert [specs[f"REP0{m}"].pools for m in (1, 2, 3)] == [(50, 51), (52, 53), (54, 55)]
+        assert all(w.needs_production((p, p + 1)) for p in range(56, 68, 2))   # retired pools stay reserved
         spec = w.DatasetSpec("NULL", (6, 7), 1e6, (), 1, 1, null_check=True)
         root = w.write_dataset(spec, tmp_path, workers=2)
         names = sorted(p.stem for p in (root / "sinograms").glob("*.h5"))

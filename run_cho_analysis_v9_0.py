@@ -5,8 +5,8 @@ CHO analysis v9.0: D-DOG channels, pooled covariance, antler-plot AUC∞
 AUC∞ per method and ΔAUC∞ = AUC∞(method) − AUC∞(fbp).
 
 Usage: python run_cho_analysis_v9_0.py roi.npz --out cho.json [--internal-noise-c 2.5]
-       python run_cho_analysis_v9_0.py --dataset-dir REP04 --mar-output-dir C1_R1
-       python run_cho_analysis_v9_0.py --dataset-dir REP04 --record-reference   (coordinator)
+       python run_cho_analysis_v9_0.py --dataset-dir REP01 --mar-output-dir C1_R1
+       python run_cho_analysis_v9_0.py --dataset-dir REP01 --record-reference   (coordinator)
 """
 from __future__ import annotations
 
