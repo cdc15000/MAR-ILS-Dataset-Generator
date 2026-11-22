@@ -2,9 +2,9 @@
 Tests for the v8.0.0 seeding scheme and the null-signal reference radius.
 """
 
+import generator_v8_0_0 as gen
 import numpy as np
 
-import generator_v8_0_0 as gen
 from mar_ils_core.constants import LESION_CENTER_X, LESION_RADIUS_VOX, PHANTOM_CENTER_X
 
 

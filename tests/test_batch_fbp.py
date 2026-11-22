@@ -16,10 +16,10 @@ The batch kernel is Numba-only, so the whole module is skipped when numba is
 not installed (the CI `numba` job installs it; the default `test` job does not).
 """
 
+import generator_v7_0_0 as g
 import numpy as np
 import pytest
 
-import generator_v7_0_0 as g
 from mar_ils_core.phantom import build_attenuation_map, build_metal_mask
 
 pytestmark = pytest.mark.skipif(
