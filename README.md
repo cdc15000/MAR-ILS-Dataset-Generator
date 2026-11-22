@@ -6,7 +6,6 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![Standard: ASTM WK101378 Rev 06 draft](https://img.shields.io/badge/Standard-ASTM%20WK101378%20Rev%2006%20draft-orange)
-![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
 ---
