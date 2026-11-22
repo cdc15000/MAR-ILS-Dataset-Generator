@@ -18,6 +18,7 @@
 [**Repository Layout**](#repository-layout) |
 [**References**](#references) |
 [**Citation**](#citation) |
+[**Status and Limitations**](#status-and-limitations) |
 [**License**](#license) |
 [**Contact**](#contact)
 
@@ -193,9 +194,15 @@ The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489
 
 ---
 
+## Status and Limitations
+
+ASTM WK101378 is a draft under development; it is not an approved ASTM standard, and its content and this software may change before balloting. This software and its datasets are for evaluating MAR methods with a simulated phantom. They are not intended or validated for clinical use or diagnosis, and a result from this test is not, by itself, a regulatory determination. The software is provided "as is", without warranties of any kind; see [`LICENSE.md`](LICENSE.md).
+
+---
+
 ## License
 
-The code and documentation are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md).
+The code and documentation are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md). The datasets will be released under CC BY 4.0.
 
 Change control for normative parameters is described in [`GOVERNANCE.md`](GOVERNANCE.md).
 
