@@ -72,8 +72,8 @@ The plan is for the standard to go to its first ballot with a single-operator re
 ### Installation
 
 ```bash
-git clone https://github.com/cdc15000/MAR-ILS-Dataset-Generator.git
-cd MAR-ILS-Dataset-Generator
+git clone https://github.com/cdc15000/MAR-ILS-DataGen.git
+cd MAR-ILS-DataGen
 
 python3.11 -m venv mar-ils       # Windows: py -3.11 -m venv mar-ils
 source mar-ils/bin/activate      # Windows: mar-ils\Scripts\activate
@@ -175,7 +175,7 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 
 ## Citation
 
-> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WK101378: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-Dataset-Generator
+> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WK101378: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-DataGen
 
 The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489 once the Zenodo record is published.
 
