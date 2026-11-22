@@ -61,6 +61,7 @@ import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+import _repo_path  # noqa: F401  (repository root on sys.path)
 import numpy as np
 import pydicom
 from scipy.optimize import curve_fit

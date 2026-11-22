@@ -29,7 +29,9 @@ from pydicom.uid import generate_uid
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "legacy"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from generator_v7_0_0 import fbp_reconstruct_slice
 from reference_li_mar_v7 import (
     METAL_HU_THRESH,
     detect_metal_mask,
@@ -40,7 +42,6 @@ from reference_li_mar_v7 import (
     metal_trace_weights,
 )
 
-from generator_v7_0_0 import fbp_reconstruct_slice
 from mar_ils_core.constants import (
     LESION_CENTER_X,
     LESION_RADIUS_VOX,

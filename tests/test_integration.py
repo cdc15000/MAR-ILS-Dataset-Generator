@@ -10,7 +10,7 @@ class TestGeneratorDryRun:
     def test_dry_run_exits_zero(self):
         """generator_v7_0_0.py --dry-run should validate config and exit 0."""
         result = subprocess.run(
-            [sys.executable, "generator_v7_0_0.py", "--dry-run"],
+            [sys.executable, "legacy/generator_v7_0_0.py", "--dry-run"],
             capture_output=True, text=True, timeout=60, check=False,
         )
         assert result.returncode == 0
@@ -18,7 +18,7 @@ class TestGeneratorDryRun:
 
     def test_dry_run_prints_geometry(self):
         result = subprocess.run(
-            [sys.executable, "generator_v7_0_0.py", "--dry-run"],
+            [sys.executable, "legacy/generator_v7_0_0.py", "--dry-run"],
             capture_output=True, text=True, timeout=60, check=False,
         )
         assert "fan-beam" in result.stdout
@@ -28,7 +28,7 @@ class TestGeneratorDryRun:
     def test_dry_run_warns_when_workers_exceed_memory(self):
         """Far more workers than RAM supports should print a memory warning."""
         result = subprocess.run(
-            [sys.executable, "generator_v7_0_0.py", "--dry-run", "--workers", "512"],
+            [sys.executable, "legacy/generator_v7_0_0.py", "--dry-run", "--workers", "512"],
             capture_output=True, text=True, timeout=60, check=False,
         )
         assert result.returncode == 0
@@ -37,7 +37,7 @@ class TestGeneratorDryRun:
 
     def test_dry_run_no_memory_warning_for_one_worker(self):
         result = subprocess.run(
-            [sys.executable, "generator_v7_0_0.py", "--dry-run", "--workers", "1"],
+            [sys.executable, "legacy/generator_v7_0_0.py", "--dry-run", "--workers", "1"],
             capture_output=True, text=True, timeout=60, check=False,
         )
         assert "workers need about" not in result.stdout
@@ -76,7 +76,7 @@ class TestImports:
     def test_generator_imports(self):
         """Verify generator_v7_0_0.py can be imported without errors."""
         result = subprocess.run(
-            [sys.executable, "-c", "import generator_v7_0_0"],
+            [sys.executable, "-c", "import sys; sys.path.insert(0, 'legacy'); import generator_v7_0_0"],
             capture_output=True, text=True, timeout=30, check=False,
         )
         assert result.returncode == 0
@@ -84,7 +84,7 @@ class TestImports:
     def test_cho_imports(self):
         """Verify run_cho_analysis_v7_0.py can be imported without errors."""
         result = subprocess.run(
-            [sys.executable, "-c", "import run_cho_analysis_v7_0"],
+            [sys.executable, "-c", "import sys; sys.path.insert(0, 'legacy'); import run_cho_analysis_v7_0"],
             capture_output=True, text=True, timeout=30, check=False,
         )
         assert result.returncode == 0

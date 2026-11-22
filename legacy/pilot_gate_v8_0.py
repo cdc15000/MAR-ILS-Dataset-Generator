@@ -44,11 +44,13 @@ from pathlib import Path
 
 import numpy as np
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "legacy"))
 sys.path.insert(0, str(REPO / "algorithms" / "v7"))
 
 import generator_v8_0_0 as gen
+
 from mar_ils_core.constants import (
     BASE_SEED,
     JITTER_MAX_DEG,
@@ -123,7 +125,7 @@ def _mar_worker(args) -> None:
 
 def _cho(ds: Path, mar_dir: Path, results: Path, workers: int, n: int,
          n_boot: int | None = None) -> dict:
-    cmd = [sys.executable, str(REPO / "run_cho_analysis_v8_0.py"),
+    cmd = [sys.executable, str(REPO / "legacy" / "run_cho_analysis_v8_0.py"),
            "--dataset-dir", str(ds), "--mar-output-dir", str(mar_dir),
            "--internal-noise-sigma", "15", "--workers", str(workers),
            "--realizations", str(n), "--results-file", str(results)]

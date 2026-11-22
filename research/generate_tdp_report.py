@@ -62,6 +62,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 # from research/ (matches the shim pattern used in algorithms/).
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "legacy"))
 from tier_config import TierConfig, TIER_REGISTRY
 
 # ─── Font paths ───────────────────────────────────────────────────────────────

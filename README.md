@@ -156,7 +156,7 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 | `mar_ils_core/release.py`, `RELEASE_COMMIT` | Records the software release in every run and dataset record |
 | `docs_and_references/ILS_Lab_Instructions.md` | Procedure for ILS laboratories |
 | `tests/` | Automated tests |
-| `legacy/`, `*_v7_*`, `*_v8_*`, `blind_dataset_v9_0_0.py` | Earlier, superseded versions, kept for the record |
+| `legacy/`, `blind_dataset_v9_0_0.py` | Earlier, superseded versions (v6 to v8), kept for the record |
 | `algorithms/`, `research/`, `docs/` | Earlier research code and design notes, not part of the test method |
 
 ---

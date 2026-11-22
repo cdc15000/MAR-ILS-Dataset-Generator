@@ -50,7 +50,16 @@ import sys
 import warnings
 from pathlib import Path
 
+import _repo_path  # noqa: F401  (repository root on sys.path)
 import numpy as np
+from run_cho_analysis_v7_0 import (
+    _fit_and_score,
+    calculate_lg_channels,
+    compute_50_50_auc,
+    compute_noise_sweep,
+    load_all_rois_parallel,
+    mw_auc,
+)
 
 from mar_ils_core.constants import (
     AUC_TOLERANCE,
@@ -62,14 +71,6 @@ from mar_ils_core.constants import (
     ROI_CENTER_X,
     ROI_CENTER_Y,
     ROI_SIZE,
-)
-from run_cho_analysis_v7_0 import (
-    _fit_and_score,
-    calculate_lg_channels,
-    compute_50_50_auc,
-    compute_noise_sweep,
-    load_all_rois_parallel,
-    mw_auc,
 )
 
 SCRIPT_VERSION = "run_cho_analysis_v8_0"

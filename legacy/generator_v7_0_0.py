@@ -58,6 +58,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+import _repo_path  # noqa: F401  (repository root on sys.path)
 import h5py
 import numpy as np
 import scipy.ndimage
@@ -968,7 +969,7 @@ def generate_pdf(output_dir: Path, num_realizations: int) -> None:
             "Run the following command (--internal-noise-sigma 15 is normative):", B,
         ),
         Paragraph(
-            "python run_cho_analysis_v7_0.py "
+            "python legacy/run_cho_analysis_v7_0.py "
             "--dataset-dir &lt;output_dir&gt; "
             "--mar-output-dir ./mar_recon "
             "--internal-noise-sigma 15",
@@ -1139,7 +1140,7 @@ def main() -> None:
     print()
     print(f"Dataset complete → {output_dir}")
     print("Next step:")
-    print("  python run_cho_analysis_v7_0.py \\")
+    print("  python legacy/run_cho_analysis_v7_0.py \\")
     print(f"      --dataset-dir {output_dir} \\")
     print("      --mar-output-dir ./mar_recon \\")
     print("      --internal-noise-sigma 15")

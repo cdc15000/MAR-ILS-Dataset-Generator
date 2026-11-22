@@ -32,7 +32,9 @@ from tqdm import tqdm
 
 # Run from algorithms/v7/ -> prepend repo root so the shared modules import.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "legacy"))
 from generator_v7_0_0 import fbp_reconstruct_slice, forward_project_slice
+
 from mar_ils_core.constants import LESION_SLICE_INDEX, N_ANGLES, N_DET
 from mar_ils_core.dicom_utils import write_dicom_slice
 

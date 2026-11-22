@@ -5,7 +5,7 @@
 Reference MAR implementations compatible with the **v7.0.0 fan-beam** dataset
 (ASTM Rev 05). Unlike the parallel-beam references in `algorithms/`, these
 operate on the (256, 720, 512) fan-beam sinograms and reuse the validated
-`forward_project_slice` / `fbp_reconstruct_slice` from `generator_v7_0_0.py`.
+`forward_project_slice` / `fbp_reconstruct_slice` from `legacy/generator_v7_0_0.py`.
 
 ## reference_li_mar_v7.py — Linear-Interpolation MAR
 
@@ -26,7 +26,7 @@ python algorithms/v7/reference_li_mar_v7.py \
     --dataset-dir ./astm_reference_dataset \
     --output-dir  ./li_mar_recon
 # then score it:
-python run_cho_analysis_v7_0.py \
+python legacy/run_cho_analysis_v7_0.py \
     --dataset-dir ./astm_reference_dataset \
     --mar-output-dir ./li_mar_recon \
     --internal-noise-sigma 15

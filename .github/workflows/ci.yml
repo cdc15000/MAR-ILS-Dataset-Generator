@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff==0.16.10
-      - run: ruff check mar_ils_core/ tests/ algorithms/v7/ generator_v7_0_0.py run_cho_analysis_v7_0.py generator_v8_0_0.py run_cho_analysis_v8_0.py pilot_gate_v8_0.py generator_v9_0_0.py run_cho_analysis_v9_0.py write_dataset_v9_0_0.py blind_dataset_v9_0_0.py run_control_v9_0.py allocate_v9_0_0.py templates/python/
+      - run: ruff check mar_ils_core/ tests/ algorithms/v7/ legacy/generator_v7_0_0.py legacy/run_cho_analysis_v7_0.py legacy/generator_v8_0_0.py legacy/run_cho_analysis_v8_0.py legacy/pilot_gate_v8_0.py legacy/_repo_path.py generator_v9_0_0.py run_cho_analysis_v9_0.py write_dataset_v9_0_0.py blind_dataset_v9_0_0.py run_control_v9_0.py allocate_v9_0_0.py templates/python/
 
   test:
     runs-on: ubuntu-latest
@@ -72,4 +72,4 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -r requirements.txt
-      - run: python generator_v7_0_0.py --dry-run
+      - run: python legacy/generator_v7_0_0.py --dry-run

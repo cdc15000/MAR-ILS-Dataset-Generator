@@ -57,6 +57,7 @@ import numpy as np
 from scipy.stats import norm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "legacy"))
 from run_cho_analysis_v7_0 import mw_auc, _fit_and_score  # noqa: E402
 
 P = 10                       # channels (NUM_CHANNELS)

@@ -58,6 +58,7 @@ from skimage.transform import radon as _sk_radon, iradon as _sk_iradon
 
 # Add parent dir for tier_config import
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "legacy"))
 from tier_config import (
     BACKGROUND_HU,
     TIER_REGISTRY,
