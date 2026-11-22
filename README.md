@@ -1,5 +1,5 @@
 ![One simulated scan of the test phantom, reconstructed without MAR and with MAR 2; the box marks the region the model observer scores.](docs_and_references/images/readme_header.png)<br>
-<sub>*One simulated scan of the test phantom, reconstructed without MAR (left) and with the improving control, MAR 2 (right). The box is the region the model observer scores. Display window −600 to +600 HU.*</sub>
+*One simulated scan of the test phantom, reconstructed without MAR (left) and with the improving control, MAR 2 (right). The box is the region the model observer scores. Display window −600 to +600 HU.*
 
 # MAR ILS Dataset Generator and Evaluation Framework
 
@@ -20,8 +20,6 @@
 [**Citation**](#citation) |
 [**License**](#license) |
 [**Contact**](#contact)
-
-Version history and release details are on the [Releases page](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/releases). The [wiki](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/wiki) explains the method in more depth.
 
 ---
 

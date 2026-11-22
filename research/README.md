@@ -1,3 +1,5 @@
+> **Superseded.** This directory predates the current v9.0.0 design and is not part of the test method. See the main [README](../README.md).
+
 # research/ — non-normative tooling
 
 These are exploratory / research-era utilities. **None are part of the v7.0.0

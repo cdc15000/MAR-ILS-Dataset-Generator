@@ -1,3 +1,5 @@
+> **Superseded.** This directory predates the current v9.0.0 design and is not part of the test method. See the main [README](../README.md).
+
 # Reference MAR Algorithms
 
 **The `reference_*.py` files in this directory use parallel-beam geometry

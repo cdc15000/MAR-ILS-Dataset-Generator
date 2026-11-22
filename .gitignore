@@ -26,6 +26,10 @@ venv/
 # ASTM IP — standard text kept local, not in public repo
 private/
 
+# Local instructions for Claude Code; not part of the public repo
+CLAUDE.md
+.claude/
+
 # Scratch/review files
 docs_and_references/ASTM_MAR_Standard_Rev05_Review.md
 # CHO output written to the working directory on every run

@@ -1,53 +1,53 @@
 # Governance
 
-This document describes the change-control process for the MAR ILS Dataset Generator and Evaluation Framework.
+This document describes how changes are made to the MAR ILS Dataset Generator and Evaluation Framework, the reference software for ASTM WK101378.
 
 ## Roles
 
-| Role | Who | Authority |
+| Role | Who | Responsibility |
 | :--- | :--- | :--- |
-| WK101378 sponsor | Christopher D. Cocchiaraley | Controls normative branch; authors revisions |
-| ASTM Task Group (F04.15) | Committee members | Approves locked-constant changes; conducts ballot |
-| ILS participants | Enrolled laboratories | Submit reconstructed DICOMs; do not modify reference code |
+| Technical contact | Christopher D. Cocchiaraley | Maintains the software; proposes and carries out changes |
+| CT-MAR Test Method task group | ASTM F04.15.24 members | Reviews changes that affect the test method's results |
+| ILS laboratories | Participating laboratories | Run the supplied software without modification; report problems |
 
-## What constitutes a breaking change
+## What counts as a change to the method
 
-Any modification that would alter the bit-exact reproducibility of the locked metrology baseline is a **breaking change**. This includes, but is not limited to:
+A change to the method is any change that alters the numbers the test produces. This includes:
 
-- Changing any value in the **ASTM Metrology Baseline** table in CLAUDE.md (AUC, I_0, DC offset, contrast, noise parameters, geometry).
-- Modifying forward-projection, FBP reconstruction, or CHO observer numerics in a way that changes output values.
-- Changing the number of realizations, ROI coordinates, channel parameters, or regularization constants.
-- Altering the DICOM encoding in a way that changes pixel values read by the CHO script.
+- the phantom, the scan simulation, the noise model or the reference reconstruction;
+- the observer: channels, scored region, training and test sizes, or the AUC∞ extrapolation;
+- the contrast levels, the dose, or the thresholds of the two reference MAR methods;
+- the content or format of the datasets distributed with the standard.
 
-Non-breaking changes (documentation, tooling, diagnostics, additional output formats) do not require Task Group approval.
+Documentation, tooling, diagnostics and new output formats that leave the results unchanged are not changes to the method.
 
-## Version freeze protocol
+## How a change to the method is made
 
-1. **Lock** — When the metrology baseline is validated (self-test AUC within tolerance, SHA-256 checksums verified), the baseline constants are frozen. The locked values and date are recorded in CLAUDE.md.
-2. **Regeneration gate** — Any proposed change to locked constants requires full dataset regeneration (N=40, all realizations) and re-validation of the baseline AUC to within the stated tolerance (currently +/-0.005).
-3. **Task Group approval** — Changes to locked constants must be presented to ASTM F04.15 and approved before merging to the normative branch.
-4. **Versioning** — Breaking changes increment the major version. Non-breaking enhancements increment the minor version. The version is embedded in script filenames (e.g., `generator_v7_0_0.py`).
+1. **Proposal.** The change, the reason for it and the checks that will judge it are written down before any run, with the pass and fail rules fixed in advance.
+2. **Review.** The proposal goes to the CT-MAR Test Method task group.
+3. **Validation.** The pre-registered checks are run on independent datasets. A failed check is recorded as a failure; the rules are not adjusted after the fact.
+4. **Release.** The change is released as a new version, with the results of the checks in the release notes. A change that alters results increments the major version; other changes increment the minor version. The version is part of each script's file name (for example, `generator_v9_0_0.py`).
 
-## Current baseline
+## Current version
 
-The current design is v9.0.0, following Vaishnav et al. (2020). Its fixed parameters are listed in the [v9.0.0 release notes](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/releases/tag/v9.0.0) and in the README. Key values:
+The current design is v9.0.0, following Vaishnav et al. (2020). Its parameters are listed in the README and in the [v9.0.0 release notes](https://github.com/cdc15000/MAR-ILS-Dataset-Generator/releases/tag/v9.0.0). Key values:
 
 | Parameter | Value |
 | :--- | :--- |
 | Lump amplitude scale | 0.0588 |
 | Dose | 1 × 10⁶ counts per detector bin per view |
 | Contrast levels | 1.020, 1.025, 1.030 |
-| Images | 1000 training + 1000 test per class and level |
+| Images | 1000 training and 1000 test per class and level |
 | MAR 1 / MAR 2 thresholds | 1124 counts / 1.953 cm⁻¹ |
 
-The v7.0.0 baseline (AUC_noMAR = 0.8294, N = 40, internal noise 15) is superseded.
+The earlier v7.0.0 design is superseded.
 
-## Contribution process
+## Contributing
 
-1. Open an issue or discussion describing the proposed change.
-2. For non-breaking changes: submit a pull request; the sponsor reviews and merges.
-3. For breaking changes: the sponsor brings the proposal to the Task Group. If approved, the sponsor regenerates the dataset, re-validates the baseline, updates the locked-constant table, and merges.
+1. Open an issue describing the proposed change.
+2. A change that leaves results unchanged: submit a pull request; the technical contact reviews and merges it.
+3. A change to the method: follows the process above.
 
-## Standard alignment
+## Standard
 
-This repository tracks **ASTM WK101378 Rev 06** (draft, October 2026). When the standard is published as ASTM FXXXX, this governance document and all references will be updated to reflect the published designation.
+This repository follows **ASTM WK101378 Rev 06** (draft). When the standard is published, this document and the other references will be updated to its designation.
