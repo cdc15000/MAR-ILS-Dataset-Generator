@@ -1,6 +1,6 @@
 # Governance
 
-This document describes how changes are made to the MAR ILS Dataset Generator and Evaluation Framework, the reference software for ASTM WK101378.
+This document describes how changes are made to MAR ILS Dataset Generation and Evaluation, the reference software for ASTM WK101378.
 
 ## Roles
 
@@ -30,7 +30,7 @@ Documentation, tooling, diagnostics and new output formats that leave the result
 
 ## Current version
 
-The current design is v9.0.0, following Vaishnav et al. (2020). Its parameters are listed in the README and in the [v9.0.0 release notes](https://github.com/cdc15000/MAR-ILS-DataGen/releases/tag/v9.0.0). Key values:
+The current design is v9.0.0, following Vaishnav et al. (2020). Its parameters are listed in the README and in the [v9.0.0 release notes](https://github.com/cdc15000/MAR-ILS-DataGen-Eval/releases/tag/v9.0.0). Key values:
 
 | Parameter | Value |
 | :--- | :--- |

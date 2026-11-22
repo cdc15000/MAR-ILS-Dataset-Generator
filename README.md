@@ -1,7 +1,7 @@
 ![One simulated scan of the test phantom, reconstructed without MAR and with MAR 2; the box marks the region the model observer scores.](docs_and_references/images/readme_header.png)<br>
 <sub>*A simulated scan without MAR (left) and with MAR 2 (right). The box is the region the observer scores. Window −600 to +600 HU.*</sub>
 
-# MAR ILS Dataset Generator and Evaluation Framework
+# MAR ILS Dataset Generation and Evaluation
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.md)
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
@@ -72,8 +72,8 @@ The plan is for the standard to go to its first ballot with a single-operator re
 ### Installation
 
 ```bash
-git clone https://github.com/cdc15000/MAR-ILS-DataGen.git
-cd MAR-ILS-DataGen
+git clone https://github.com/cdc15000/MAR-ILS-DataGen-Eval.git
+cd MAR-ILS-DataGen-Eval
 
 python3.11 -m venv mar-ils       # Windows: py -3.11 -m venv mar-ils
 source mar-ils/bin/activate      # Windows: mar-ils\Scripts\activate
@@ -175,7 +175,7 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 
 ## Citation
 
-> Cocchiaraley, C.D. *MAR ILS Dataset Generator and Evaluation Framework*, v9.0.0. ASTM Work Item WK101378: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-DataGen
+> Cocchiaraley, C.D. *MAR ILS Dataset Generation and Evaluation*, v9.0.0. ASTM Work Item WK101378: Standard Test Method for Evaluation of Metal Artifact Reduction (MAR) Performance in Tomographic Imaging Systems Using a Model Observer. https://github.com/cdc15000/MAR-ILS-DataGen-Eval
 
 The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489 once the Zenodo record is published.
 
