@@ -1,5 +1,5 @@
-![Axial pelvic CT of a patient with bilateral metal-on-metal total hip arthroplasties, before and after orthopedic metal artifact reduction.](docs_and_references/images/wellenberg_2019_fig8_ab.jpg)<br>
-<sub>*Adapted from Wellenberg et al., Skeletal Radiology 48:1775 (2019) [[DOI](https://doi.org/10.1007/s00256-019-03206-z)] · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)*</sub>
+![One simulated scan of the test phantom, reconstructed without MAR and with MAR 2; the box marks the region the model observer scores.](docs_and_references/images/readme_header.png)<br>
+<sub>*One simulated scan of the test phantom, reconstructed without MAR (left) and with the improving control, MAR 2 (right). The box is the region the model observer scores. Display window −600 to +600 HU.*</sub>
 
 # MAR ILS Dataset Generator and Evaluation Framework
 
@@ -197,8 +197,6 @@ The reference dataset will be citable at https://doi.org/10.5281/zenodo.23144489
 ## License
 
 The code and documentation are released under the **Apache License, Version 2.0**; see [`LICENSE.md`](LICENSE.md).
-
-The figure at the top of this page is reproduced from Wellenberg et al. 2019 under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) and is not covered by the Apache license.
 
 Change control for normative parameters is described in [`GOVERNANCE.md`](GOVERNANCE.md).
 
