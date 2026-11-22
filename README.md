@@ -58,7 +58,7 @@ The ∞ means the AUC is extrapolated to an unlimited number of training images,
 3. **Reconstruct** the corrected sinograms with the supplied reference reconstruction, and **write each image as DICOM**, 512 × 512 pixels, with Metal Artifact Reduction Applied (0018,9391) set to YES. Save the corrected sinograms with the dataset's file names (HDF5, dataset `line_integrals`) and run `python run_control_v9_0.py REP01 MY_R1 --sinograms my_corrected/REP01`, which does both.
 4. **Score** the images with the reference observer software and report ΔAUC∞ at each level.
 
-No CT scanner is needed; the test is entirely computational. The datasets will be published under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
+No CT scanner is needed; the test is entirely computational. The datasets will be indexed under DOI [10.5281/zenodo.23144489](https://doi.org/10.5281/zenodo.23144489).
 
 ### The Interlaboratory Study
 
@@ -69,7 +69,7 @@ The study has two stages: a pilot with three laboratories, which verifies the pr
 
 In the full study, each laboratory uses MAR 2 to process three replicate datasets that no other laboratory receives, plus a shared null-check dataset, scores the results with the reference observer, and reports them to ASTM. The study is registered with the ASTM Interlaboratory Study Program as ILS 2165.
 
-Under ASTM's provision for delaying an interlaboratory study, the standard goes to its first ballot with a single-operator repeatability statement, and the full study follows approval. The pilot is planned for March to April 2027. The step-by-step procedure for laboratories is in [`docs_and_references/ILS_Lab_Instructions.md`](docs_and_references/ILS_Lab_Instructions.md); the protocol and datasets are sent to participating laboratories by the ILS coordinator.
+The plan is for the standard to go to its first ballot with a single-operator repeatability statement, under ASTM's provision for delaying an interlaboratory study, with the full study after approval. The pilot is planned for March to April 2027. The step-by-step procedure for laboratories is in [`docs_and_references/ILS_Lab_Instructions.md`](docs_and_references/ILS_Lab_Instructions.md); the protocol and datasets are sent to participating laboratories by the ILS coordinator.
 
 ---
 
@@ -170,7 +170,8 @@ In the developer's validation on five independent datasets, MAR 2 gave ΔAUC∞ 
 | `mar_ils_core/release.py`, `RELEASE_COMMIT` | Records the software release in every run and dataset record |
 | `docs_and_references/ILS_Lab_Instructions.md` | Procedure for ILS laboratories |
 | `tests/` | Automated tests |
-| `legacy/`, `*_v7_*`, `*_v8_*` | Earlier, superseded versions, kept for the record |
+| `legacy/`, `*_v7_*`, `*_v8_*`, `blind_dataset_v9_0_0.py` | Earlier, superseded versions, kept for the record |
+| `algorithms/`, `research/`, `docs/` | Earlier research code and design notes, not part of the test method |
 
 ---
 
