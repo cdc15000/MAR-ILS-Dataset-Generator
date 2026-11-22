@@ -9,19 +9,6 @@
 ![Standard: IEC 60601-2-44 Ed. 4](https://img.shields.io/badge/Standard-IEC%2060601--2--44%20Ed.%204-green)
 ![DICOM 2026b](https://img.shields.io/badge/DICOM-2026b%20CP--2575-purple)
 
-## Contents
-
-[**Overview**](#overview) |
-[**Setup**](#setup) |
-[**Try It**](#try-it) |
-[**Key Parameters**](#key-parameters) |
-[**Repository Layout**](#repository-layout) |
-[**References**](#references) |
-[**Citation**](#citation) |
-[**Status and Limitations**](#status-and-limitations) |
-[**License**](#license) |
-[**Contact**](#contact)
-
 ---
 
 ## Overview
