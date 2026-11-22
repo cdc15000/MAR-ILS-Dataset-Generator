@@ -202,5 +202,6 @@ Chair, ASTM Task Group F04.15.24 (CT-MAR Test Method)
 Consumer Member, IEC TC 62 / SC 62B WG 30 (Computed Tomography)  
 Consumer Advocate, IEC USNC TAG SC 62B  
 Consumer Member, DICOM WG-21  
-cc15000@gmail.com  
+cc15000@gmail.com
+
 ORCID: [0009-0006-4995-566X](https://orcid.org/0009-0006-4995-566X)
